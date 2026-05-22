@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AlumioDTU – Digital Bridges, Real Connections</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #F5C842;
+      --gold-dim: #c9a227;
+      --navy: #0a0f2e;
+      --navy-mid: #0d1540;
+      --teal: #00d4c8;
+      --teal-dim: #00a89e;
+      --glass: rgba(255,255,255,0.05);
+      --glass-border: rgba(255,255,255,0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--navy);
+      color: #e8eaf6;
+      overflow-x: hidden;
+    }
+    h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; }
+
+    /* Canvas backgrounds */
+    #bg-canvas {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0; pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+    #bg-canvas-dashboard {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0; pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    /* Navbar */
+    nav {
+      position: fixed; top: 0; left: 0; width: 100%;
+      z-index: 100; padding: 18px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(10,15,46,0.7);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(245,200,66,0.15);
+    }
+    .nav-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; color: var(--gold); letter-spacing:-0.5px; }
+    .nav-logo span { color: var(--teal); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-menu a {
+      color: rgba(232,234,246,0.75);
+      text-decoration: none;
+      margin-left: 28px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-menu a:hover { color: var(--gold); }
+    .nav-menu.hidden {
+      display: none;
+    }
+    .btn-nav {
+      background: var(--gold);
+      color: var(--navy);
+      padding: 9px 22px;
+      border-radius: 50px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-left: 16px;
+    }
+    .btn-nav:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245,200,66,0.4);
+    }
+    .btn-logout {
+      background: transparent;
+      border: 1.5px solid rgba(245,200,66,0.5);
+      color: var(--gold);
+      padding: 8px 20px;
+      border-radius: 50px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-left: 16px;
+    }
+    .btn-logout:hover {
+      background: rgba(245,200,66,0.1);
+      border-color: var(--gold);
+      transform: translateY(-2px);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+    }
+    .user-greeting {
+      font-size: 0.85rem;
+      color: var(--teal);
+      margin-right: 12px;
+      font-weight: 500;
+    }
+
+    /* Hero */
+    #hero {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 24px 60px;
+    }
+    .hero-dtu-badge {
+      display:inline-flex; align-items:center; gap:10px;
+      background: rgba(245,200,66,0.12);
+      border: 1px solid rgba(245,200,66,0.4);
+      padding: 8px 20px; border-radius:50px;
+      font-size: 0.82rem; color: var(--gold);
+      letter-spacing: 1.2px; text-transform:uppercase;
+      margin-bottom: 28px;
+      font-family: 'Syne', sans-serif; font-weight: 700;
+      animation: fadeSlideUp 0.6s ease both;
+    }
+    .hero-dtu-badge .dtu-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--gold);
+      animation: pulse-gold 1.8s ease-in-out infinite;
+    }
+    .hero-title {
+      font-family:'Syne',sans-serif; font-weight:800;
+      font-size: clamp(2.8rem, 6vw, 5.2rem);
+      line-height: 1.05; letter-spacing: -2px;
+      color: #fff;
+      animation: fadeSlideUp 0.8s ease 0.1s both;
+    }
+    .hero-title .accent { color: var(--gold); }
+    .hero-title .cursor {
+      display:inline-block; width:4px; height:0.9em;
+      background: var(--gold); margin-left:4px; vertical-align:middle;
+      animation: blink 0.75s step-end infinite;
+    }
+    .hero-sub {
+      font-size: clamp(1rem,2vw,1.2rem); color: rgba(232,234,246,0.65);
+      margin-top: 18px; max-width: 540px;
+      font-weight:300; line-height:1.7;
+      animation: fadeSlideUp 0.8s ease 0.25s both;
+    }
+    .hero-cta {
+      display:flex; gap:16px; margin-top:40px; flex-wrap:wrap; justify-content:center;
+      animation: fadeSlideUp 0.8s ease 0.4s both;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      color: var(--navy); padding:14px 36px; border-radius:50px;
+      font-family:'Syne',sans-serif; font-weight:700; font-size:0.95rem;
+      border:none; cursor:pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(245,200,66,0.3);
+    }
+    .btn-primary:hover { transform:translateY(-3px); box-shadow:0 8px 32px rgba(245,200,66,0.5); }
+    .btn-ghost {
+      background: transparent; color:#fff;
+      padding:14px 36px; border-radius:50px;
+      font-family:'Syne',sans-serif; font-weight:600; font-size:0.95rem;
+      border: 1px solid rgba(255,255,255,0.25); cursor:pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--teal); background: rgba(0,212,200,0.08); }
+
+    .dtu-highlight {
+      display: flex; gap: 32px; flex-wrap: wrap; justify-content: center;
+      margin-top: 48px;
+      animation: fadeSlideUp 0.8s ease 0.5s both;
+    }
+    .dtu-hi-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.82rem; color: rgba(232,234,246,0.55);
+    }
+    .dtu-hi-item .dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--teal); flex-shrink: 0;
+    }
+
+    .stats-strip {
+      display:flex; gap:48px; margin-top:56px; flex-wrap:wrap; justify-content:center;
+      animation: fadeSlideUp 0.8s ease 0.55s both;
+    }
+    .stat-item { text-align:center; }
+    .stat-num {
+      font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; color:var(--gold);
+    }
+    .stat-label { font-size:0.78rem; color:rgba(232,234,246,0.5); text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+
+    .scroll-hint {
+      position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
+      display:flex; flex-direction:column; align-items:center; gap:8px;
+      color: rgba(232,234,246,0.4); font-size:0.72rem; letter-spacing:2px;
+      text-transform:uppercase; animation: bounce 2s infinite;
+    }
+    .scroll-hint .arrow { width:20px; height:20px; border-right:2px solid rgba(232,234,246,0.3); border-bottom:2px solid rgba(232,234,246,0.3); transform:rotate(45deg); }
+
+    /* Features */
+    #features, #how, #testimonials {
+      position:relative; z-index:1;
+    }
+    #features { padding: 100px 40px; max-width: 1200px; margin:0 auto; }
+    .section-tag {
+      color: var(--teal); font-size:0.75rem; letter-spacing:2px;
+      text-transform:uppercase; font-weight:600; margin-bottom:12px;
+    }
+    .section-title {
+      font-size: clamp(1.8rem,3.5vw,2.8rem); font-weight:800;
+      line-height:1.1; letter-spacing:-1px; margin-bottom:16px;
+    }
+    .section-desc { color:rgba(232,234,246,0.55); max-width:480px; line-height:1.7; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px; margin-top: 60px;
+    }
+    .feature-card {
+      padding: 32px; border-radius: 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s, opacity 0.6s ease, transform 0.5s ease;
+      cursor: default;
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    .feature-card.reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .feature-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(245,200,66,0.3);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .feature-icon {
+      width:52px; height:52px; border-radius:14px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.4rem; margin-bottom:20px;
+    }
+    .feature-card h3 { font-size:1.1rem; font-weight:700; margin-bottom:10px; color:#fff; }
+    .feature-card p { font-size:0.87rem; color:rgba(232,234,246,0.55); line-height:1.65; }
+    .feature-tag {
+      display:inline-block; margin-top:16px;
+      font-size:0.72rem; color:var(--teal);
+      background: rgba(0,212,200,0.1); padding:3px 10px; border-radius:20px;
+    }
+
+    /* How it works */
+    #how { padding: 80px 40px; background: rgba(255,255,255,0.02); }
+    .how-inner { max-width:1100px; margin:0 auto; }
+    .steps-row {
+      display:flex; gap:0; margin-top:60px;
+      flex-wrap:wrap; position:relative;
+    }
+    .step {
+      flex:1; min-width:200px; padding:32px 24px; text-align:center; position:relative;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .step.reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .step::after {
+      content:''; position:absolute; top:46px; right:-1px;
+      width:2px; height:40px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+    }
+    .step:last-child::after { display:none; }
+    .step-num {
+      width:48px; height:48px; border-radius:50%;
+      background: linear-gradient(135deg,var(--gold),var(--gold-dim));
+      color:var(--navy); font-family:'Syne',sans-serif; font-weight:800;
+      font-size:1.1rem; display:flex; align-items:center; justify-content:center;
+      margin: 0 auto 16px;
+      box-shadow: 0 0 20px rgba(245,200,66,0.4);
+    }
+    .step h4 { font-size:0.95rem; font-weight:700; margin-bottom:8px; }
+    .step p { font-size:0.82rem; color:rgba(232,234,246,0.5); line-height:1.6; }
+
+    /* Testimonials */
+    #testimonials { padding: 80px 40px; max-width:1100px; margin:0 auto; }
+    .testi-grid {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:24px; margin-top:48px;
+    }
+    .testi-card {
+      padding:28px; border-radius:16px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.07);
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .testi-card.reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .testi-quote { font-size:0.9rem; color:rgba(232,234,246,0.7); line-height:1.7; font-style:italic; }
+    .testi-author { display:flex; align-items:center; gap:12px; margin-top:20px; }
+    .testi-avatar {
+      width:40px; height:40px; border-radius:50%;
+      background: linear-gradient(135deg, var(--teal), var(--gold));
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Syne',sans-serif; font-weight:800; font-size:0.9rem; color:var(--navy);
+    }
+    .testi-name { font-weight:600; font-size:0.88rem; }
+    .testi-role { font-size:0.75rem; color:rgba(232,234,246,0.45); }
+
+    /* Footer */
+    footer {
+      position:relative; z-index:1;
+      padding:48px 40px; text-align:center;
+      border-top:1px solid rgba(255,255,255,0.06);
+      color:rgba(232,234,246,0.35); font-size:0.82rem;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position:fixed; inset:0; z-index:999;
+      background: rgba(5,8,30,0.85);
+      backdrop-filter: blur(8px);
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; pointer-events:none; transition: opacity 0.3s;
+    }
+    .modal-overlay.open { opacity:1; pointer-events:all; }
+    .modal-box {
+      width:100%; max-width:440px; border-radius:24px;
+      padding:40px 36px;
+      background: rgba(13,21,64,0.95);
+      border: 1px solid rgba(245,200,66,0.2);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+      transform: translateY(20px); transition: transform 0.3s;
+      position: relative;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0); }
+    .modal-close {
+      position:absolute; top:16px; right:20px;
+      background:none; border:none; color:rgba(232,234,246,0.4);
+      font-size:1.4rem; cursor:pointer; transition:color 0.2s;
+    }
+    .modal-close:hover { color:#fff; }
+    .modal-title { font-size:1.5rem; font-weight:800; margin-bottom:6px; }
+    .modal-sub { font-size:0.85rem; color:rgba(232,234,246,0.5); margin-bottom:28px; }
+    .tab-row { display:flex; background:rgba(255,255,255,0.05); border-radius:10px; padding:4px; margin-bottom:28px; }
+    .tab {
+      flex:1; padding:9px; text-align:center; border-radius:8px;
+      font-family:'Syne',sans-serif; font-weight:600; font-size:0.85rem;
+      cursor:pointer; color:rgba(232,234,246,0.5); transition: background 0.2s, color 0.2s;
+      border:none; background:none;
+    }
+    .tab.active { background:var(--gold); color:var(--navy); }
+    .input-group { margin-bottom:18px; }
+    .input-group label { display:block; font-size:0.78rem; color:rgba(232,234,246,0.6); margin-bottom:6px; letter-spacing:0.5px; }
+    .input-group input, .input-group select {
+      width:100%; padding:12px 16px; border-radius:10px;
+      background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1);
+      color:#fff; font-family:'DM Sans',sans-serif; font-size:0.9rem;
+      outline:none; transition:border-color 0.2s;
+    }
+    .input-group input:focus, .input-group select:focus { border-color:var(--gold); }
+    .role-pills { display:flex; gap:10px; margin-bottom:22px; }
+    .role-pill {
+      flex:1; padding:10px; border-radius:10px; text-align:center;
+      border:2px solid rgba(255,255,255,0.1); cursor:pointer;
+      font-family:'Syne',sans-serif; font-weight:600; font-size:0.82rem;
+      color:rgba(232,234,246,0.6); transition:all 0.2s; background:none;
+    }
+    .role-pill.active { border-color:var(--gold); color:var(--gold); background:rgba(245,200,66,0.08); }
+    .btn-submit {
+      width:100%; padding:14px; border-radius:12px;
+      background: linear-gradient(135deg,var(--gold),var(--gold-dim));
+      color:var(--navy); font-family:'Syne',sans-serif; font-weight:800;
+      font-size:0.95rem; border:none; cursor:pointer; margin-top:4px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-submit:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(245,200,66,0.4); }
+    .form-panel { display:none; }
+    .form-panel.active { display:block; }
+
+    /* Dashboard */
+    #dashboard {
+      display:none;
+      position:relative; z-index:1; min-height:100vh;
+      padding: 100px 40px 60px;
+      max-width: 1300px; margin:0 auto;
+    }
+    #dashboard.visible { display:block; }
+    #landing-content { transition: opacity 0.4s; }
+
+    .dash-greeting { font-size:clamp(1.5rem,3vw,2.2rem); font-weight:800; margin-bottom:4px; }
+    .dash-greeting span { color:var(--gold); }
+    .dash-sub { color:rgba(232,234,246,0.5); margin-bottom:40px; font-size:0.92rem; }
+
+    .quick-actions {
+      display:flex; gap:12px; flex-wrap:wrap; margin-bottom:40px;
+    }
+    .qa-btn {
+      display:flex; align-items:center; gap:8px;
+      padding:10px 20px; border-radius:50px;
+      font-family:'Syne',sans-serif; font-weight:600; font-size:0.82rem;
+      cursor:pointer; border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.05); color:#e8eaf6;
+      transition:all 0.2s;
+    }
+    .qa-btn:hover { border-color:var(--gold); color:var(--gold); background:rgba(245,200,66,0.06); }
+    .dash-grid {
+      display:grid;
+      grid-template-columns: 2fr 1fr;
+      gap:24px;
+    }
+    @media(max-width:900px){ .dash-grid { grid-template-columns:1fr; } }
+    .dash-card {
+      padding:28px; border-radius:20px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    .dash-card-title {
+      font-size:0.88rem; font-weight:700; color:rgba(232,234,246,0.6);
+      text-transform:uppercase; letter-spacing:1px; margin-bottom:20px;
+    }
+
+    /* Animations */
+    @keyframes fadeSlideUp {
+      from { opacity:0; transform:translateY(24px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes blink { 50% { opacity:0; } }
+    @keyframes bounce {
+      0%,100% { transform:translateX(-50%) translateY(0); }
+      50% { transform:translateX(-50%) translateY(8px); }
+    }
+    @keyframes pulse-gold {
+      0%,100% { opacity:1; transform: scale(1); }
+      50% { opacity:0.5; transform: scale(0.7); }
+    }
+
+    @media(max-width:640px){
+      nav { padding:14px 20px; }
+      .nav-menu a { display: none; }
+      .nav-links { gap: 8px; }
+      #features, #testimonials { padding:60px 20px; }
+      .dash-card { padding:20px; }
+      #dashboard { padding:90px 20px 40px; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<canvas id="bg-canvas-dashboard"></canvas>
+
+<!-- Navbar -->
+<nav id="navbar">
+  <div class="nav-logo">Alumio<span>DTU</span></div>
+  <div class="nav-links" id="navLinks">
+    <div class="nav-menu" id="navMenu">
+      <a href="#features">Features</a>
+      <a href="#how">How It Works</a>
+      <a href="#testimonials">Stories</a>
+    </div>
+    <div class="nav-actions" id="navActions">
+      <!-- Will be populated dynamically -->
+    </div>
+  </div>
+</nav>
+
+<!-- Landing Content -->
+<div id="landing-content">
+  <section id="hero">
+    <div class="hero-dtu-badge"><span class="dtu-dot"></span>Delhi Technological University</div>
+    <h1 class="hero-title"><span id="typed-text"></span><span class="cursor" id="cursor"></span></h1>
+    <p class="hero-sub">Where the DTU bond continues beyond campus. Connect, mentor, grow — together.</p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="openModal('signup')">Join Your Network →</button>
+      <button class="btn-ghost" onclick="openModal('login')">Alumni? Log In</button>
+    </div>
+    <div class="dtu-highlight">
+      <div class="dtu-hi-item"><span class="dot"></span>Est. 1941 · Rohini, Delhi</div>
+      <div class="dtu-hi-item"><span class="dot"></span>Formerly DCET / DCE</div>
+      <div class="dtu-hi-item"><span class="dot"></span>NAAC A+ Accredited</div>
+      <div class="dtu-hi-item"><span class="dot"></span>Top-5 Engineering College, India</div>
+    </div>
+    <div class="stats-strip">
+      <div class="stat-item"><div class="stat-num" data-target="120000">0</div><div class="stat-label">Alumni Connected</div></div>
+      <div class="stat-item"><div class="stat-num" data-target="8400">0</div><div class="stat-label">Mentorships Formed</div></div>
+      <div class="stat-item"><div class="stat-num" data-target="340">0</div><div class="stat-label">Companies Hiring</div></div>
+      <div class="stat-item"><div class="stat-num" data-target="92">0</div><div class="stat-label">% Would Recommend</div></div>
+    </div>
+    <div class="scroll-hint"><span>Scroll</span><div class="arrow"></div></div>
+  </section>
+
+  <section id="features">
+    <div class="section-tag">What we offer</div>
+    <h2 class="section-title">Everything Your Network Needs</h2>
+    <p class="section-desc">AlumioDTU bridges the gap between graduating students and the powerful DTU alumni community.</p>
+    <div class="features-grid" id="featuresGrid">
+      <div class="feature-card"><div class="feature-icon" style="background:rgba(245,200,66,0.12);">🔗</div><h3>Smart Alumni Matching</h3><p>Filter alumni by batch year, department, company, and city — find the right person to connect with in seconds.</p><span class="feature-tag">✦ Precision Search</span></div>
+      <div class="feature-card"><div class="feature-icon" style="background:rgba(0,212,200,0.12);">🎯</div><h3>Mentorship Hub</h3><p>Structured 1-on-1 mentorship programs with scheduling, goal tracking, and session notes.</p><span class="feature-tag">✦ Structured Programs</span></div>
+      <div class="feature-card"><div class="feature-icon" style="background:rgba(100,120,255,0.12);">💼</div><h3>Exclusive Job Board</h3><p>Alumni-posted jobs, referrals, and internships exclusive to the DTU network.</p><span class="feature-tag">✦ Referral Network</span></div>
+      <div class="feature-card"><div class="feature-icon" style="background:rgba(245,100,100,0.12);">📅</div><h3>Events & Reunions</h3><p>Virtual and in-person event management — from networking dinners to global alumni meets.</p><span class="feature-tag">✦ Virtual & IRL</span></div>
+      <div class="feature-card"><div class="feature-icon" style="background:rgba(50,200,100,0.12);">💬</div><h3>Community Forums</h3><p>Domain-specific discussion boards for career advice, startup ideas, and research collaboration.</p><span class="feature-tag">✦ Niche Boards</span></div>
+      <div class="feature-card"><div class="feature-icon" style="background:rgba(200,100,255,0.12);">🗺️</div><h3>Alumni World Map</h3><p>Visualize where your DTU network is spread across the globe. Find alumni in your city.</p><span class="feature-tag">✦ Interactive Globe</span></div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="how-inner"><div class="section-tag">Simple process</div><h2 class="section-title">Get Connected in Minutes</h2>
+    <div class="steps-row" id="stepsRow"><div class="step"><div class="step-num">1</div><h4>Create Your Profile</h4><p>Sign up as a DTU student or alumni.</p></div>
+    <div class="step"><div class="step-num">2</div><h4>Discover Your Network</h4><p>Browse alumni by batch, department, or industry.</p></div>
+    <div class="step"><div class="step-num">3</div><h4>Connect & Chat</h4><p>Send connection requests, message directly.</p></div>
+    <div class="step"><div class="step-num">4</div><h4>Grow Together</h4><p>Attend events, apply for jobs via referrals.</p></div></div></div>
+  </section>
+
+  <section id="testimonials"><div class="section-tag">Real stories</div><h2 class="section-title">DTU Alumni & Students Love Us</h2>
+  <div class="testi-grid" id="testiGrid"><div class="testi-card"><p class="testi-quote">"Within a week on AlumioDTU I had coffee with three DTU alumni. One of them referred me to my dream company."</p><div class="testi-author"><div class="testi-avatar">P</div><div><div class="testi-name">Priya Sharma</div><div class="testi-role">Final Year, CS — DTU Delhi</div></div></div></div>
+  <div class="testi-card"><p class="testi-quote">"As a DTU alumni, giving back now feels structured and rewarding. Mentorship dashboard is a game changer."</p><div class="testi-author"><div class="testi-avatar">R</div><div><div class="testi-name">Rahul Mehta</div><div class="testi-role">Batch of 2018, Google</div></div></div></div>
+  <div class="testi-card"><p class="testi-quote">"The job board with alumni referrals got me three interviews in a month. Absolutely brilliant."</p><div class="testi-author"><div class="testi-avatar">A</div><div><div class="testi-name">Aisha Khan</div><div class="testi-role">Final Year, ECE — DTU</div></div></div></div></div></section>
+  <footer><div class="nav-logo" style="display:inline-block;margin-bottom:12px;">Alumio<span style="color:var(--teal)">DTU</span></div><p>Digital Bridges, Real Connections.</p><p>© 2026 AlumioDTU. Built with ❤️ by Aman.</p></footer>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard">
+  <div class="dash-greeting">Hello, <span id="user-name-display">Friend</span> 👋</div>
+  <p class="dash-sub">Your DTU network is growing — here's your command center (more features coming soon).</p>
+  <div class="quick-actions"><button class="qa-btn"><span>👤</span> My Profile</button><button class="qa-btn"><span>💼</span> Browse Jobs</button><button class="qa-btn"><span>📅</span> Events</button><button class="qa-btn"><span>🎯</span> Find Mentor</button></div>
+  <div class="dash-grid"><div class="dash-card"><div class="dash-card-title">✨ Welcome to AlumioDTU Pro</div><p style="line-height:1.6;color:rgba(232,234,246,0.7);">Your personalized alumni dashboard is under construction — but you're connected! Soon you'll see smart recommendations, mentorship matches, and live alumni events.</p><div style="margin-top:20px;padding:12px;background:rgba(245,200,66,0.08);border-radius:12px;"><span style="color:var(--gold);">📢 Coming soon:</span> AI-powered job matches, 1:1 video mentoring, and exclusive DTU networking rooms.</div></div>
+  <div class="dash-card"><div class="dash-card-title">🌟 Quick Stats</div><div style="margin-bottom:12px;"><span style="color:var(--gold);">245</span> new alumni joined this week</div><div><span style="color:var(--gold);">18</span> exclusive jobs posted by alumni</div><div style="margin-top:12px;"><button class="qa-btn" style="width:100%;text-align:center;">Explore Empty State →</button></div></div></div></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal-box"><button class="modal-close" onclick="closeModal()">✕</button><h2 class="modal-title">Welcome Back</h2><p class="modal-sub" id="modal-sub">Sign in to your AlumioDTU account</p>
+  <div class="tab-row"><button class="tab active" id="tab-login" onclick="switchTab('login')">Log In</button><button class="tab" id="tab-signup" onclick="switchTab('signup')">Sign Up</button></div>
+  <div class="form-panel active" id="panel-login"><div class="input-group"><label>EMAIL</label><input type="email" id="login-email" placeholder="you@dtu.ac.in"/></div><div class="input-group"><label>PASSWORD</label><input type="password" id="login-password" placeholder="••••••••"/></div><button class="btn-submit" onclick="handleLogin()">Log In →</button><p id="auth-error" style="text-align:center;margin-top:12px;font-size:0.8rem;color:#ef5350;"></p></div>
+  <div class="form-panel" id="panel-signup"><div class="role-pills"><button class="role-pill active" id="pill-student" onclick="selectRole('student')">🎓 Student</button><button class="role-pill" id="pill-alumni" onclick="selectRole('alumni')">💼 Alumni</button></div><div class="input-group"><label>FULL NAME</label><input type="text" id="signup-name" placeholder="Your full name"/></div><div class="input-group"><label>EMAIL</label><input type="email" id="signup-email" placeholder="you@dtu.ac.in"/></div><div class="input-group"><label>DEPARTMENT</label><input type="text" id="signup-university" placeholder="e.g. Computer Science"/></div><div class="input-group"><label>GRAD YEAR</label><input type="text" id="signup-year" placeholder="e.g. 2025"/></div><div class="input-group"><label>PASSWORD</label><input type="password" id="signup-password" placeholder="Min. 8 characters"/></div><button class="btn-submit" onclick="handleSignup()">Create Account →</button></div></div>
+</div>
+
+<script>
+  // ---------- Enhanced Three.js Cosmic Background (Landing) ----------
+  (function initLandingBG() {
+    const canvas = document.getElementById('bg-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x0a0a1a, 1);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+    camera.position.set(0, 20, 160);
+    
+    const starCount = 2500;
+    const starGeo = new THREE.BufferGeometry();
+    const starPos = [];
+    for (let i = 0; i < starCount; i++) {
+      starPos.push((Math.random() - 0.5) * 800);
+      starPos.push((Math.random() - 0.5) * 500);
+      starPos.push((Math.random() - 0.5) * 300 - 100);
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(starPos), 3));
+    const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.28, transparent: true, opacity: 0.7 });
+    const stars = new THREE.Points(starGeo, starMat);
+    scene.add(stars);
+    
+    const orbCount = 600;
+    const orbGeo = new THREE.BufferGeometry();
+    const orbPositions = [];
+    for (let i = 0; i < orbCount; i++) {
+      orbPositions.push((Math.random() - 0.5) * 420, (Math.random() - 0.5) * 280, (Math.random() - 0.5) * 180);
+    }
+    orbGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(orbPositions), 3));
+    const orbMatGlow = new THREE.PointsMaterial({ color: 0xf5c842, size: 0.55, transparent: true, opacity: 0.45 });
+    const orbs = new THREE.Points(orbGeo, orbMatGlow);
+    scene.add(orbs);
+    
+    const ringParticleCount = 800;
+    const ringGeo = new THREE.BufferGeometry();
+    const ringPos = [];
+    for (let i = 0; i < ringParticleCount; i++) {
+      const angle = (i / ringParticleCount) * Math.PI * 2;
+      const radius = 78;
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      ringPos.push(x, (Math.sin(angle * 3) * 8), z);
+    }
+    ringGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(ringPos), 3));
+    const ringMat = new THREE.PointsMaterial({ color: 0xf5c842, size: 0.45, transparent: true });
+    const ringPoints = new THREE.Points(ringGeo, ringMat);
+    scene.add(ringPoints);
+    
+    scene.fog = new THREE.FogExp2(0x0a0a1a, 0.0006);
+    const ambientLight = new THREE.AmbientLight(0x224466);
+    const pointLight1 = new THREE.PointLight(0x00d4c8, 0.9);
+    pointLight1.position.set(40, 60, 50);
+    const pointLight2 = new THREE.PointLight(0xf5c842, 0.7);
+    pointLight2.position.set(-50, 30, 70);
+    scene.add(ambientLight, pointLight1, pointLight2);
+    
+    let time = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      time += 0.008;
+      stars.rotation.y += 0.0003;
+      stars.rotation.x += 0.0002;
+      orbs.rotation.y -= 0.0006;
+      orbs.rotation.x += 0.0004;
+      ringPoints.rotation.y += 0.002;
+      ringPoints.rotation.x = Math.sin(time * 0.5) * 0.1;
+      camera.position.z = 160 + Math.sin(time * 0.3) * 4;
+      camera.lookAt(0, 15, 0);
+      renderer.render(scene, camera);
+    }
+    animate();
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  })();
+  
+  // Dashboard subtle background
+  const dashCanvas = document.getElementById('bg-canvas-dashboard');
+  let dashRenderer, dashScene, dashCamera;
+  function initDashboardBG() {
+    dashRenderer = new THREE.WebGLRenderer({ canvas: dashCanvas, alpha: true });
+    dashRenderer.setSize(window.innerWidth, window.innerHeight);
+    dashRenderer.setClearColor(0x0d1540, 1);
+    dashScene = new THREE.Scene();
+    dashCamera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    dashCamera.position.set(0, 20, 100);
+    const gridHelper = new THREE.GridHelper(400, 30, 0x00d4c8, 0x334466);
+    gridHelper.position.y = -30;
+    dashScene.add(gridHelper);
+    const ambientDash = new THREE.AmbientLight(0x335588);
+    dashScene.add(ambientDash);
+    function animateDash() {
+      if (dashRenderer) {
+        requestAnimationFrame(animateDash);
+        dashCamera.position.z = 100 + Math.sin(Date.now() * 0.0003) * 2;
+        dashRenderer.render(dashScene, dashCamera);
+      }
+    }
+    animateDash();
+    window.addEventListener('resize', () => {
+      if (dashRenderer) {
+        dashCamera.aspect = window.innerWidth / window.innerHeight;
+        dashCamera.updateProjectionMatrix();
+        dashRenderer.setSize(window.innerWidth, window.innerHeight);
+      }
+    });
+  }
+  initDashboardBG();
+  
+  // Scroll reveal for cards
+  const revealElements = document.querySelectorAll('.feature-card, .step, .testi-card');
+  function checkReveal() {
+    const windowHeight = window.innerHeight;
+    revealElements.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < windowHeight - 100) {
+        el.classList.add('reveal');
+      }
+    });
+  }
+  window.addEventListener('scroll', checkReveal);
+  window.addEventListener('load', () => { checkReveal(); setTimeout(checkReveal, 200); });
+  
+  // Typewriter effect
+  const phrases = ['Connect with Alumni.', 'Find Your Mentor.', 'Land That Referral.', 'Build Your Legacy.'];
+  let pi = 0, ci = 0, deleting = false;
+  const typedEl = document.getElementById('typed-text');
+  function typeLoop() {
+    const current = phrases[pi];
+    if (!deleting) {
+      typedEl.innerHTML = '<span class="accent">' + current.slice(0, ci + 1) + '</span>';
+      ci++;
+      if (ci === current.length) { deleting = true; setTimeout(typeLoop, 1800); return; }
+    } else {
+      typedEl.innerHTML = '<span class="accent">' + current.slice(0, ci - 1) + '</span>';
+      ci--;
+      if (ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; }
+    }
+    setTimeout(typeLoop, deleting ? 42 : 80);
+  }
+  typeLoop();
+  
+  // Counter animation
+  function animateCounters() {
+    document.querySelectorAll('.stat-num').forEach(el => {
+      const target = parseInt(el.dataset.target);
+      let current = 0;
+      const inc = target / 80;
+      const t = setInterval(() => {
+        current = Math.min(current + inc, target);
+        el.textContent = Math.floor(current).toLocaleString() + (el.dataset.target === '92' ? '%' : '+');
+        if (current >= target) clearInterval(t);
+      }, 20);
+    });
+  }
+  const statsObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { animateCounters(); statsObserver.disconnect(); } });
+  });
+  statsObserver.observe(document.querySelector('.stats-strip'));
+  
+  // Modal & Auth logic
+  let selectedRole = 'student';
+  function openModal(type) { 
+    document.getElementById('modal-overlay').classList.add('open'); 
+    switchTab(type); 
+  }
+  function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+  function handleOverlayClick(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
+  function switchTab(type) {
+    ['login','signup'].forEach(t => {
+      document.getElementById('tab-'+t).classList.toggle('active', t===type);
+      document.getElementById('panel-'+t).classList.toggle('active', t===type);
+    });
+    document.querySelector('.modal-title').textContent = type === 'login' ? 'Welcome Back' : 'Join AlumioDTU';
+    document.getElementById('modal-sub').textContent = type === 'login' ? 'Sign in to your AlumioDTU account' : 'Create your free DTU alumni profile';
+  }
+  function selectRole(role) { 
+    selectedRole = role; 
+    document.getElementById('pill-student').classList.toggle('active', role==='student'); 
+    document.getElementById('pill-alumni').classList.toggle('active', role==='alumni'); 
+  }
+  
+  // Update navbar based on login state - HIDE FEATURES, HOW IT WORKS, STORIES when logged in
+  function updateNavbarForLoggedIn(userName) {
+    const navMenu = document.getElementById('navMenu');
+    navMenu.classList.add('hidden'); // Hide the feature links
+    const navActions = document.getElementById('navActions');
+    navActions.innerHTML = `
+      <span class="user-greeting">👋 ${userName}</span>
+      <button class="btn-logout" id="navbar-logout-btn">Logout</button>
+    `;
+    document.getElementById('navbar-logout-btn').addEventListener('click', () => {
+      handleLogout();
+    });
+  }
+  
+  function updateNavbarForLoggedOut() {
+    const navMenu = document.getElementById('navMenu');
+    navMenu.classList.remove('hidden'); // Show feature links
+    const navActions = document.getElementById('navActions');
+    navActions.innerHTML = `
+      <button class="btn-nav" onclick="openModal('login')">Log In</button>
+      <button class="btn-nav" style="background:transparent;color:var(--gold);border:1.5px solid var(--gold);" onclick="openModal('signup')">Sign Up</button>
+    `;
+  }
+  
+  function handleLogin() { 
+    const email = document.getElementById('login-email').value.trim(); 
+    const pass = document.getElementById('login-password').value; 
+    if (!email || !pass) { document.getElementById('auth-error').textContent = 'Please fill fields'; return; } 
+    const name = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); 
+    showDashboard(name); 
+  }
+  
+  function handleSignup() { 
+    const name = document.getElementById('signup-name').value.trim(); 
+    if (!name) { alert('Please enter your name.'); return; } 
+    showDashboard(name.split(' ')[0]); 
+  }
+  
+  function showDashboard(name) {
+    closeModal();
+    document.getElementById('user-name-display').textContent = name;
+    updateNavbarForLoggedIn(name);
+    document.getElementById('landing-content').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('landing-content').style.display = 'none';
+      document.getElementById('dashboard').classList.add('visible');
+      document.getElementById('bg-canvas').style.opacity = '0';
+      document.getElementById('bg-canvas-dashboard').style.opacity = '1';
+    }, 400);
+  }
+  
+  function handleLogout() {
+    document.getElementById('dashboard').classList.remove('visible');
+    document.getElementById('landing-content').style.display = 'block';
+    setTimeout(() => { 
+      document.getElementById('landing-content').style.opacity = '1'; 
+      document.getElementById('bg-canvas').style.opacity = '1'; 
+      document.getElementById('bg-canvas-dashboard').style.opacity = '0'; 
+      updateNavbarForLoggedOut();
+    }, 50);
+  }
+  
+  // Initialize navbar as logged out
+  updateNavbarForLoggedOut();
+  
+  // Dashboard background opacity init
+  document.getElementById('bg-canvas-dashboard').style.opacity = '0';
+</script>
+</body>
+</html>
