@@ -597,20 +597,7 @@
     const orbs = new THREE.Points(orbGeo, orbMatGlow);
     scene.add(orbs);
     
-    const ringParticleCount = 800;
-    const ringGeo = new THREE.BufferGeometry();
-    const ringPos = [];
-    for (let i = 0; i < ringParticleCount; i++) {
-      const angle = (i / ringParticleCount) * Math.PI * 2;
-      const radius = 78;
-      const x = Math.cos(angle) * radius;
-      const z = Math.sin(angle) * radius;
-      ringPos.push(x, (Math.sin(angle * 3) * 8), z);
-    }
-    ringGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(ringPos), 3));
-    const ringMat = new THREE.PointsMaterial({ color: 0xf5c842, size: 0.45, transparent: true });
-    const ringPoints = new THREE.Points(ringGeo, ringMat);
-    scene.add(ringPoints);
+
     
     scene.fog = new THREE.FogExp2(0x0a0a1a, 0.0006);
     const ambientLight = new THREE.AmbientLight(0x224466);
@@ -628,8 +615,7 @@
       stars.rotation.x += 0.0002;
       orbs.rotation.y -= 0.0006;
       orbs.rotation.x += 0.0004;
-      ringPoints.rotation.y += 0.002;
-      ringPoints.rotation.x = Math.sin(time * 0.5) * 0.1;
+
       camera.position.z = 160 + Math.sin(time * 0.3) * 4;
       camera.lookAt(0, 15, 0);
       renderer.render(scene, camera);
