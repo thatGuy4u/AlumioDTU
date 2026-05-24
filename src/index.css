@@ -1,1 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@300;400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
 @import "tailwindcss";
+
+:root {
+  --gold: #F5C842;
+  --gold-dim: #c9a227;
+  --navy: #0a0f2e;
+  --navy-mid: #0d1540;
+  --teal: #00d4c8;
+  --teal-dim: #00a89e;
+  --glass: rgba(255,255,255,0.05);
+  --glass-border: rgba(255,255,255,0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--navy);
+  color: #e8eaf6;
+  overflow-x: hidden;
+}
+h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; }
