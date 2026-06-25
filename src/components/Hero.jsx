@@ -103,7 +103,7 @@ export default function Hero({ onOpenModal }) {
           <div className="stat-label">Referrals</div>
         </div>
         <div className="stat-item">
-          <div className="stat-num" data-target="92">0</div>
+          <div className="stat-num" data-target="93">0</div>
           <div className="stat-label">% Would Recommend</div>
         </div>
       </div>
