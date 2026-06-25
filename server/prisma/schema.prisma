@@ -1,0 +1,540 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ======================== ENUMS ========================
+
+enum Role {
+  student
+  alumni
+  admin
+}
+
+enum OnlineStatus {
+  online
+  offline
+  away
+}
+
+enum Branch {
+  CSE
+  IT
+  ECE
+  EE
+  ME
+  CE
+  BT
+  EP
+  COE
+  SE
+  MCE
+  PIE
+  ENE
+  Other
+}
+
+enum MentorshipStatus {
+  pending
+  accepted
+  rejected
+  completed
+}
+
+enum SessionStatus {
+  scheduled
+  completed
+  cancelled
+}
+
+enum JobType {
+  internship
+  full_time
+  part_time
+  contract
+}
+
+enum WorkMode {
+  remote
+  onsite
+  hybrid
+}
+
+enum ApplicationStatus {
+  applied
+  reviewed
+  shortlisted
+  rejected
+  hired
+}
+
+enum PostCategory {
+  placements
+  internships
+  higher_studies
+  startups
+  general
+}
+
+enum EventType {
+  alumni_talk
+  webinar
+  networking
+  workshop
+  meetup
+}
+
+enum RegistrationStatus {
+  registered
+  attended
+  cancelled
+}
+
+enum NotificationType {
+  mentorship_request
+  mentorship_accepted
+  mentorship_rejected
+  message
+  job_posted
+  application_update
+  event_reminder
+  community_reply
+  community_upvote
+  achievement_unlocked
+  system_notification
+  verification
+}
+
+enum ReportReason {
+  spam
+  harassment
+  inappropriate
+  misinformation
+  other
+}
+
+enum ReportStatus {
+  pending
+  reviewed
+  resolved
+  dismissed
+}
+
+// ======================== MODELS ========================
+
+model User {
+  id                       String         @id @default(cuid())
+  email                    String         @unique
+  password                 String
+  name                     String
+  role                     Role           @default(student)
+  avatar                   String         @default("")
+  isEmailVerified          Boolean        @default(false)
+  isProfileComplete        Boolean        @default(false)
+  isVerified               Boolean        @default(false)
+  isBanned                 Boolean        @default(false)
+  emailVerificationToken   String?
+  emailVerificationExpires DateTime?
+  passwordResetToken       String?
+  passwordResetExpires     DateTime?
+  refreshToken             String?
+  lastLogin                DateTime?
+  onlineStatus             OnlineStatus   @default(offline)
+  lastSeen                 DateTime       @default(now())
+
+  // Social links stored as JSON
+  socialLinks              Json           @default("{}")
+
+  createdAt                DateTime       @default(now())
+  updatedAt                DateTime       @updatedAt
+
+  // Relations
+  studentProfile           StudentProfile?
+  alumniProfile            AlumniProfile?
+
+  // Posts & comments
+  posts                    Post[]
+  comments                 Comment[]
+
+  // Jobs
+  postedJobs               Job[]          @relation("PostedJobs")
+  jobApplications          JobApplication[]
+  referredApplications     JobApplication[] @relation("ReferredBy")
+
+  // Events
+  organizedEvents          Event[]
+  eventRegistrations       EventRegistration[]
+
+  // Mentorship
+  menteeRequests           MentorshipRequest[] @relation("MenteeRequests")
+  mentorRequests           MentorshipRequest[] @relation("MentorRequests")
+  menteeSessions           MentorshipSession[] @relation("MenteeSessions")
+  mentorSessions           MentorshipSession[] @relation("MentorSessions")
+
+  // Chat
+  conversations            ConversationParticipant[]
+  sentMessages             Message[]
+
+  // Notifications & achievements
+  notifications            Notification[]
+  achievements             Achievement[]
+
+  // Reports
+  reportsFiled             Report[]       @relation("Reporter")
+  reportsAgainst           Report[]       @relation("ReportedUser")
+  resolvedReports          Report[]       @relation("ResolvedBy")
+
+  // Upvotes (many-to-many)
+  upvotedPosts             PostUpvote[]
+  upvotedComments          CommentUpvote[]
+
+  // Saved jobs
+  savedJobs                SavedJob[]
+
+  @@index([role])
+  @@index([createdAt(sort: Desc)])
+}
+
+model StudentProfile {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch                 Branch?
+  year                   Int?
+  graduationYear         Int?
+  rollNumber             String?
+  bio                    String   @default("")
+  skills                 String[] @default([])
+  interests              String[] @default([])
+  careerGoals            String   @default("")
+  resume                 String   @default("")
+  projects               Json     @default("[]")
+  achievements           String[] @default([])
+  profileCompletionScore Int      @default(0)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@index([branch, year])
+}
+
+model AlumniProfile {
+  id                      String   @id @default(cuid())
+  userId                  String   @unique
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch                  Branch?
+  graduationYear          Int?
+  company                 String   @default("")
+  designation             String   @default("")
+  industry                String   @default("")
+  location                String   @default("")
+  experience              Int      @default(0)
+  bio                     String   @default("")
+  skills                  String[] @default([])
+  linkedinProfile         String   @default("")
+  mentorshipAvailability  Boolean  @default(false)
+  mentorshipCapacity      Int      @default(3)
+  activeMentees           Int      @default(0)
+  mentorRatingAvg         Float    @default(0)
+  mentorRatingCount       Int      @default(0)
+  careerJourney           Json     @default("[]")
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@index([company])
+  @@index([industry])
+  @@index([graduationYear])
+  @@index([location])
+  @@index([mentorshipAvailability])
+}
+
+model MentorshipRequest {
+  id        String           @id @default(cuid())
+  menteeId  String
+  mentee    User             @relation("MenteeRequests", fields: [menteeId], references: [id], onDelete: Cascade)
+  mentorId  String
+  mentor    User             @relation("MentorRequests", fields: [mentorId], references: [id], onDelete: Cascade)
+  message   String
+  status    MentorshipStatus @default(pending)
+
+  feedbackRating  Int?
+  feedbackComment String?
+  feedbackAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions MentorshipSession[]
+
+  @@index([menteeId, status])
+  @@index([mentorId, status])
+}
+
+model MentorshipSession {
+  id                  String        @id @default(cuid())
+  mentorshipRequestId String
+  mentorshipRequest   MentorshipRequest @relation(fields: [mentorshipRequestId], references: [id], onDelete: Cascade)
+  menteeId            String
+  mentee              User          @relation("MenteeSessions", fields: [menteeId], references: [id])
+  mentorId            String
+  mentor              User          @relation("MentorSessions", fields: [mentorId], references: [id])
+  scheduledAt         DateTime
+  duration            Int           @default(30)
+  topic               String
+  meetingLink         String?
+  status              SessionStatus @default(scheduled)
+  notes               String?
+  createdAt           DateTime      @default(now())
+
+  @@index([menteeId])
+  @@index([mentorId])
+}
+
+model Conversation {
+  id           String   @id @default(cuid())
+  lastContent  String?
+  lastSenderId String?
+  lastMsgAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  unreadCount    Int          @default(0)
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  content        String
+  attachments    Json         @default("[]")
+  readBy         String[]     @default([])
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model Job {
+  id                  String    @id @default(cuid())
+  postedById          String
+  postedBy            User      @relation("PostedJobs", fields: [postedById], references: [id], onDelete: Cascade)
+  title               String
+  company             String
+  type                JobType
+  workMode            WorkMode
+  location            String?
+  description         String
+  requirements        String[]  @default([])
+  skills              String[]  @default([])
+  stipendMin          Int?
+  stipendMax          Int?
+  salaryMin           Int?
+  salaryMax           Int?
+  currency            String    @default("INR")
+  experienceMin       Int       @default(0)
+  experienceMax       Int?
+  applicationDeadline DateTime?
+  isActive            Boolean   @default(true)
+  applicantCount      Int       @default(0)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  applications JobApplication[]
+  savedBy      SavedJob[]
+
+  @@index([isActive, createdAt(sort: Desc)])
+  @@index([type])
+  @@index([workMode])
+}
+
+model JobApplication {
+  id          String            @id @default(cuid())
+  jobId       String
+  job         Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  applicantId String
+  applicant   User              @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  resume      String
+  coverLetter String?
+  status      ApplicationStatus @default(applied)
+  referredById String?
+  referredBy  User?             @relation("ReferredBy", fields: [referredById], references: [id])
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@unique([jobId, applicantId])
+  @@index([applicantId])
+}
+
+model SavedJob {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId  String
+  job    Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId])
+}
+
+model Post {
+  id           String       @id @default(cuid())
+  authorId     String
+  author       User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title        String
+  content      String
+  category     PostCategory @default(general)
+  tags         String[]     @default([])
+  upvoteCount  Int          @default(0)
+  commentCount Int          @default(0)
+  isPinned     Boolean      @default(false)
+  isModerated  Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  comments Comment[]
+  upvotes  PostUpvote[]
+
+  @@index([category, createdAt(sort: Desc)])
+  @@index([upvoteCount(sort: Desc)])
+}
+
+model PostUpvote {
+  id     String @id @default(cuid())
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+model Comment {
+  id              String   @id @default(cuid())
+  postId          String
+  post            Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId        String
+  author          User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content         String
+  parentCommentId String?
+  parentComment   Comment? @relation("CommentReplies", fields: [parentCommentId], references: [id])
+  replies         Comment[] @relation("CommentReplies")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  upvotes CommentUpvote[]
+
+  @@index([postId, createdAt])
+}
+
+model CommentUpvote {
+  id        String  @id @default(cuid())
+  commentId String
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+}
+
+model Event {
+  id              String    @id @default(cuid())
+  organizerId     String
+  organizer       User      @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  title           String
+  description     String
+  type            EventType
+  date            DateTime
+  endDate         DateTime?
+  location        String    @default("Online")
+  meetingLink     String?
+  coverImage      String?
+  maxAttendees    Int       @default(100)
+  registeredCount Int       @default(0)
+  tags            String[]  @default([])
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  registrations EventRegistration[]
+
+  @@index([date, isActive])
+}
+
+model EventRegistration {
+  id       String             @id @default(cuid())
+  eventId  String
+  event    Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status   RegistrationStatus @default(registered)
+  reminder Boolean            @default(true)
+  createdAt DateTime          @default(now())
+
+  @@unique([eventId, userId])
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  recipientId String
+  recipient   User             @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  type        NotificationType
+  title       String
+  message     String
+  link        String?
+  relatedId   String?
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  @@index([recipientId, isRead, createdAt(sort: Desc)])
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge       String
+  title       String
+  description String?
+  icon        String?
+  points      Int      @default(10)
+  earnedAt    DateTime @default(now())
+
+  @@unique([userId, badge])
+  @@index([userId, points(sort: Desc)])
+}
+
+model Report {
+  id             String       @id @default(cuid())
+  reporterId     String
+  reporter       User         @relation("Reporter", fields: [reporterId], references: [id])
+  reportedUserId String?
+  reportedUser   User?        @relation("ReportedUser", fields: [reportedUserId], references: [id])
+  contentId      String?
+  contentType    String?
+  reason         ReportReason
+  description    String?
+  status         ReportStatus @default(pending)
+  adminNotes     String?
+  resolvedById   String?
+  resolvedBy     User?        @relation("ResolvedBy", fields: [resolvedById], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([status, createdAt(sort: Desc)])
+}

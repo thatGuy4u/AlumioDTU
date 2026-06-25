@@ -1,10 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@300;400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
 @import "tailwindcss";
+@import "./styles/dashboard.css";
+@import "./styles/pages.css";
 
 :root {
   --gold: #F5C842;
   --gold-dim: #c9a227;
-  --navy: #0a0f2e;
+  --navy: #000000;
   --navy-mid: #0d1540;
   --teal: #00d4c8;
   --teal-dim: #00a89e;
@@ -19,5 +21,11 @@ body {
   background: var(--navy);
   color: #e8eaf6;
   overflow-x: hidden;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+[data-theme="light"] body {
+  background: var(--bg-primary, #f5f7fa);
+  color: var(--text-primary, #1a1a2e);
 }
 h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; }

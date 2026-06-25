@@ -1,115 +1,192 @@
 import { useState, useCallback } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser, selectIsAuthenticated } from './store/slices/authSlice';
+import { BYPASS_AUTH_FOR_TESTING } from './utils/constants';
 import './App.css';
 
+// Existing landing page components
 import CinematicIntro from './components/CinematicIntro';
-import ThreeBackground from './components/ThreeBackground';
-import DashboardBackground from './components/DashboardBackground';
+import NexusGlowBackground from './components/NexusGlowBackground';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Features from './components/Features';
 import HowItWorks from './components/HowItWorks';
 import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
-import Dashboard from './components/Dashboard';
-import AuthModal from './components/AuthModal';
 
-function App() {
+// Layouts
+import AuthLayout from './layouts/AuthLayout';
+import AppLayout from './layouts/AppLayout';
+
+// Auth pages
+import LoginPage from './pages/auth/LoginPage';
+import SignupPage from './pages/auth/SignupPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
+import VerifyEmailPage from './pages/auth/VerifyEmailPage';
+
+// Dashboard
+import DashboardRouter from './pages/dashboard/DashboardRouter';
+
+// Onboarding
+import StudentOnboarding from './pages/onboarding/StudentOnboarding';
+import AlumniOnboarding from './pages/onboarding/AlumniOnboarding';
+
+// Core pages
+import ProfilePage from './pages/profile/ProfilePage';
+import EditProfilePage from './pages/profile/EditProfilePage';
+import DirectoryPage from './pages/directory/DirectoryPage';
+import MentorshipPage from './pages/mentorship/MentorshipPage';
+import MessagesPage from './pages/messages/MessagesPage';
+import JobsPage from './pages/jobs/JobsPage';
+import JobDetailPage from './pages/jobs/JobDetailPage';
+import PostJobPage from './pages/jobs/PostJobPage';
+import MyApplicationsPage from './pages/jobs/MyApplicationsPage';
+import CommunityPage from './pages/community/CommunityPage';
+import PostDetailPage from './pages/community/PostDetailPage';
+import EventsPage from './pages/events/EventsPage';
+import EventDetailPage from './pages/events/EventDetailPage';
+import CreateEventPage from './pages/events/CreateEventPage';
+import AchievementsPage from './pages/achievements/AchievementsPage';
+import NotificationsPage from './pages/notifications/NotificationsPage';
+
+// Admin pages
+import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminVerificationsPage from './pages/admin/AdminVerificationsPage';
+import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage';
+import AdminModerationPage from './pages/admin/AdminModerationPage';
+
+// Landing Page Component
+function LandingPage() {
   const [introComplete, setIntroComplete] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('');
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalTab, setModalTab] = useState('login');
+  const navigate = useNavigate();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
 
   const handleIntroComplete = useCallback(() => {
     setIntroComplete(true);
   }, []);
 
-  const handleOpenModal = useCallback((tab) => {
-    setModalTab(tab);
-    setModalOpen(true);
-  }, []);
+  if (!BYPASS_AUTH_FOR_TESTING && isAuthenticated) {
+    return <Navigate to="/app/dashboard" replace />;
+  }
 
-  const handleCloseModal = useCallback(() => {
-    setModalOpen(false);
-  }, []);
-
-  const handleLogin = useCallback((name) => {
-    setModalOpen(false);
-    setUserName(name);
-    setIsLoggedIn(true);
-  }, []);
-
-  const handleLogout = useCallback(() => {
-    setIsLoggedIn(false);
-    setUserName('');
-  }, []);
-
+  const handleOpenModal = (tab) => {
+    if (BYPASS_AUTH_FOR_TESTING) {
+      navigate('/app/dashboard');
+      return;
+    }
+    window.location.href = tab === 'login' ? '/auth/login' : '/auth/signup';
+  };
+  
   return (
     <>
-      {/* Cinematic Intro */}
       <AnimatePresence>
         {!introComplete && (
           <CinematicIntro onComplete={handleIntroComplete} />
         )}
       </AnimatePresence>
 
-      {/* Three.js Backgrounds (always mounted for performance) */}
-      <ThreeBackground visible={!isLoggedIn} />
-      <DashboardBackground visible={isLoggedIn} />
+      <NexusGlowBackground visible={introComplete} />
 
-      {/* Main Content — fades in after intro */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: introComplete ? 1 : 0 }}
         transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
         style={{ position: 'relative', zIndex: 1 }}
       >
-        {/* Navbar */}
         <Navbar
-          isLoggedIn={isLoggedIn}
-          userName={userName}
+          isLoggedIn={false}
+          userName=""
           onOpenModal={handleOpenModal}
-          onLogout={handleLogout}
+          onLogout={() => {}}
         />
-
-        {/* Landing Content */}
-        {!isLoggedIn && (
-          <motion.div
-            id="landing-content"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-          >
-            <Hero onOpenModal={handleOpenModal} />
-            <Features />
-            <HowItWorks />
-            <Testimonials />
-            <Footer />
-          </motion.div>
-        )}
-
-        {/* Dashboard */}
-        {isLoggedIn && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <Dashboard userName={userName} />
-          </motion.div>
-        )}
-
-        {/* Auth Modal */}
-        <AuthModal
-          isOpen={modalOpen}
-          initialTab={modalTab}
-          onClose={handleCloseModal}
-          onLogin={handleLogin}
-        />
+        <Hero onOpenModal={handleOpenModal} />
+        <Features />
+        <HowItWorks />
+        <Testimonials />
+        <Footer />
       </motion.div>
     </>
+  );
+}
+
+// Onboarding router — routes by role
+function OnboardingRouter() {
+  const user = useSelector(selectCurrentUser);
+  if (user?.role === 'alumni') return <AlumniOnboarding />;
+  return <StudentOnboarding />;
+}
+
+
+
+function App() {
+  return (
+    <Routes>
+      {/* Landing Page */}
+      <Route path="/" element={<LandingPage />} />
+
+      {/* Auth Pages */}
+      <Route path="/auth" element={<AuthLayout />}>
+        <Route path="login" element={<LoginPage />} />
+        <Route path="signup" element={<SignupPage />} />
+        <Route path="forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="reset-password/:token" element={<ResetPasswordPage />} />
+        <Route path="verify-email/:token" element={<VerifyEmailPage />} />
+      </Route>
+
+      {/* Authenticated App */}
+      <Route path="/app" element={<AppLayout />}>
+        <Route path="dashboard" element={<DashboardRouter />} />
+        <Route path="onboarding" element={<OnboardingRouter />} />
+
+        {/* Profile */}
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="profile/edit" element={<EditProfilePage />} />
+        <Route path="profile/:userId" element={<ProfilePage />} />
+
+        {/* Directory */}
+        <Route path="directory" element={<DirectoryPage />} />
+
+        {/* Mentorship */}
+        <Route path="mentorship" element={<MentorshipPage />} />
+        <Route path="mentorship/:mentorId" element={<MentorshipPage />} />
+
+        {/* Messages */}
+        <Route path="messages" element={<MessagesPage />} />
+        <Route path="messages/:conversationId" element={<MessagesPage />} />
+
+        {/* Jobs */}
+        <Route path="jobs" element={<JobsPage />} />
+        <Route path="jobs/:jobId" element={<JobDetailPage />} />
+        <Route path="jobs/post" element={<PostJobPage />} />
+        <Route path="jobs/my-applications" element={<MyApplicationsPage />} />
+
+        {/* Community */}
+        <Route path="community" element={<CommunityPage />} />
+        <Route path="community/:postId" element={<PostDetailPage />} />
+        <Route path="community/create" element={<CommunityPage />} />
+
+        {/* Events */}
+        <Route path="events" element={<EventsPage />} />
+        <Route path="events/:eventId" element={<EventDetailPage />} />
+        <Route path="events/create" element={<CreateEventPage />} />
+
+        {/* Others */}
+        <Route path="achievements" element={<AchievementsPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
+
+        {/* Admin */}
+        <Route path="admin/users" element={<AdminUsersPage />} />
+        <Route path="admin/verifications" element={<AdminVerificationsPage />} />
+        <Route path="admin/reports" element={<AdminAnalyticsPage />} />
+        <Route path="admin/moderation" element={<AdminModerationPage />} />
+      </Route>
+
+      {/* Catch-all */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 

@@ -1,35 +1,122 @@
+import { useState, useEffect } from 'react';
+import { HiOutlineBars3, HiOutlineXMark } from 'react-icons/hi2';
+import { useMobileNav } from '../hooks/useMediaQuery';
+import LeftDrawer from '../ui/LeftDrawer';
+
+const NAV_LINKS = [
+  { href: '#features', label: 'Features' },
+  { href: '#how', label: 'How It Works' },
+  { href: '#testimonials', label: 'Stories' },
+];
+
 export default function Navbar({ isLoggedIn, userName, onOpenModal, onLogout }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const isCompactNav = useMobileNav();
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (!isCompactNav) setMenuOpen(false);
+  }, [isCompactNav]);
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') setMenuOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const closeMenu = () => setMenuOpen(false);
+
+  const handleNavClick = (href) => {
+    closeMenu();
+    const el = document.querySelector(href);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    <nav id="navbar">
-      <div className="nav-logo">Alumio<span>DTU</span></div>
-      <div className="nav-links">
-        {!isLoggedIn && (
-          <div className="nav-menu">
-            <a href="#features">Features</a>
-            <a href="#how">How It Works</a>
-            <a href="#testimonials">Stories</a>
-          </div>
-        )}
-        <div className="nav-actions">
-          {isLoggedIn ? (
-            <>
-              <span className="user-greeting">👋 {userName}</span>
-              <button className="btn-logout" onClick={onLogout}>Logout</button>
-            </>
-          ) : (
-            <>
-              <button className="btn-nav" onClick={() => onOpenModal('login')}>Log In</button>
-              <button
-                className="btn-nav"
-                style={{ background: 'transparent', color: 'var(--gold)', border: '1.5px solid var(--gold)' }}
-                onClick={() => onOpenModal('signup')}
-              >
-                Sign Up
-              </button>
-            </>
+    <>
+      <header id="navbar">
+        <div className="nav-left">
+          {!isLoggedIn && isCompactNav && (
+            <button
+              type="button"
+              className="nav-hamburger"
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+            >
+              {menuOpen ? <HiOutlineXMark size={22} /> : <HiOutlineBars3 size={22} />}
+            </button>
           )}
+          <div className="nav-logo">Alumio<span>DTU</span></div>
         </div>
-      </div>
-    </nav>
+
+        <div className="nav-links">
+          {!isLoggedIn && !isCompactNav && (
+            <div className="nav-menu">
+              {NAV_LINKS.map((link) => (
+                <a key={link.href} href={link.href}>{link.label}</a>
+              ))}
+            </div>
+          )}
+
+          <div className="nav-actions">
+            {isLoggedIn ? (
+              <>
+                <span className="user-greeting">👋 {userName}</span>
+                <button type="button" className="btn-logout" onClick={onLogout}>Logout</button>
+              </>
+            ) : (
+              <>
+                {!isCompactNav && (
+                  <>
+                    <button type="button" className="btn-nav" onClick={() => onOpenModal('login')}>Log In</button>
+                    <button type="button" className="btn-nav btn-nav-outline" onClick={() => onOpenModal('signup')}>
+                      Sign Up
+                    </button>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {!isLoggedIn && (
+        <LeftDrawer
+          open={menuOpen}
+          onClose={closeMenu}
+          className="landing-drawer"
+          width={300}
+          logo={<div className="nav-drawer-logo">Alumio<span>DTU</span></div>}
+        >
+          <div className="landing-drawer-links" role="navigation" aria-label="Landing navigation">
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick(link.href);
+                }}
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+          <div className="landing-drawer-actions">
+            <button type="button" className="btn-nav" onClick={() => { closeMenu(); onOpenModal('login'); }}>
+              Log In
+            </button>
+            <button type="button" className="btn-nav btn-nav-outline" onClick={() => { closeMenu(); onOpenModal('signup'); }}>
+              Sign Up
+            </button>
+          </div>
+        </LeftDrawer>
+      )}
+    </>
   );
 }
