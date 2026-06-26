@@ -64,7 +64,7 @@ export default function CinematicIntro({ onComplete }) {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(245, 200, 66, ${p.opacity})`;
+        ctx.fillStyle = `rgba(56, 189, 248, ${p.opacity})`;
         ctx.fill();
       });
 
@@ -79,7 +79,7 @@ export default function CinematicIntro({ onComplete }) {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(245, 200, 66, ${0.03 * (1 - dist / 150)})`;
+            ctx.strokeStyle = `rgba(56, 189, 248, ${0.04 * (1 - dist / 150)})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }

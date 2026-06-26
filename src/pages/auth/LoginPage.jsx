@@ -48,7 +48,7 @@ export default function LoginPage() {
         <h1>Welcome Back</h1>
         <p>Sign in to your AlumioDTU account</p>
         {BYPASS_AUTH_FOR_TESTING && (
-          <p style={{ marginTop: 8, fontSize: '0.82rem', color: 'var(--teal)' }}>
+          <p style={{ marginTop: 8, fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)' }}>
             Auth bypass active — click Sign In to enter the app
           </p>
         )}

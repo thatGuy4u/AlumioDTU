@@ -2,11 +2,12 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 /**
- * Ascending Particles Background — React & Modern Three.js
+ * Ascending Particles Background — Sky-Blue / Midnight Black Theme
+ * Fixed-position so it covers the entire landing page behind all sections.
  */
 export default function FloatingParticlesBackground({ 
   visible = true, 
-  particleOpacity = 0.035 // <-- Added this prop so you can easily tweak the brightness
+  particleOpacity = 0.055
 }) {
   const mountRef = useRef(null);
 
@@ -18,10 +19,10 @@ export default function FloatingParticlesBackground({
     let W = mount.clientWidth || window.innerWidth;
     let H = mount.clientHeight || window.innerHeight;
 
-    // 1. Scene Setup
+    // 1. Scene Setup — Deep midnight blue-black
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x111111);
-    scene.fog = new THREE.Fog(0x000000, 800, 1600);
+    scene.background = new THREE.Color(0x020a18);
+    scene.fog = new THREE.Fog(0x020a18, 500, 1800);
 
     // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(35, W / H, 1, 10000);
@@ -35,8 +36,8 @@ export default function FloatingParticlesBackground({
     renderer.setSize(W, H);
     mount.appendChild(renderer.domElement);
 
-    // 4. Lighting
-    const light = new THREE.HemisphereLight(0x77ffaa, 0x77ffaa, 1);
+    // 4. Lighting — cool sky-blue hemisphere
+    const light = new THREE.HemisphereLight(0x38bdf8, 0x0c2d4a, 1.2);
     light.position.set(
       Math.cos(camRad1) * Math.cos(camRad2) * 1000,
       Math.sin(camRad1) * 1000,
@@ -44,22 +45,26 @@ export default function FloatingParticlesBackground({
     );
     scene.add(light);
 
-    // 5. Particle System Setup
-    const particleCount = 50000;
-    const halfCount = particleCount / 2;
+    // 5. Particle System Setup — 3 layers for depth
+    const layerCount = 20000;
 
-    const pos1 = new Float32Array(halfCount * 3);
-    const pos2 = new Float32Array(halfCount * 3);
-    const velocities1 = new Float32Array(halfCount);
-    const velocities2 = new Float32Array(halfCount);
+    const createLayer = (count) => {
+      const positions = new Float32Array(count * 3);
+      const velocities = new Float32Array(count);
+      return { positions, velocities, count };
+    };
+
+    const layer1 = createLayer(layerCount);       // Sky blue — primary
+    const layer2 = createLayer(layerCount);       // Ice blue — secondary  
+    const layer3 = createLayer(layerCount / 2);   // Warm white — accent sparkles
 
     const resetParticle = (positions, velocities, index, initialSpawn = false) => {
-      const range = (1 - Math.log(THREE.MathUtils.randInt(2, 256)) / Math.log(256)) * 500;
+      const range = (1 - Math.log(THREE.MathUtils.randInt(2, 256)) / Math.log(256)) * 550;
       const rad = THREE.MathUtils.degToRad(THREE.MathUtils.randInt(0, 360));
       
       const x = Math.cos(rad) * range;
       const z = Math.sin(rad) * range;
-      const y = initialSpawn ? THREE.MathUtils.randFloat(-300, 500) : -300;
+      const y = initialSpawn ? THREE.MathUtils.randFloat(-350, 550) : -350;
 
       positions[index * 3] = x;
       positions[index * 3 + 1] = y;
@@ -69,38 +74,57 @@ export default function FloatingParticlesBackground({
       velocities[index] = 5 / mass; 
     };
 
-    for (let i = 0; i < halfCount; i++) {
-      resetParticle(pos1, velocities1, i, true);
-      resetParticle(pos2, velocities2, i, true);
-    }
+    // Initialize all layers
+    const initLayer = (layer) => {
+      for (let i = 0; i < layer.count; i++) {
+        resetParticle(layer.positions, layer.velocities, i, true);
+      }
+    };
+    initLayer(layer1);
+    initLayer(layer2);
+    initLayer(layer3);
 
-    // Cyan Particles
+    // Layer 1 — Sky Blue particles
     const geo1 = new THREE.BufferGeometry();
-    geo1.setAttribute('position', new THREE.BufferAttribute(pos1, 3));
+    geo1.setAttribute('position', new THREE.BufferAttribute(layer1.positions, 3));
     const mat1 = new THREE.PointsMaterial({
-      color: 0x77ffaa,
-      size: 6,
+      color: 0x38bdf8,
+      size: 5,
       transparent: true,
-      opacity: particleOpacity, // <-- Using the new prop here
+      opacity: particleOpacity,
       depthTest: false,
       blending: THREE.AdditiveBlending,
     });
     const points1 = new THREE.Points(geo1, mat1);
     scene.add(points1);
 
-    // Blue Particles
+    // Layer 2 — Ice Blue particles
     const geo2 = new THREE.BufferGeometry();
-    geo2.setAttribute('position', new THREE.BufferAttribute(pos2, 3));
+    geo2.setAttribute('position', new THREE.BufferAttribute(layer2.positions, 3));
     const mat2 = new THREE.PointsMaterial({
-      color: 0x77aaff,
-      size: 6,
+      color: 0x7dd3fc,
+      size: 4,
       transparent: true,
-      opacity: particleOpacity, // <-- Using the new prop here
+      opacity: particleOpacity * 0.8,
       depthTest: false,
       blending: THREE.AdditiveBlending,
     });
     const points2 = new THREE.Points(geo2, mat2);
     scene.add(points2);
+
+    // Layer 3 — Warm White accent sparkles (smaller, dimmer, adds depth)
+    const geo3 = new THREE.BufferGeometry();
+    geo3.setAttribute('position', new THREE.BufferAttribute(layer3.positions, 3));
+    const mat3 = new THREE.PointsMaterial({
+      color: 0xbae6fd,
+      size: 3,
+      transparent: true,
+      opacity: particleOpacity * 0.5,
+      depthTest: false,
+      blending: THREE.AdditiveBlending,
+    });
+    const points3 = new THREE.Points(geo3, mat3);
+    scene.add(points3);
 
     // 6. Resize Handler
     const onResize = () => {
@@ -113,12 +137,12 @@ export default function FloatingParticlesBackground({
     window.addEventListener('resize', onResize);
 
     // 7. Update Loop Logic
-    const updateParticles = (pointsMesh, velocities) => {
+    const updateParticles = (pointsMesh, layer) => {
       const positions = pointsMesh.geometry.attributes.position.array;
-      for (let i = 0; i < halfCount; i++) {
-        positions[i * 3 + 1] += velocities[i];
-        if (positions[i * 3 + 1] > 500) {
-          resetParticle(positions, velocities, i, false);
+      for (let i = 0; i < layer.count; i++) {
+        positions[i * 3 + 1] += layer.velocities[i];
+        if (positions[i * 3 + 1] > 550) {
+          resetParticle(positions, layer.velocities, i, false);
         }
       }
       pointsMesh.geometry.attributes.position.needsUpdate = true;
@@ -128,7 +152,7 @@ export default function FloatingParticlesBackground({
     const animate = () => {
       animId = requestAnimationFrame(animate);
 
-      camRad2 += 0.2 * (Math.PI / 180);
+      camRad2 += 0.15 * (Math.PI / 180);
       camera.position.set(
         Math.cos(camRad1) * Math.cos(camRad2) * camRange,
         Math.sin(camRad1) * camRange,
@@ -136,8 +160,9 @@ export default function FloatingParticlesBackground({
       );
       camera.lookAt(0, 0, 0);
 
-      updateParticles(points1, velocities1);
-      updateParticles(points2, velocities2);
+      updateParticles(points1, layer1);
+      updateParticles(points2, layer2);
+      updateParticles(points3, layer3);
 
       renderer.render(scene, camera);
     };
@@ -153,13 +178,15 @@ export default function FloatingParticlesBackground({
       mat1.dispose();
       geo2.dispose();
       mat2.dispose();
+      geo3.dispose();
+      mat3.dispose();
       renderer.dispose();
       
       if (renderer.domElement.parentNode === mount) {
         mount.removeChild(renderer.domElement);
       }
     };
-  }, [particleOpacity]); // <-- Added dependency here so it updates if you change the prop
+  }, [particleOpacity]);
 
   return (
     <div
@@ -167,14 +194,14 @@ export default function FloatingParticlesBackground({
       className="floating-particles-bg"
       aria-hidden="true"
       style={{
-        position: 'absolute',
+        position: 'fixed',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
         opacity: visible ? 1 : 0,
         pointerEvents: 'none', 
-        zIndex: -1,
+        zIndex: 0,
         transition: 'opacity 0.5s ease',
       }}
     />
