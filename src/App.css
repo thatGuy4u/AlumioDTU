@@ -278,6 +278,15 @@
   line-height: 1.05; letter-spacing: -2px;
   color: #fff;
   animation: fadeSlideUp 0.8s ease 0.1s both;
+  /* Fixed height to prevent typewriter layout shift */
+  min-height: 2.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#typed-text {
+  display: inline-block;
+  min-width: 1ch;
 }
 .hero-title .accent { color: #38bdf8; }
 .hero-title .cursor {
@@ -630,6 +639,10 @@ footer {
   #features, #testimonials { padding:60px 20px; }
   .dash-card { padding:20px; }
   #dashboard { padding:90px 20px 40px; }
+  /* Taller reserve for typewriter text wrapping on tablets/phones */
+  .hero-title {
+    min-height: 3.5em;
+  }
 }
 
 @media(max-width:400px){
@@ -648,5 +661,9 @@ footer {
     padding: 6px 10px;
     font-size: 0.7rem;
     margin-left: 4px;
+  }
+  /* Even taller reserve for narrow screens where phrases wrap more */
+  .hero-title {
+    min-height: 4.5em;
   }
 }
