@@ -53,7 +53,7 @@
 .btn-nav-outline {
   background: transparent !important;
   color: #7dd3fc !important;
-  border: 1.5px solid rgba(56,189,248,0.5) !important;
+  border: 1.5px solid rgb(255, 255, 255) !important;
   box-shadow: none !important;
 }
 .btn-nav-outline:hover {
@@ -202,7 +202,7 @@
   display: none;
 }
 .btn-nav {
-  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  background: linear-gradient(135deg, #ffffff, #0ea5e9);
   color: #020a18;
   padding: 9px 22px;
   border-radius: 50px;
@@ -305,7 +305,7 @@
   animation: fadeSlideUp 5.8s ease 0.4s both;
 }
 .btn-primary {
-  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  background: linear-gradient(135deg, #ffffff, #0ea5e9);
   color: #020a18; padding:14px 36px; border-radius:50px;
   font-family:'Syne',sans-serif; font-weight:700; font-size:0.95rem;
   border:none; cursor:pointer;
@@ -317,7 +317,7 @@
   background: transparent; color:#fff;
   padding:14px 36px; border-radius:50px;
   font-family:'Syne',sans-serif; font-weight:600; font-size:0.95rem;
-  border: 1px solid rgba(125,211,252,0.3); cursor:pointer;
+  border: 1px solid rgb(255, 255, 255); cursor:pointer;
   transition: border-color 0.2s, background 0.2s;
 }
 .btn-ghost:hover { border-color: #38bdf8; background: rgba(56,189,248,0.1); }
@@ -340,7 +340,7 @@
   display:flex; gap:48px; margin-top:56px; flex-wrap:wrap; justify-content:center;
   animation: fadeSlideUp 0.8s ease 0.55s both;
 }
-.stat-item { text-align:center; }
+.stat-item { text-align:center; margin-top:-50px; margin-bottom:20px; }
 .stat-num {
   font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; color:#38bdf8;
 }
@@ -349,7 +349,7 @@
 .scroll-hint {
   position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
   display:flex; flex-direction:column; align-items:center; gap:8px;
-  color: rgba(232,234,246,0.7); font-size:0.72rem; letter-spacing:2px;
+  color: rgb(255, 255, 255); font-size:0.72rem; letter-spacing:2px;
   text-transform:uppercase; animation: bounce 2s infinite;
 }
 .scroll-hint .arrow { width:20px; height:20px; border-right:2px solid rgba(232,234,246,0.6); border-bottom:2px solid rgba(232,234,246,0.6); transform:rotate(45deg); }
@@ -490,7 +490,7 @@ footer {
 .modal-box {
   width:100%; max-width:440px; border-radius:24px;
   padding:40px 36px;
-  background: rgba(13,21,64,0.95);
+  background: rgba(0, 0, 0, 0.95);
   border: 1px solid rgba(245,200,66,0.2);
   box-shadow: 0 30px 80px rgba(0,0,0,0.6);
   transform: translateY(20px); transition: transform 0.3s;

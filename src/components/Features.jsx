@@ -71,7 +71,7 @@ export default function Features() {
   return (
     <section id="features">
       <div className="section-tag">What we offer</div>
-      <h2 className="section-title">Everything Your Network Needs</h2>
+      <h2 className="section-title">Everything You Need</h2>
       <p className="section-desc">
         AlumioDTU bridges the gap between graduating students and the powerful DTU alumni community.
       </p>
