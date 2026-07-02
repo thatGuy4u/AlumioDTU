@@ -37,6 +37,7 @@ import AlumniOnboarding from './pages/onboarding/AlumniOnboarding';
 // Core pages
 import ProfilePage from './pages/profile/ProfilePage';
 import EditProfilePage from './pages/profile/EditProfilePage';
+import SettingsPage from './pages/settings/SettingsPage';
 import DirectoryPage from './pages/directory/DirectoryPage';
 import MentorshipPage from './pages/mentorship/MentorshipPage';
 import MessagesPage from './pages/messages/MessagesPage';
@@ -176,6 +177,7 @@ function App() {
         {/* Others */}
         <Route path="achievements" element={<AchievementsPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
 
         {/* Admin */}
         <Route path="admin/users" element={<AdminUsersPage />} />

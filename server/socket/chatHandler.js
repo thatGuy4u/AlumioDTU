@@ -7,7 +7,7 @@ export function chatHandler(io, socket, onlineUsers) {
   socket.on('send_message', async (data) => {
     try {
       const { conversationId, content, attachments = [] } = data;
-      const userId = socket.handshake.auth?.userId;
+      const userId = socket.userId;
       if (!userId || !conversationId || !content) return;
 
       const message = await prisma.message.create({
@@ -30,14 +30,14 @@ export function chatHandler(io, socket, onlineUsers) {
   });
 
   socket.on('typing', (conversationId) => {
-    socket.to(`chat_${conversationId}`).emit('user_typing', { conversationId, userId: socket.handshake.auth?.userId });
+    socket.to(`chat_${conversationId}`).emit('user_typing', { conversationId, userId: socket.userId });
   });
   socket.on('stop_typing', (conversationId) => {
-    socket.to(`chat_${conversationId}`).emit('user_stop_typing', { conversationId, userId: socket.handshake.auth?.userId });
+    socket.to(`chat_${conversationId}`).emit('user_stop_typing', { conversationId, userId: socket.userId });
   });
 
   socket.on('mark_read', async (conversationId) => {
-    const userId = socket.handshake.auth?.userId;
+    const userId = socket.userId;
     if (!userId) return;
     await prisma.conversationParticipant.updateMany({ where: { conversationId, userId }, data: { unreadCount: 0 } });
     socket.to(`chat_${conversationId}`).emit('messages_read', { conversationId, userId });

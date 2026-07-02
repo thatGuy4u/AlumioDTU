@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@300;400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
-@import "tailwindcss";
 @import "./styles/dashboard.css";
 @import "./styles/pages.css";
 
@@ -18,14 +17,30 @@
 html { scroll-behavior: smooth; }
 body {
   font-family: 'DM Sans', sans-serif;
-  background: var(--navy);
-  color: #e8eaf6;
+  background: var(--bg-primary, #080c24);
+  color: var(--text-primary, #e8eaf6);
   overflow-x: hidden;
-  transition: background 0.25s ease, color 0.25s ease;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-[data-theme="light"] body {
-  background: var(--bg-primary, #f5f7fa);
-  color: var(--text-primary, #1a1a2e);
-}
 h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; }
+
+/* ===== Light Theme — Global Overrides ===== */
+[data-theme="light"] {
+  --gold: #c9a227;
+  --gold-dim: #a8851e;
+  --navy: #1a1a2e;
+  --navy-mid: #eef1f5;
+  --teal: #00a89e;
+  --teal-dim: #008f87;
+  --glass: rgba(0,0,0,0.03);
+  --glass-border: rgba(0,0,0,0.08);
+}
+
+/* Toast in light mode */
+[data-theme="light"] [data-sonner-toast],
+[data-theme="light"] .go2072408551 {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #1a1a2e !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}

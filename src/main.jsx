@@ -19,9 +19,9 @@ createRoot(document.getElementById('root')).render(
           position="top-right"
           toastOptions={{
             style: {
-              background: 'rgba(13, 21, 64, 0.95)',
-              color: '#e8eaf6',
-              border: '1px solid rgba(245, 200, 66, 0.2)',
+              background: 'var(--bg-secondary, rgba(13, 21, 64, 0.95))',
+              color: 'var(--text-primary, #e8eaf6)',
+              border: '1px solid var(--border-color, rgba(245, 200, 66, 0.2))',
               borderRadius: '12px',
               backdropFilter: 'blur(8px)',
             },

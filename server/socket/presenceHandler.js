@@ -1,5 +1,5 @@
 export function presenceHandler(io, socket, onlineUsers) {
-  const userId = socket.handshake.auth?.userId;
+  const userId = socket.userId;
 
   // Client requests who's online
   socket.on('get_online_users', () => {

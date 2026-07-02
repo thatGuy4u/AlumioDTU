@@ -24,6 +24,7 @@ const studentLinks = [
   { to: '/app/events', icon: HiOutlineCalendarDays, label: 'Events' },
   { to: '/app/achievements', icon: HiOutlineTrophy, label: 'Achievements' },
   { to: '/app/notifications', icon: HiOutlineBell, label: 'Notifications' },
+  { to: '/app/settings', icon: HiOutlineCog6Tooth, label: 'Settings' },
 ];
 
 const alumniLinks = [
@@ -36,6 +37,7 @@ const alumniLinks = [
   { to: '/app/events', icon: HiOutlineCalendarDays, label: 'Events' },
   { to: '/app/achievements', icon: HiOutlineTrophy, label: 'Achievements' },
   { to: '/app/notifications', icon: HiOutlineBell, label: 'Notifications' },
+  { to: '/app/settings', icon: HiOutlineCog6Tooth, label: 'Settings' },
 ];
 
 const adminLinks = [
@@ -47,6 +49,7 @@ const adminLinks = [
   { to: '/app/community', icon: HiOutlineChatBubbleOvalLeft, label: 'Community' },
   { to: '/app/events', icon: HiOutlineCalendarDays, label: 'Events' },
   { to: '/app/notifications', icon: HiOutlineBell, label: 'Notifications' },
+  { to: '/app/settings', icon: HiOutlineCog6Tooth, label: 'Settings' },
 ];
 
 function SidebarLinks({ links, collapsed, isMobile, location, onNavigate }) {

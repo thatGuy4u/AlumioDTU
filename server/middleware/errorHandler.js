@@ -8,23 +8,29 @@ export const errorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || (res.statusCode === 200 ? 500 : res.statusCode);
   let message = err.message || 'Internal Server Error';
 
-  // Mongoose bad ObjectId
-  if (err.name === 'CastError' && err.kind === 'ObjectId') {
+  // Prisma unique constraint violation (e.g. duplicate email)
+  if (err.code === 'P2002') {
     statusCode = 400;
-    message = 'Invalid ID format';
+    const field = err.meta?.target?.[0] || 'field';
+    message = `A record with this ${field} already exists.`;
   }
 
-  // Mongoose duplicate key
-  if (err.code === 11000) {
-    statusCode = 400;
-    const field = Object.keys(err.keyValue)[0];
-    message = `Duplicate value for ${field}. This ${field} already exists.`;
+  // Prisma record not found
+  if (err.code === 'P2025') {
+    statusCode = 404;
+    message = err.meta?.cause || 'Record not found.';
   }
 
-  // Mongoose validation error
-  if (err.name === 'ValidationError') {
+  // Prisma foreign key constraint failure
+  if (err.code === 'P2003') {
     statusCode = 400;
-    message = Object.values(err.errors).map((e) => e.message).join(', ');
+    message = 'Related record not found. Please check the referenced data.';
+  }
+
+  // Prisma required relation violation
+  if (err.code === 'P2014') {
+    statusCode = 400;
+    message = 'This operation violates a required relation.';
   }
 
   // Multer errors

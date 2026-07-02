@@ -1,4 +1,4 @@
-import transporter from '../config/email.js';
+import { sendMail } from '../config/email.js';
 
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
@@ -33,10 +33,10 @@ export const sendVerificationEmail = async (email, name, token) => {
     </div>
   `;
 
-  await transporter.sendMail({
+  await sendMail({
     from: process.env.EMAIL_FROM,
     to: email,
-    subject: '✉️ Verify your AlumioDTU account',
+    subject: 'Verify your AlumioDTU account',
     html,
   });
 };
@@ -72,10 +72,10 @@ export const sendPasswordResetEmail = async (email, name, token) => {
     </div>
   `;
 
-  await transporter.sendMail({
+  await sendMail({
     from: process.env.EMAIL_FROM,
     to: email,
-    subject: '🔐 Reset your AlumioDTU password',
+    subject: 'Reset your AlumioDTU password',
     html,
   });
 };
@@ -106,7 +106,7 @@ export const sendNotificationEmail = async (email, subject, name, body) => {
     </div>
   `;
 
-  await transporter.sendMail({
+  await sendMail({
     from: process.env.EMAIL_FROM,
     to: email,
     subject,

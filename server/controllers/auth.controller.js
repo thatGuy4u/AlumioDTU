@@ -2,19 +2,18 @@ import bcrypt from 'bcryptjs';
 import prisma from '../config/db.js';
 import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { sanitizeUser } from '../utils/sanitize.js';
 import {
   generateAccessToken, generateRefreshToken, generateRandomToken, setRefreshTokenCookie,
 } from '../services/token.service.js';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service.js';
 import jwt from 'jsonwebtoken';
 
-const sanitizeUser = (user) => {
-  const { password, refreshToken, emailVerificationToken, emailVerificationExpires, passwordResetToken, passwordResetExpires, ...safe } = user;
-  return safe;
-};
-
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password, role } = req.body;
+
+  // Guard: never allow admin self-registration
+  const safeRole = role === 'alumni' ? 'alumni' : 'student';
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) throw new ApiError(400, 'An account with this email already exists');
@@ -24,16 +23,16 @@ export const register = asyncHandler(async (req, res) => {
 
   const user = await prisma.user.create({
     data: {
-      name, email, password: hashedPassword, role,
+      name, email, password: hashedPassword, role: safeRole,
       emailVerificationToken: verificationToken,
       emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
     },
   });
 
   // Create empty profile
-  if (role === 'student') {
+  if (safeRole === 'student') {
     await prisma.studentProfile.create({ data: { userId: user.id } });
-  } else if (role === 'alumni') {
+  } else {
     await prisma.alumniProfile.create({ data: { userId: user.id } });
   }
 

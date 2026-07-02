@@ -24,7 +24,7 @@
 .pagination span { font-size: 0.82rem; color: var(--text-muted); }
 
 .tab-bar {
-  display: flex; gap: 4px; padding: 4px; background: rgba(255,255,255,0.03);
+  display: flex; gap: 4px; padding: 4px; background: var(--hover-bg);
   border-radius: 12px; margin-bottom: 24px; flex-wrap: wrap;
 }
 .tab-btn {
@@ -32,7 +32,7 @@
   color: var(--text-muted); font-weight: 600; font-size: 0.82rem;
   cursor: pointer; transition: all 0.2s; white-space: nowrap;
 }
-.tab-btn:hover { color: var(--text-primary); background: rgba(255,255,255,0.04); }
+.tab-btn:hover { color: var(--text-primary); background: var(--glass-bg); }
 .tab-btn.active { color: var(--navy); background: var(--gold); }
 
 /* ===== Onboarding ===== */
@@ -74,14 +74,14 @@
 
 .onboarding-input {
   width: 100%; padding: 10px 14px; border-radius: 10px;
-  background: rgba(255,255,255,0.06); border: 1px solid var(--card-border);
+  background: var(--input-bg); border: 1px solid var(--card-border);
   color: var(--text-primary); font-family: 'DM Sans', sans-serif;
   font-size: 0.88rem; outline: none; transition: border-color 0.2s;
 }
 .onboarding-input:focus { border-color: var(--gold); }
 .onboarding-textarea {
   width: 100%; padding: 10px 14px; border-radius: 10px;
-  background: rgba(255,255,255,0.06); border: 1px solid var(--card-border);
+  background: var(--input-bg); border: 1px solid var(--card-border);
   color: var(--text-primary); font-family: 'DM Sans', sans-serif;
   font-size: 0.88rem; resize: vertical; outline: none; transition: border-color 0.2s;
 }
@@ -140,7 +140,7 @@
 .directory-search {
   flex: 1; display: flex; align-items: center; gap: 10px;
   padding: 0 16px; border-radius: 12px;
-  background: rgba(255,255,255,0.04); border: 1px solid var(--card-border);
+  background: var(--glass-bg); border: 1px solid var(--card-border);
   min-width: 240px;
 }
 .directory-search input {
@@ -270,7 +270,7 @@
   padding: 10px; border-radius: 10px;
   transition: background 0.2s;
 }
-.profile-achievement:hover { background: rgba(255,255,255,0.03); }
+.profile-achievement:hover { background: var(--hover-bg); }
 .profile-achievement-icon { font-size: 1.4rem; flex-shrink: 0; }
 .profile-achievement strong { display: block; font-size: 0.85rem; color: var(--text-primary); }
 .profile-achievement span { font-size: 0.78rem; color: var(--text-muted); }
@@ -397,7 +397,7 @@
 .messages-search {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 16px; margin: 8px 12px;
-  background: rgba(255,255,255,0.04); border-radius: 10px;
+  background: var(--glass-bg); border-radius: 10px;
   border: 1px solid var(--border-color);
 }
 .messages-search input {
@@ -415,7 +415,7 @@
   border-radius: 10px; cursor: pointer; text-align: left;
   transition: background 0.2s;
 }
-.message-convo-btn:hover { background: rgba(255,255,255,0.04); }
+.message-convo-btn:hover { background: var(--glass-bg); }
 .message-convo-btn.active { background: rgba(245,200,66,0.08); }
 
 .message-convo-avatar {
@@ -470,7 +470,7 @@
 }
 .message-bubble.theirs {
   align-self: flex-start;
-  background: rgba(255,255,255,0.06);
+  background: var(--input-bg);
   color: var(--text-primary); border-bottom-left-radius: 4px;
 }
 .message-time {
@@ -484,7 +484,7 @@
 }
 .messages-input input {
   flex: 1; padding: 10px 16px; border-radius: 12px;
-  background: rgba(255,255,255,0.04); border: 1px solid var(--border-color);
+  background: var(--glass-bg); border: 1px solid var(--border-color);
   color: var(--text-primary); font-family: 'DM Sans', sans-serif;
   font-size: 0.88rem; outline: none;
 }
@@ -678,7 +678,7 @@
 .edit-save-bar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
   display: flex; justify-content: flex-end; gap: 12px;
-  padding: 16px 32px; background: rgba(10,15,46,0.95);
+  padding: 16px 32px; background: var(--bg-secondary);
   border-top: 1px solid var(--card-border); backdrop-filter: blur(12px);
 }
 
@@ -719,7 +719,7 @@
   text-decoration: none; padding: 12px; border-radius: 12px;
   transition: background 0.2s;
 }
-.job-detail-poster:hover { background: rgba(255,255,255,0.03); }
+.job-detail-poster:hover { background: var(--hover-bg); }
 .poster-name { font-weight: 700; font-size: 0.9rem; color: var(--text-primary); display: block; }
 .poster-email { font-size: 0.78rem; color: var(--text-muted); }
 .directory-card-avatar.small { width: 40px; height: 40px; border-radius: 10px; margin: 0; font-size: 0.9rem; }
@@ -749,7 +749,7 @@
 .job-requirements-list { padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
 .job-requirements-list li {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 14px; border-radius: 8px; background: rgba(255,255,255,0.03);
+  padding: 8px 14px; border-radius: 8px; background: var(--hover-bg);
   font-size: 0.85rem; color: var(--text-secondary);
 }
 .job-requirements-list li button { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px; }
@@ -825,11 +825,11 @@
 .post-comments-list { display: flex; flex-direction: column; gap: 16px; }
 .post-comment {
   padding: 16px; border-radius: 12px;
-  background: rgba(255,255,255,0.02); border: 1px solid var(--border-color);
+  background: var(--glass-bg); border: 1px solid var(--border-color);
 }
 .post-comment.reply {
   margin-top: 10px; margin-left: 24px;
-  background: rgba(255,255,255,0.01); border-color: rgba(255,255,255,0.04);
+  background: var(--glass-bg); border-color: var(--border-color);
 }
 .post-comment-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
 .post-comment-content { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 6px; }
@@ -881,7 +881,7 @@
 .event-attendee-chip {
   display: flex; align-items: center; gap: 6px;
   padding: 6px 12px; border-radius: 8px;
-  background: rgba(255,255,255,0.04); border: 1px solid var(--border-color);
+  background: var(--glass-bg); border: 1px solid var(--border-color);
   text-decoration: none; font-size: 0.78rem; color: var(--text-secondary);
   transition: all 0.2s;
 }
@@ -896,7 +896,7 @@
 }
 .admin-table-header {
   display: grid; grid-template-columns: 2fr 0.8fr 1fr 1fr 1fr;
-  padding: 12px 20px; background: rgba(255,255,255,0.03);
+  padding: 12px 20px; background: var(--hover-bg);
   font-size: 0.72rem; font-weight: 700; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: 0.5px;
 }
@@ -905,7 +905,7 @@
   padding: 14px 20px; align-items: center;
   border-top: 1px solid var(--border-color); transition: background 0.2s;
 }
-.admin-table-row:hover { background: rgba(255,255,255,0.02); }
+.admin-table-row:hover { background: var(--glass-bg); }
 .admin-user-cell { display: flex; align-items: center; gap: 10px; }
 .admin-status-badges { display: flex; gap: 4px; flex-wrap: wrap; }
 .admin-mini-badge {
@@ -1012,7 +1012,7 @@
 .moderation-party-label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
 .moderation-content-ref {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 14px; border-radius: 8px; background: rgba(255,255,255,0.02);
+  padding: 10px 14px; border-radius: 8px; background: var(--glass-bg);
   font-size: 0.82rem; color: var(--text-muted);
 }
 
@@ -1032,4 +1032,291 @@
   .verification-grid { grid-template-columns: 1fr; }
   .analytics-stats-grid { grid-template-columns: repeat(2, 1fr); }
   .analytics-chart { height: 120px; }
+}
+
+/* =====================================================
+   SELECT / DROPDOWN DARK THEME FIX (C4)
+   ===================================================== */
+
+/* Fix select dropdowns having white background in dark mode */
+select.onboarding-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(232,234,246,0.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+select.onboarding-input option {
+  background: var(--bg-secondary, #0d1540);
+  color: var(--text-primary, #e8eaf6);
+  padding: 8px 12px;
+}
+
+[data-theme="light"] select.onboarding-input {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(26,26,46,0.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+[data-theme="light"] select.onboarding-input option {
+  background: #ffffff;
+  color: #1a1a2e;
+}
+
+/* Also style .directory-filters selects */
+.directory-filters select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(232,234,246,0.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 36px;
+}
+
+/* =====================================================
+   SETTINGS PAGE STYLES (C3)
+   ===================================================== */
+
+.settings-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.settings-option:last-child {
+  border-bottom: none;
+}
+
+.settings-option-info {
+  flex: 1;
+}
+
+.settings-option-info strong {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.settings-option-info span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.settings-theme-toggle {
+  display: flex;
+  background: var(--glass-bg);
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+[data-theme="light"] .settings-theme-toggle {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.settings-theme-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.settings-theme-pill.active {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+.settings-password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .settings-info-grid { grid-template-columns: 1fr; }
+}
+
+.settings-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
+}
+
+[data-theme="light"] .settings-info-item {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.settings-info-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.settings-info-value {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.text-green { color: #4caf50; }
+.text-warning { color: #ff9800; }
+
+.settings-danger-zone {
+  border-color: rgba(239, 83, 80, 0.2) !important;
+}
+
+.settings-danger-zone h3 {
+  color: #ef5350 !important;
+}
+
+.settings-danger-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-danger-confirm {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.settings-delete-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px solid rgba(239, 83, 80, 0.4);
+  background: rgba(239, 83, 80, 0.08);
+  color: #ef5350;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.settings-delete-btn:hover:not(:disabled) {
+  background: rgba(239, 83, 80, 0.15);
+  border-color: #ef5350;
+}
+
+.settings-delete-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* =====================================================
+   LIGHT THEME — Page Component Overrides
+   ===================================================== */
+
+[data-theme="light"] .onboarding-input {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .onboarding-textarea {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .tab-bar {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .tab-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .directory-search {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .message-bubble.theirs {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .message-bubble.mine {
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.1), rgba(201, 162, 39, 0.05));
+}
+
+[data-theme="light"] .messages-search {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .messages-input input {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .message-convo-btn:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .message-convo-btn.active {
+  background: rgba(201, 162, 39, 0.06);
+}
+
+[data-theme="light"] .profile-achievement:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .post-comment {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .post-comment.reply {
+  background: rgba(0, 0, 0, 0.01);
+}
+
+[data-theme="light"] .admin-table-header {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .admin-table-row:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .job-requirements-list li {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .moderation-content-ref {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .create-post-form {
+  background: var(--card-bg);
 }

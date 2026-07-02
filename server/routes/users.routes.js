@@ -4,15 +4,12 @@ import { roleGuard } from '../middleware/roleGuard.js';
 import { uploadAvatar, uploadResume, uploadToCloudinary } from '../middleware/upload.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
+import { sanitizeUser } from '../utils/sanitize.js';
 import prisma from '../config/db.js';
+import bcrypt from 'bcryptjs';
 
 const router = Router();
 router.use(protect);
-
-const sanitizeUser = (u) => {
-  const { password, refreshToken, emailVerificationToken, emailVerificationExpires, passwordResetToken, passwordResetExpires, ...safe } = u;
-  return safe;
-};
 
 // GET /profile
 router.get('/profile', asyncHandler(async (req, res) => {
@@ -68,35 +65,31 @@ router.get('/profile/:userId', asyncHandler(async (req, res) => {
   res.json({ success: true, data: { user: sanitizeUser(user), profile, achievements } });
 }));
 
-// PUT /onboarding
+// PUT /onboarding — deduplicated student/alumni logic
 router.put('/onboarding', asyncHandler(async (req, res) => {
   const { role } = req.user;
-  const data = req.body;
+  const { name, socialLinks, avatar, ...profileFields } = req.body;
 
+  // Update role-specific profile
   let profile;
   if (role === 'student') {
-    const { name, socialLinks, avatar, ...profileFields } = data;
     profile = await prisma.studentProfile.update({ where: { userId: req.user.id }, data: profileFields });
-    const userUpdate = { isProfileComplete: true };
-    if (name) userUpdate.name = name;
-    if (avatar) userUpdate.avatar = avatar;
-    if (socialLinks) userUpdate.socialLinks = socialLinks;
-    await prisma.user.update({ where: { id: req.user.id }, data: userUpdate });
   } else if (role === 'alumni') {
-    const { name, socialLinks, avatar, ...profileFields } = data;
     profile = await prisma.alumniProfile.update({ where: { userId: req.user.id }, data: profileFields });
-    const userUpdate = { isProfileComplete: true };
-    if (name) userUpdate.name = name;
-    if (avatar) userUpdate.avatar = avatar;
-    if (socialLinks) userUpdate.socialLinks = socialLinks;
-    await prisma.user.update({ where: { id: req.user.id }, data: userUpdate });
   }
+
+  // Update common user fields
+  const userUpdate = { isProfileComplete: true };
+  if (name) userUpdate.name = name;
+  if (avatar) userUpdate.avatar = avatar;
+  if (socialLinks) userUpdate.socialLinks = socialLinks;
+  await prisma.user.update({ where: { id: req.user.id }, data: userUpdate });
 
   const user = await prisma.user.findUnique({ where: { id: req.user.id } });
   res.json({ success: true, message: 'Onboarding complete!', data: { user: sanitizeUser(user), profile } });
 }));
 
-// GET /directory
+// GET /directory — fixed search to use database-level filtering
 router.get('/directory', asyncHandler(async (req, res) => {
   const { search, company, industry, branch, graduationYear, location, skills, mentorshipAvailable, page = 1, limit = 12 } = req.query;
   const where = {};
@@ -109,24 +102,21 @@ router.get('/directory', asyncHandler(async (req, res) => {
   if (skills) where.skills = { hasSome: skills.split(',').map(s => s.trim()) };
   if (mentorshipAvailable === 'true') where.mentorshipAvailability = true;
 
+  // Search by user name at the database level (not client-side filtering)
+  if (search) {
+    where.user = { name: { contains: search, mode: 'insensitive' } };
+  }
+
   const skip = (parseInt(page) - 1) * parseInt(limit);
   const take = parseInt(limit);
 
-  let profiles, total;
-  if (search) {
-    profiles = await prisma.alumniProfile.findMany({
+  const [profiles, total] = await prisma.$transaction([
+    prisma.alumniProfile.findMany({
       where, skip, take, orderBy: { createdAt: 'desc' },
       include: { user: { select: { id: true, name: true, email: true, avatar: true, isVerified: true, socialLinks: true } } },
-    });
-    // filter by user name search
-    profiles = profiles.filter(p => p.user.name.toLowerCase().includes(search.toLowerCase()));
-    total = profiles.length;
-  } else {
-    [profiles, total] = await prisma.$transaction([
-      prisma.alumniProfile.findMany({ where, skip, take, orderBy: { createdAt: 'desc' }, include: { user: { select: { id: true, name: true, email: true, avatar: true, isVerified: true, socialLinks: true } } } }),
-      prisma.alumniProfile.count({ where }),
-    ]);
-  }
+    }),
+    prisma.alumniProfile.count({ where }),
+  ]);
 
   res.json({ success: true, data: { profiles, pagination: { page: parseInt(page), limit: take, total, pages: Math.ceil(total / take) } } });
 }));
@@ -159,6 +149,38 @@ router.get('/leaderboard', asyncHandler(async (req, res) => {
     return user ? { userId: a.userId, totalPoints: a._sum.points, badgeCount: a._count._all, user } : null;
   }).filter(Boolean);
   res.json({ success: true, data: { leaderboard } });
+}));
+
+// PUT /change-password
+router.put('/change-password', asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) throw new ApiError(400, 'Both current and new password are required');
+  if (newPassword.length < 8) throw new ApiError(400, 'New password must be at least 8 characters');
+
+  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!isMatch) throw new ApiError(400, 'Current password is incorrect');
+
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+  await prisma.user.update({ where: { id: req.user.id }, data: { password: hashedPassword } });
+  res.json({ success: true, message: 'Password changed successfully' });
+}));
+
+// DELETE /account
+router.delete('/account', asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  // Delete related data in order (child records first)
+  await prisma.message.deleteMany({ where: { senderId: userId } });
+  await prisma.conversationParticipant.deleteMany({ where: { userId } });
+  await prisma.notification.deleteMany({ where: { userId } });
+  await prisma.achievement.deleteMany({ where: { userId } });
+  await prisma.studentProfile.deleteMany({ where: { userId } });
+  await prisma.alumniProfile.deleteMany({ where: { userId } });
+  await prisma.user.delete({ where: { id: userId } });
+
+  res.cookie('refreshToken', '', { httpOnly: true, expires: new Date(0) });
+  res.json({ success: true, message: 'Account deleted successfully' });
 }));
 
 export default router;

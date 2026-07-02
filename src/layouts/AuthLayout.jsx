@@ -1,6 +1,15 @@
 import { Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
+const orbColors = [
+  'rgba(245, 200, 66, 0.06)',  // gold
+  'rgba(0, 212, 200, 0.05)',   // teal
+  'rgba(124, 77, 255, 0.04)',  // purple
+  'rgba(245, 200, 66, 0.05)',  // gold
+  'rgba(0, 212, 200, 0.04)',   // teal
+  'rgba(255, 255, 255, 0.03)', // white
+];
+
 export default function AuthLayout() {
   return (
     <div className="auth-layout">
@@ -8,7 +17,7 @@ export default function AuthLayout() {
       <div className="auth-bg">
         <div className="auth-bg-gradient" />
         <div className="auth-bg-grid" />
-        {/* Floating orbs */}
+        {/* Floating orbs — gold/teal to match app branding */}
         {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
@@ -18,6 +27,7 @@ export default function AuthLayout() {
               height: 80 + i * 40,
               left: `${10 + i * 15}%`,
               top: `${20 + (i % 3) * 25}%`,
+              background: `radial-gradient(circle, ${orbColors[i]} 0%, transparent 70%)`,
             }}
             animate={{
               y: [0, -20, 0],

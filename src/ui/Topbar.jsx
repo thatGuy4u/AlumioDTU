@@ -261,7 +261,7 @@ export default function Topbar({ onMenuToggle, isMobileNav = false, mobileOpen =
                 <button type="button" onClick={() => { navigate('/app/profile'); setDropdownOpen(false); }}>
                   <HiOutlineUser size={16} /> My Profile
                 </button>
-                <button type="button" onClick={() => { navigate('/app/profile/edit'); setDropdownOpen(false); }}>
+                <button type="button" onClick={() => { navigate('/app/settings'); setDropdownOpen(false); }}>
                   <HiOutlineCog6Tooth size={16} /> Settings
                 </button>
                 <div className="topbar-dropdown-divider" />

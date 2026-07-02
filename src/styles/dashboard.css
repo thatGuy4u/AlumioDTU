@@ -4,33 +4,45 @@
    ===================================================== */
 
 /* ===== Theme Variables ===== */
-[data-theme="light"] {
-  --bg-primary: #f5f7fa;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #eef1f5;
-  --text-primary: #1a1a2e;
-  --text-secondary: #555570;
-  --text-muted: #8888a0;
-  --border-color: rgba(0, 0, 0, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --card-bg: rgba(255, 255, 255, 0.95);
-  --card-border: rgba(0, 0, 0, 0.06);
-  --shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
-}
-
-/* Default dark theme */
+/* IMPORTANT: :root (dark) MUST come FIRST so [data-theme="light"] can override */
 :root, [data-theme="dark"] {
-  --bg-primary: #080c24;
-  --bg-secondary: #0d1540;
-  --bg-tertiary: #111a4a;
-  --text-primary: #e8eaf6;
-  --text-secondary: rgba(232, 234, 246, 0.7);
-  --text-muted: rgba(232, 234, 246, 0.45);
+  --bg-primary: #0b0f28;
+  --bg-secondary: #0f1642;
+  --bg-tertiary: #141d52;
+  --text-primary: #eaecf5;
+  --text-secondary: rgba(234, 236, 245, 0.72);
+  --text-muted: rgba(234, 236, 245, 0.42);
   --border-color: rgba(255, 255, 255, 0.08);
   --glass-bg: rgba(255, 255, 255, 0.04);
   --card-bg: rgba(255, 255, 255, 0.04);
   --card-border: rgba(255, 255, 255, 0.08);
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --hover-bg: rgba(255, 255, 255, 0.06);
+  --input-bg: rgba(255, 255, 255, 0.06);
+  --input-border: rgba(255, 255, 255, 0.12);
+  --accent: #F5C842;
+  --accent-dim: #c9a227;
+  --accent-subtle: rgba(245, 200, 66, 0.08);
+}
+
+[data-theme="light"] {
+  --bg-primary: #f4f6fb;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #edf0f7;
+  --text-primary: #1a1d2e;
+  --text-secondary: #52556b;
+  --text-muted: #888da6;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --card-bg: #ffffff;
+  --card-border: rgba(0, 0, 0, 0.06);
+  --shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  --hover-bg: rgba(0, 0, 0, 0.04);
+  --input-bg: rgba(0, 0, 0, 0.03);
+  --input-border: rgba(0, 0, 0, 0.12);
+  --accent: #b8941e;
+  --accent-dim: #9a7a18;
+  --accent-subtle: rgba(184, 148, 30, 0.08);
 }
 
 /* ===== Auth Layout ===== */
@@ -43,7 +55,7 @@
   padding: 40px 20px;
   position: relative;
   overflow: hidden;
-  background: #000;
+  background: var(--bg-primary);
 }
 
 .auth-bg {
@@ -57,24 +69,24 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, var(--accent-subtle) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0, 212, 200, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(124, 77, 255, 0.03) 0%, transparent 50%);
 }
 
 .auth-bg-grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    linear-gradient(var(--border-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
   background-size: 60px 60px;
 }
 
 .auth-orb {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--hover-bg) 0%, transparent 70%);
   filter: blur(40px);
 }
 
@@ -94,7 +106,7 @@
 }
 
 .auth-logo span {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-muted);
 }
 
 .auth-content {
@@ -106,12 +118,12 @@
 
 /* ===== Auth Card ===== */
 .auth-card {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--card-bg);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--card-border);
   border-radius: 24px;
   padding: 40px 36px;
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow);
 }
 
 .auth-card-header {
@@ -127,7 +139,7 @@
 
 .auth-card-header p {
   font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-muted);
 }
 
 .auth-form {
@@ -149,7 +161,7 @@
   display: block;
   font-size: 0.72rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-muted);
   letter-spacing: 0.8px;
   margin-bottom: 6px;
   text-transform: uppercase;
@@ -164,7 +176,7 @@
 .auth-input-icon {
   position: absolute;
   left: 14px;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--text-muted);
   z-index: 1;
 }
 
@@ -172,9 +184,9 @@
   width: 100%;
   padding: 12px 16px 12px 42px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-primary);
   font-family: 'DM Sans', sans-serif;
   font-size: 0.9rem;
   outline: none;
@@ -182,12 +194,12 @@
 }
 
 .auth-input-wrapper input:focus {
-  border-color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
 }
 
 .auth-input-wrapper input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--text-muted);
 }
 
 .auth-toggle-password {
@@ -195,7 +207,7 @@
   right: 12px;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--text-muted);
   cursor: pointer;
   padding: 4px;
   display: flex;
@@ -210,14 +222,14 @@
   display: block;
   margin-top: 4px;
   font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--text-muted);
 }
 
 /* Role Selector */
 .auth-role-selector {
   display: flex;
   position: relative;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--input-bg);
   border-radius: 12px;
   padding: 4px;
   margin-bottom: 4px;
@@ -237,7 +249,7 @@
   cursor: pointer;
   border: none;
   background: none;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-muted);
   transition: color 0.2s;
   position: relative;
   z-index: 1;
@@ -260,7 +272,7 @@
 
 .auth-role-desc {
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-muted);
   text-align: center;
   line-height: 1.5;
   margin-bottom: 8px;
@@ -274,7 +286,7 @@
 
 .auth-forgot-link {
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-secondary);
   text-decoration: none;
   font-weight: 500;
 }
@@ -288,8 +300,8 @@
   width: 100%;
   padding: 14px;
   border-radius: 12px;
-  background: #ffffff;
-  color: #000000;
+  background: var(--accent);
+  color: var(--bg-primary);
   font-family: 'Syne', sans-serif;
   font-weight: 800;
   font-size: 0.95rem;
@@ -304,7 +316,7 @@
 
 .auth-submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(245, 200, 66, 0.25);
 }
 
 .auth-submit-btn:disabled {
@@ -315,7 +327,7 @@
 .auth-spinner {
   width: 20px;
   height: 20px;
-  border: 2.5px solid #000000;
+  border: 2.5px solid var(--bg-primary);
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
@@ -324,7 +336,7 @@
 .auth-spinner-large {
   width: 40px;
   height: 40px;
-  border: 3px solid #ffffff;
+  border: 3px solid var(--text-primary);
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
@@ -339,7 +351,7 @@
   text-align: center;
   margin-top: 20px;
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-muted);
 }
 
 .auth-footer a {
@@ -551,7 +563,7 @@
 
 .sidebar-link:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--input-bg);
 }
 
 [data-theme="light"] .sidebar-link:hover {
@@ -645,7 +657,7 @@
   flex-shrink: 0;
 }
 .topbar-menu-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--input-bg);
   color: var(--text-primary);
 }
 @media (max-width: 1024px) {
@@ -672,7 +684,7 @@
   width: 100%;
   padding: 10px 16px 10px 40px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--glass-bg);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   font-family: 'DM Sans', sans-serif;
@@ -702,7 +714,7 @@
   height: 38px;
   border-radius: 10px;
   border: none;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--glass-bg);
   color: var(--text-secondary);
   cursor: pointer;
   display: flex;
@@ -712,7 +724,7 @@
 }
 
 .topbar-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--hover-bg);
   color: var(--text-primary);
 }
 
@@ -816,7 +828,7 @@
 }
 
 .topbar-notif-item:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--glass-bg);
 }
 
 [data-theme="light"] .topbar-notif-item:hover {
@@ -878,7 +890,7 @@
   padding: 12px;
   border: none;
   border-top: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--glass-bg);
   color: var(--gold);
   font-size: 0.82rem;
   font-weight: 600;
@@ -902,7 +914,7 @@
   padding: 6px 12px 6px 6px;
   border-radius: 12px;
   border: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--glass-bg);
   cursor: pointer;
   transition: border-color 0.2s;
 }
@@ -1008,7 +1020,7 @@
 }
 
 .topbar-dropdown button:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--input-bg);
   color: var(--text-primary);
 }
 
@@ -1275,7 +1287,7 @@
 }
 
 .dash-alumni-card:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--hover-bg);
 }
 
 .dash-alumni-avatar {
@@ -1341,7 +1353,7 @@
 }
 
 .dash-event-card:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--hover-bg);
 }
 
 .dash-event-date {
@@ -1393,7 +1405,7 @@
 }
 
 .dash-job-card:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--hover-bg);
 }
 
 .dash-job-info strong {
@@ -1437,7 +1449,7 @@
 }
 
 .dash-post-card:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--hover-bg);
 }
 
 .dash-post-votes {
@@ -1471,7 +1483,7 @@
   gap: 12px;
   padding: 12px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--glass-bg);
   border: 1px solid var(--border-color);
 }
 
@@ -1559,7 +1571,7 @@
 }
 
 .dash-analytics-card:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--hover-bg);
 }
 
 .dash-analytics-info {
@@ -1747,5 +1759,211 @@
   .auth-card {
     padding: 28px 20px;
   }
+}
+
+/* =====================================================
+   LIGHT THEME — Comprehensive Overrides
+   ===================================================== */
+
+/* --- Auth Layout (C2: Enhanced UI) --- */
+.auth-layout {
+  background: linear-gradient(135deg, #050816 0%, #0d1540 50%, #0a1e3d 100%);
+}
+
+.auth-bg-gradient {
+  background:
+    radial-gradient(ellipse at 20% 30%, rgba(245, 200, 66, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0, 212, 200, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(124, 77, 255, 0.04) 0%, transparent 50%);
+}
+
+.auth-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 4px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--teal), transparent);
+  border-radius: 2px;
+}
+
+.auth-card { position: relative; }
+
+/* --- Light theme auth --- */
+[data-theme="light"] .auth-layout {
+  background: linear-gradient(135deg, #f0f2f7 0%, #e8ecf4 50%, #dde3ee 100%);
+}
+
+[data-theme="light"] .auth-bg-gradient {
+  background:
+    radial-gradient(ellipse at 20% 30%, rgba(201, 162, 39, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0, 168, 158, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(100, 60, 200, 0.04) 0%, transparent 50%);
+}
+
+[data-theme="light"] .auth-bg-grid {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+}
+
+[data-theme="light"] .auth-orb {
+  background: radial-gradient(circle, rgba(201, 162, 39, 0.06) 0%, transparent 70%);
+}
+
+[data-theme="light"] .auth-card {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="light"] .auth-card-header h1 { color: #1a1a2e; }
+[data-theme="light"] .auth-card-header p { color: #555570; }
+[data-theme="light"] .auth-logo { color: #1a1a2e; }
+[data-theme="light"] .auth-logo span { color: #8888a0; }
+
+[data-theme="light"] .auth-field label { color: #8888a0; }
+[data-theme="light"] .auth-input-icon { color: #8888a0; }
+[data-theme="light"] .auth-input-wrapper input {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #1a1a2e;
+}
+[data-theme="light"] .auth-input-wrapper input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.12);
+}
+[data-theme="light"] .auth-input-wrapper input::placeholder { color: #8888a0; }
+[data-theme="light"] .auth-toggle-password { color: #8888a0; }
+[data-theme="light"] .auth-toggle-password:hover { color: #1a1a2e; }
+
+[data-theme="light"] .auth-field-hint { color: #8888a0; }
+[data-theme="light"] .auth-forgot-link { color: #555570; }
+[data-theme="light"] .auth-forgot-link:hover { color: var(--gold); }
+
+[data-theme="light"] .auth-submit-btn {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  color: #ffffff;
+}
+[data-theme="light"] .auth-submit-btn:hover:not(:disabled) {
+  box-shadow: 0 8px 24px rgba(201, 162, 39, 0.3);
+}
+[data-theme="light"] .auth-spinner { border-color: #ffffff; border-top-color: transparent; }
+
+[data-theme="light"] .auth-role-selector { background: rgba(0, 0, 0, 0.05); }
+[data-theme="light"] .auth-role-pill { color: #8888a0; }
+[data-theme="light"] .auth-role-pill.active { color: #1a1a2e; }
+[data-theme="light"] .auth-role-slider { background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+[data-theme="light"] .auth-role-desc { color: #555570; }
+
+[data-theme="light"] .auth-footer { color: #8888a0; }
+[data-theme="light"] .auth-footer a { color: var(--gold); }
+
+[data-theme="light"] .auth-error {
+  background: rgba(239, 83, 80, 0.08);
+  border-color: rgba(239, 83, 80, 0.2);
+}
+
+/* --- Topbar light theme --- */
+[data-theme="light"] .topbar {
+  background: var(--bg-secondary);
+  border-bottom-color: var(--border-color);
+}
+
+[data-theme="light"] .topbar-search-input {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .topbar-icon-btn {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-secondary);
+}
+[data-theme="light"] .topbar-icon-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .topbar-user-btn {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: var(--border-color);
+}
+[data-theme="light"] .topbar-user-btn:hover {
+  border-color: rgba(201, 162, 39, 0.4);
+}
+
+[data-theme="light"] .topbar-dropdown {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+[data-theme="light"] .topbar-dropdown button:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .topbar-notif-panel {
+  background: var(--bg-secondary);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+[data-theme="light"] .topbar-notif-view-all {
+  background: rgba(0, 0, 0, 0.02);
+  color: var(--gold);
+}
+[data-theme="light"] .topbar-notif-view-all:hover {
+  background: rgba(201, 162, 39, 0.06);
+}
+
+[data-theme="light"] .topbar-menu-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* --- Sidebar light theme --- */
+[data-theme="light"] .sidebar {
+  background: var(--bg-secondary) !important;
+  border-right-color: var(--border-color) !important;
+}
+
+/* --- Dashboard cards light theme --- */
+[data-theme="light"] .dash-action-card:hover {
+  border-color: rgba(201, 162, 39, 0.3);
+  background: rgba(201, 162, 39, 0.04);
+}
+[data-theme="light"] .dash-alumni-card:hover,
+[data-theme="light"] .dash-event-card:hover,
+[data-theme="light"] .dash-job-card:hover,
+[data-theme="light"] .dash-post-card:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .dash-cta-banner {
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.06), rgba(0, 168, 158, 0.04));
+  border-color: rgba(201, 162, 39, 0.12);
+}
+
+/* --- Edit save bar light theme --- */
+[data-theme="light"] .edit-save-bar {
+  background: rgba(255, 255, 255, 0.95);
+  border-top-color: var(--border-color);
+}
+
+/* --- Left drawer light theme --- */
+[data-theme="light"] .left-drawer-backdrop {
+  background: rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="light"] .sidebar-mobile.left-drawer {
+  background: var(--bg-secondary) !important;
 }
 

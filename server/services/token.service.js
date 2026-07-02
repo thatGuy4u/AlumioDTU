@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 
 /**
  * Generate access token (short-lived).
@@ -19,25 +20,21 @@ export const generateRefreshToken = (userId) => {
 };
 
 /**
- * Generate a random hex token for email verification / password reset.
+ * Generate a cryptographically secure random hex token for email verification / password reset.
  */
 export const generateRandomToken = () => {
-  const chars = 'abcdef0123456789';
-  let token = '';
-  for (let i = 0; i < 64; i++) {
-    token += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return token;
+  return crypto.randomBytes(32).toString('hex');
 };
 
 /**
  * Set refresh token as httpOnly cookie.
+ * Uses 'none' sameSite in production for cross-origin deployments (e.g. Vercel frontend + Render backend).
  */
 export const setRefreshTokenCookie = (res, token) => {
   res.cookie('refreshToken', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 };
