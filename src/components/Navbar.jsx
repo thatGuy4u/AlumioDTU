@@ -11,7 +11,15 @@ const NAV_LINKS = [
 
 export default function Navbar({ isLoggedIn, userName, onOpenModal, onLogout }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const isCompactNav = useMobileNav();
+
+  // Track scroll for navbar styling
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : '';
@@ -38,7 +46,7 @@ export default function Navbar({ isLoggedIn, userName, onOpenModal, onLogout }) 
 
   return (
     <>
-      <header id="navbar">
+      <header id="navbar" className={scrolled ? 'navbar-scrolled' : ''}>
         <div className="nav-left">
           {!isLoggedIn && isCompactNav && (
             <button
@@ -48,7 +56,7 @@ export default function Navbar({ isLoggedIn, userName, onOpenModal, onLogout }) 
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
             >
-              {menuOpen ? <HiOutlineXMark size={22} /> : <HiOutlineBars3 size={22} />}
+              {menuOpen ? <HiOutlineXMark size={20} /> : <HiOutlineBars3 size={20} />}
             </button>
           )}
           <div className="nav-logo">Alumio<span>DTU</span></div>
@@ -58,7 +66,16 @@ export default function Navbar({ isLoggedIn, userName, onOpenModal, onLogout }) 
           {!isLoggedIn && !isCompactNav && (
             <div className="nav-menu">
               {NAV_LINKS.map((link) => (
-                <a key={link.href} href={link.href}>{link.label}</a>
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavClick(link.href);
+                  }}
+                >
+                  {link.label}
+                </a>
               ))}
             </div>
           )}
@@ -73,8 +90,8 @@ export default function Navbar({ isLoggedIn, userName, onOpenModal, onLogout }) 
               <>
                 {!isCompactNav && (
                   <>
-                    <button type="button" className="btn-nav" onClick={() => onOpenModal('login')}>Log In</button>
-                    <button type="button" className="btn-nav btn-nav-outline" onClick={() => onOpenModal('signup')}>
+                    <button type="button" className="btn-nav btn-nav-secondary" onClick={() => onOpenModal('login')}>Log In</button>
+                    <button type="button" className="btn-nav btn-nav-primary" onClick={() => onOpenModal('signup')}>
                       Sign Up
                     </button>
                   </>
@@ -108,10 +125,10 @@ export default function Navbar({ isLoggedIn, userName, onOpenModal, onLogout }) 
             ))}
           </div>
           <div className="landing-drawer-actions">
-            <button type="button" className="btn-nav" onClick={() => { closeMenu(); onOpenModal('login'); }}>
+            <button type="button" className="btn-nav btn-nav-secondary" onClick={() => { closeMenu(); onOpenModal('login'); }}>
               Log In
             </button>
-            <button type="button" className="btn-nav btn-nav-outline" onClick={() => { closeMenu(); onOpenModal('signup'); }}>
+            <button type="button" className="btn-nav btn-nav-primary" onClick={() => { closeMenu(); onOpenModal('signup'); }}>
               Sign Up
             </button>
           </div>

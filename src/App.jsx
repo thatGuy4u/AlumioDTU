@@ -1,14 +1,11 @@
-import { useState, useCallback } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectIsAuthenticated } from './store/slices/authSlice';
 import { BYPASS_AUTH_FOR_TESTING } from './utils/constants';
 import './App.css';
 
 // Existing landing page components
-import CinematicIntro from './components/CinematicIntro';
-import NexusGlowBackground from './components/NexusGlowBackground';
+import LampEffect from './components/LampEffect';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Features from './components/Features';
@@ -61,13 +58,8 @@ import AdminModerationPage from './pages/admin/AdminModerationPage';
 
 // Landing Page Component
 function LandingPage() {
-  const [introComplete, setIntroComplete] = useState(false);
   const navigate = useNavigate();
   const isAuthenticated = useSelector(selectIsAuthenticated);
-
-  const handleIntroComplete = useCallback(() => {
-    setIntroComplete(true);
-  }, []);
 
   if (!BYPASS_AUTH_FOR_TESTING && isAuthenticated) {
     return <Navigate to="/app/dashboard" replace />;
@@ -83,20 +75,7 @@ function LandingPage() {
   
   return (
     <>
-      <AnimatePresence>
-        {!introComplete && (
-          <CinematicIntro onComplete={handleIntroComplete} />
-        )}
-      </AnimatePresence>
-
-      <NexusGlowBackground visible={introComplete} />
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: introComplete ? 1 : 0 }}
-        transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-        style={{ position: 'relative', zIndex: 1 }}
-      >
+      <LampEffect>
         <Navbar
           isLoggedIn={false}
           userName=""
@@ -104,11 +83,14 @@ function LandingPage() {
           onLogout={() => {}}
         />
         <Hero onOpenModal={handleOpenModal} />
+      </LampEffect>
+
+      <div style={{ position: 'relative', zIndex: 1, background: '#000' }}>
         <Features />
         <HowItWorks />
         <Testimonials />
         <Footer />
-      </motion.div>
+      </div>
     </>
   );
 }
