@@ -149,7 +149,7 @@ export default function EditProfilePage() {
           </div>
           <div className="edit-field">
             <label>Bio</label>
-            <textarea className="onboarding-input" rows={3} value={profileData.bio || ''} onChange={e => setProfileData(p => ({ ...p, bio: e.target.value }))} placeholder="Tell us about yourself..." />
+            <textarea className="onboarding-input" style = {{resize: "none"}} rows={3} value={profileData.bio || ''} onChange={e => setProfileData(p => ({ ...p, bio: e.target.value }))} placeholder="Tell us about yourself..." />
           </div>
         </motion.section>
 
@@ -175,7 +175,7 @@ export default function EditProfilePage() {
                 </div>
                 <div className="edit-field">
                   <label>Graduation Year</label>
-                  <input className="onboarding-input" type="number" min={2020} max={2035} value={profileData.graduationYear || ''} onChange={e => setProfileData(p => ({ ...p, graduationYear: e.target.value ? parseInt(e.target.value) : null }))} />
+                  <input className="onboarding-input" type="number" min={2000} max={2035} value={profileData.graduationYear || ''} onChange={e => setProfileData(p => ({ ...p, graduationYear: e.target.value ? parseInt(e.target.value) : null }))} />
                 </div>
                 <div className="edit-field">
                   <label>Roll Number</label>
@@ -183,7 +183,7 @@ export default function EditProfilePage() {
                 </div>
                 <div className="edit-field full">
                   <label>Career Goals</label>
-                  <textarea className="onboarding-input" rows={2} value={profileData.careerGoals || ''} onChange={e => setProfileData(p => ({ ...p, careerGoals: e.target.value }))} placeholder="What are you working towards?" />
+                  <textarea className="onboarding-input" rows={2} style = {{resize: "none"}} value={profileData.careerGoals || ''} onChange={e => setProfileData(p => ({ ...p, careerGoals: e.target.value }))} placeholder="What are you working towards?" />
                 </div>
               </>
             )}

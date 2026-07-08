@@ -1,48 +1,48 @@
 /* =====================================================
    AlumioDTU — Dashboard & App Styles
-   Premium dark theme with gold/teal accents
+   Premium dark/light theme with blue accents
    ===================================================== */
 
 /* ===== Theme Variables ===== */
 /* IMPORTANT: :root (dark) MUST come FIRST so [data-theme="light"] can override */
 :root, [data-theme="dark"] {
-  --bg-primary: #0b0f28;
-  --bg-secondary: #0f1642;
-  --bg-tertiary: #141d52;
-  --text-primary: #eaecf5;
-  --text-secondary: rgba(234, 236, 245, 0.72);
-  --text-muted: rgba(234, 236, 245, 0.42);
+  --bg-primary: #0f172a;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: rgb(205, 226, 255);
+  --text-muted: rgb(210, 211, 213);
   --border-color: rgba(255, 255, 255, 0.08);
   --glass-bg: rgba(255, 255, 255, 0.04);
   --card-bg: rgba(255, 255, 255, 0.04);
   --card-border: rgba(255, 255, 255, 0.08);
-  --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
   --hover-bg: rgba(255, 255, 255, 0.06);
   --input-bg: rgba(255, 255, 255, 0.06);
   --input-border: rgba(255, 255, 255, 0.12);
-  --accent: #F5C842;
-  --accent-dim: #c9a227;
-  --accent-subtle: rgba(245, 200, 66, 0.08);
+  --accent: #2c87f6;
+  --accent-dim: #2c87f6;
+  --accent-subtle: rgba(79, 110, 247, 0.1);
 }
 
 [data-theme="light"] {
-  --bg-primary: #f4f6fb;
+  --bg-primary: #e8edf8;
   --bg-secondary: #ffffff;
-  --bg-tertiary: #edf0f7;
-  --text-primary: #1a1d2e;
-  --text-secondary: #52556b;
-  --text-muted: #888da6;
-  --border-color: rgba(0, 0, 0, 0.08);
+  --bg-tertiary: #f0f4ff;
+  --text-primary: #1e293b;
+  --text-secondary: #000000;
+  --text-muted: #4a5768;
+  --border-color: rgba(0, 0, 0, 0.06);
   --glass-bg: rgba(255, 255, 255, 0.85);
   --card-bg: #ffffff;
   --card-border: rgba(0, 0, 0, 0.06);
   --shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
   --hover-bg: rgba(0, 0, 0, 0.04);
   --input-bg: rgba(0, 0, 0, 0.03);
-  --input-border: rgba(0, 0, 0, 0.12);
-  --accent: #b8941e;
-  --accent-dim: #9a7a18;
-  --accent-subtle: rgba(184, 148, 30, 0.08);
+  --input-border: rgba(0, 0, 0, 0.10);
+  --accent: #2c87f6;
+  --accent-dim: #2c87f6;
+  --accent-subtle: rgba(79, 110, 247, 0.08);
 }
 
 /* ===== Auth Layout ===== */
@@ -300,7 +300,7 @@
   width: 100%;
   padding: 14px;
   border-radius: 12px;
-  background: skyblue;
+  background: rgb(255, 255, 255);
   color: var(--bg-primary);
   font-family: 'Syne', sans-serif;
   font-weight: 800;
@@ -471,9 +471,9 @@
   width: 36px !important;
   height: 36px !important;
   border-radius: 10px !important;
-  border: 1.5px solid rgba(245, 200, 66, 0.4) !important;
-  background: rgba(245, 200, 66, 0.08) !important;
-  color: var(--gold) !important;
+  border: 1.5px solid rgba(79, 110, 247, 0.4) !important;
+  background: rgba(79, 110, 247, 0.08) !important;
+  color: var(--accent) !important;
   cursor: pointer !important;
   display: flex !important;
   align-items: center !important;
@@ -482,8 +482,8 @@
   flex-shrink: 0 !important;
 }
 .sidebar-close-btn:hover {
-  background: rgba(245, 200, 66, 0.15) !important;
-  border-color: var(--gold) !important;
+  background: rgba(79, 110, 247, 0.15) !important;
+  border-color: var(--accent) !important;
   color: #fff !important;
   transform: scale(1.05);
 }
@@ -500,8 +500,8 @@
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: var(--navy);
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+  color: #ffffff;
   font-family: 'Syne', sans-serif;
   font-weight: 800;
   font-size: 1.1rem;
@@ -520,7 +520,7 @@
 }
 
 .sidebar-logo-accent {
-  color: var(--teal);
+  color: var(--accent);
 }
 
 .sidebar-nav {
@@ -551,7 +551,7 @@
   gap: 12px;
   padding: 10px 14px;
   margin: 2px 6px;
-  border-radius: 0 24px 24px 0;
+  border-radius: 10px;
   color: var(--text-secondary);
   text-decoration: none;
   font-size: 0.88rem;
@@ -571,14 +571,15 @@
 }
 
 .sidebar-link.active {
-  color: var(--text-primary);
-  background: rgba(245, 200, 66, 0.14);
+  color: #ffffff;
+  background: var(--accent);
   font-weight: 600;
+  border-radius: 10px;
 }
 
 [data-theme="light"] .sidebar-link.active {
-  background: rgba(52, 168, 83, 0.14);
-  color: #1e4620;
+  background: var(--accent);
+  color: #ffffff;
 }
 
 .sidebar-link-icon {
@@ -602,7 +603,7 @@
   transform: translateY(-50%);
   width: 3px;
   height: 20px;
-  background: var(--gold);
+  background: var(--accent);
   border-radius: 0 4px 4px 0;
 }
 
@@ -694,8 +695,8 @@
 }
 
 .topbar-search-input:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(245, 200, 66, 0.08);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.12);
 }
 
 .topbar-search-input::placeholder {
@@ -784,7 +785,7 @@
   gap: 4px;
   border: none;
   background: none;
-  color: var(--gold);
+  color: var(--accent);
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -794,7 +795,7 @@
 }
 
 .topbar-notif-mark-all:hover {
-  background: rgba(245, 200, 66, 0.1);
+  background: rgba(79, 110, 247, 0.1);
 }
 
 .topbar-notif-list {
@@ -836,7 +837,7 @@
 }
 
 .topbar-notif-item.unread {
-  background: rgba(245, 200, 66, 0.06);
+  background: rgba(79, 110, 247, 0.06);
 }
 
 [data-theme="light"] .topbar-notif-item.unread {
@@ -880,7 +881,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--gold);
+  background: var(--accent);
   flex-shrink: 0;
   margin-top: 6px;
 }
@@ -891,7 +892,7 @@
   border: none;
   border-top: 1px solid var(--border-color);
   background: var(--glass-bg);
-  color: var(--gold);
+  color: var(--accent);
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
@@ -899,7 +900,7 @@
 }
 
 .topbar-notif-view-all:hover {
-  background: rgba(245, 200, 66, 0.08);
+  background: rgba(79, 110, 247, 0.08);
 }
 
 .topbar-user {
@@ -920,21 +921,21 @@
 }
 
 .topbar-user-btn:hover {
-  border-color: rgba(245, 200, 66, 0.3);
+  border-color: rgba(79, 110, 247, 0.3);
 }
 
 .topbar-avatar {
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: linear-gradient(135deg, var(--gold), var(--teal));
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim));
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Syne', sans-serif;
   font-weight: 800;
   font-size: 0.85rem;
-  color: var(--navy);
+  color: #ffffff;
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -968,13 +969,13 @@
 }
 
 .role-student {
-  color: var(--teal);
-  background: rgba(0, 212, 200, 0.1);
+  color: var(--accent);
+  background: rgba(79, 110, 247, 0.1);
 }
 
 .role-alumni {
-  color: var(--gold);
-  background: rgba(245, 200, 66, 0.1);
+  color: var(--accent);
+  background: rgba(79, 110, 247, 0.1);
 }
 
 .role-admin {
@@ -1041,8 +1042,8 @@
   gap: 24px;
 }
 
-.text-gold { color: var(--gold); }
-.text-teal { color: var(--teal); }
+.text-gold { color: var(--accent); }
+.text-teal { color: var(--accent); }
 
 .dash-hero {
   display: flex;
@@ -1089,7 +1090,7 @@
 
 .ring-progress {
   fill: none;
-  stroke: var(--gold);
+  stroke: var(--accent);
   stroke-width: 6;
   stroke-linecap: round;
   transition: stroke-dasharray 1s ease;
@@ -1104,7 +1105,7 @@
   font-family: 'Syne', sans-serif;
   font-weight: 800;
   font-size: 0.85rem;
-  color: var(--gold);
+  color: var(--accent);
 }
 
 .ring-text {
@@ -1137,20 +1138,20 @@
 }
 
 .dash-action-card:hover {
-  border-color: rgba(245, 200, 66, 0.3);
-  background: rgba(245, 200, 66, 0.06);
-  color: var(--gold);
+  border-color: rgba(79, 110, 247, 0.3);
+  background: rgba(79, 110, 247, 0.06);
+  color: var(--accent);
   transform: translateY(-2px);
 }
 
 .dash-action-card.accent {
-  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: var(--navy);
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+  color: #ffffff;
   border-color: transparent;
 }
 
 .dash-action-card.accent:hover {
-  box-shadow: 0 6px 20px rgba(245, 200, 66, 0.3);
+  box-shadow: 0 6px 20px rgba(79, 110, 247, 0.3);
 }
 
 .dash-action-icon {
@@ -1192,7 +1193,7 @@
 }
 
 .dash-stat-card:hover {
-  border-color: rgba(245, 200, 66, 0.2);
+  border-color: rgba(79, 110, 247, 0.2);
 }
 
 .dash-stat-icon {
@@ -1241,7 +1242,7 @@
 }
 
 .dash-widget:hover {
-  border-color: rgba(245, 200, 66, 0.15);
+  border-color: rgba(79, 110, 247, 0.15);
 }
 
 .dash-widget-header {
@@ -1268,7 +1269,7 @@
   margin-top: 16px;
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--gold);
+  color: var(--accent);
   text-decoration: none;
 }
 
@@ -1294,8 +1295,8 @@
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--teal), var(--gold));
-  color: var(--navy);
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1323,15 +1324,15 @@
 
 .dash-alumni-branch {
   font-size: 0.72rem !important;
-  color: var(--teal) !important;
+  color: var(--accent) !important;
 }
 
 .dash-connect-btn {
   padding: 6px 14px;
   border-radius: 8px;
-  border: 1px solid rgba(245, 200, 66, 0.3);
-  background: rgba(245, 200, 66, 0.06);
-  color: var(--gold);
+  border: 1px solid rgba(79, 110, 247, 0.3);
+  background: rgba(79, 110, 247, 0.06);
+  color: var(--accent);
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
@@ -1339,7 +1340,7 @@
 }
 
 .dash-connect-btn:hover {
-  background: rgba(245, 200, 66, 0.15);
+  background: rgba(79, 110, 247, 0.15);
 }
 
 /* Event Card */
@@ -1360,7 +1361,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: rgba(0, 212, 200, 0.08);
+  background: rgba(79, 110, 247, 0.08);
   border-radius: 10px;
   padding: 8px 12px;
   min-width: 48px;
@@ -1370,7 +1371,7 @@
   font-family: 'Syne', sans-serif;
   font-weight: 800;
   font-size: 1.1rem;
-  color: var(--teal);
+  color: var(--accent);
   line-height: 1;
 }
 
@@ -1429,13 +1430,13 @@
   padding: 3px 8px;
   border-radius: 6px;
   font-weight: 600;
-  background: rgba(245, 200, 66, 0.1);
-  color: var(--gold);
+  background: rgba(79, 110, 247, 0.1);
+  color: var(--accent);
 }
 
 .dash-tag.secondary {
-  background: rgba(0, 212, 200, 0.1);
-  color: var(--teal);
+  background: rgba(79, 110, 247, 0.1);
+  color: var(--accent);
 }
 
 /* Post Card */
@@ -1491,8 +1492,8 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--gold), var(--teal));
-  color: var(--navy);
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1627,7 +1628,7 @@
 .dash-metric-fill {
   height: 100%;
   border-radius: 3px;
-  background: linear-gradient(90deg, var(--gold), var(--teal));
+  background: linear-gradient(90deg, var(--accent), var(--accent-dim));
 }
 
 /* CTA Banner */
@@ -1637,8 +1638,8 @@
   justify-content: space-between;
   padding: 24px;
   border-radius: 16px;
-  background: linear-gradient(135deg, rgba(245, 200, 66, 0.08), rgba(0, 212, 200, 0.06));
-  border: 1px solid rgba(245, 200, 66, 0.15);
+  background: linear-gradient(135deg, rgba(79, 110, 247, 0.08), rgba(79, 110, 247, 0.04));
+  border: 1px solid rgba(79, 110, 247, 0.15);
   gap: 20px;
 }
 
@@ -1663,8 +1664,8 @@
 .dash-cta-btn {
   padding: 10px 24px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-  color: var(--navy);
+  background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+  color: #ffffff;
   font-family: 'Syne', sans-serif;
   font-weight: 700;
   font-size: 0.85rem;
@@ -1675,7 +1676,7 @@
 
 .dash-cta-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(245, 200, 66, 0.3);
+  box-shadow: 0 6px 20px rgba(79, 110, 247, 0.3);
 }
 
 /* Coming Soon */
@@ -1852,7 +1853,7 @@
 [data-theme="light"] .auth-forgot-link:hover { color: var(--gold); }
 
 [data-theme="light"] .auth-submit-btn {
-  background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+  background: linear-gradient(135deg, #4a92df 0%, #2c87f6 45%, #1f6fe5 100%);
   color: #ffffff;
 }
 [data-theme="light"] .auth-submit-btn:hover:not(:disabled) {
@@ -1900,7 +1901,7 @@
   border-color: var(--border-color);
 }
 [data-theme="light"] .topbar-user-btn:hover {
-  border-color: rgba(201, 162, 39, 0.4);
+  border-color: rgba(79, 110, 247, 0.4);
 }
 
 [data-theme="light"] .topbar-dropdown {
@@ -1919,10 +1920,10 @@
 
 [data-theme="light"] .topbar-notif-view-all {
   background: rgba(0, 0, 0, 0.02);
-  color: var(--gold);
+  color: var(--accent);
 }
 [data-theme="light"] .topbar-notif-view-all:hover {
-  background: rgba(201, 162, 39, 0.06);
+  background: rgba(79, 110, 247, 0.06);
 }
 
 [data-theme="light"] .topbar-menu-btn:hover {
@@ -1937,8 +1938,8 @@
 
 /* --- Dashboard cards light theme --- */
 [data-theme="light"] .dash-action-card:hover {
-  border-color: rgba(201, 162, 39, 0.3);
-  background: rgba(201, 162, 39, 0.04);
+  border-color: rgba(79, 110, 247, 0.3);
+  background: rgba(79, 110, 247, 0.04);
 }
 [data-theme="light"] .dash-alumni-card:hover,
 [data-theme="light"] .dash-event-card:hover,
@@ -1948,8 +1949,8 @@
 }
 
 [data-theme="light"] .dash-cta-banner {
-  background: linear-gradient(135deg, rgba(201, 162, 39, 0.06), rgba(0, 168, 158, 0.04));
-  border-color: rgba(201, 162, 39, 0.12);
+  background: linear-gradient(135deg, rgba(79, 110, 247, 0.06), rgba(79, 110, 247, 0.03));
+  border-color: rgba(79, 110, 247, 0.12);
 }
 
 /* --- Edit save bar light theme --- */
