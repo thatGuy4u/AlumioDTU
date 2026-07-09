@@ -1,6 +1,6 @@
 # AlumioDTU 🎓
 
-**The Alumni-Student Networking Platform DTU Deserved — But Never Had.**
+**The Alumni-Student Networking Platform DTU Deserved - But Never Had.**
 
 > _"Your career shouldn't depend on who you happen to know in a WhatsApp group."_
 
@@ -31,31 +31,31 @@
 
 ## 🚨 The Problem
 
-Every year, thousands of students enter DTU believing that hard work and good grades will automatically open doors. **They're wrong.** Not because effort doesn't matter — but because the system is fundamentally broken.
+Every year, thousands of students enter DTU believing that hard work and good grades will automatically open doors. **They're wrong.** Not because effort doesn't matter - but because the system is fundamentally broken.
 
-### Students Are Left Behind — Not Because They Lack Talent, But Because They Lack Access
+### Students Are Left Behind - Not Because They Lack Talent, But Because They Lack Access
 
 The harsh reality of college life in India:
 
 - **🚪 Opportunities are locked inside private circles.** The best internships, referrals, and job openings never make it to public forums. They circulate in closed WhatsApp groups, alumni cliques, and LinkedIn DMs between people who already know each other. If you're not in the loop, you don't even know what you're missing.
 
-- **🧭 Students don't get the right mentorship at the right time.** A second-year student confused about whether to pursue ML or backend development has no structured way to talk to someone who's been through the same decision. By the time they figure things out on their own, they've lost semesters of productive time. **The right guidance at the right moment can change the trajectory of an entire career** — and most students never get it.
+- **🧭 Students don't get the right mentorship at the right time.** A second-year student confused about whether to pursue ML or backend development has no structured way to talk to someone who's been through the same decision. By the time they figure things out on their own, they've lost semesters of productive time. **The right guidance at the right moment can change the trajectory of an entire career** - and most students never get it.
 
 - **📩 Cold outreach is broken.** Students resort to sending generic "Hi sir, I'm from DTU" messages on LinkedIn to strangers and getting ignored. There's no trust layer, no shared context, no reason for an alumni to respond to the 50th identical message in their inbox.
 
-- **📊 Information is scattered and chaotic.** Placement experiences, company reviews, interview prep, higher-studies guidance — all of it is fragmented across Telegram channels, WhatsApp forwards, random Google Docs, and spreadsheets that go stale within months.
+- **📊 Information is scattered and chaotic.** Placement experiences, company reviews, interview prep, higher-studies guidance - all of it is fragmented across Telegram channels, WhatsApp forwards, random Google Docs, and spreadsheets that go stale within months.
 
-- **🏗️ Existing alumni portals are dead directories.** Most institutional alumni pages are glorified databases — a list of names nobody visits, with no engagement tools, no reason to come back, and no value for either side.
+- **🏗️ Existing alumni portals are dead directories.** Most institutional alumni pages are glorified databases - a list of names nobody visits, with no engagement tools, no reason to come back, and no value for either side.
 
-- **⏳ Senior-junior knowledge transfer barely exists.** The best learnings from a graduating batch — what worked, what didn't, which companies to target, which skills actually matter — die with that batch instead of compounding for the next one.
+- **⏳ Senior-junior knowledge transfer barely exists.** The best learnings from a graduating batch - what worked, what didn't, which companies to target, which skills actually matter - die with that batch instead of compounding for the next one.
 
-- **🎓 First-generation students and those without connections suffer the most.** Students whose parents didn't go to engineering college, who come from small towns, who don't have an older sibling in tech — they're starting from zero while others are already plugged into networks.
+- **🎓 First-generation students and those without connections suffer the most.** Students whose parents didn't go to engineering college, who come from small towns, who don't have an older sibling in tech - they're starting from zero while others are already plugged into networks.
 
-**The gap between a connected student and a disconnected one isn't just about opportunities — it's about awareness that those opportunities even exist.**
+**The gap between a connected student and a disconnected one isn't just about opportunities - it's about awareness that those opportunities even exist.**
 
 ---
 
-## 💡 Our Solution — AlumioDTU
+## 💡 Our Solution - AlumioDTU
 
 AlumioDTU is a **full-stack, real-time alumni-student networking platform** purpose-built for Delhi Technological University. It's not another dead directory. It's a living ecosystem where students find mentors, alumni give back, and opportunities flow openly instead of staying locked behind closed doors.
 
@@ -63,9 +63,9 @@ AlumioDTU is a **full-stack, real-time alumni-student networking platform** purp
 
 | Principle | What It Means |
 |---|---|
-| **Open Access** | Every student sees every opportunity — no private circles, no gatekeeping |
+| **Open Access** | Every student sees every opportunity - no private circles, no gatekeeping |
 | **Structured Mentorship** | 1-on-1 connections with scheduling, goal tracking, and accountability |
-| **Two-Way Value** | Alumni aren't just "helping" — they're building reputation, recruiting talent, and staying connected |
+| **Two-Way Value** | Alumni aren't just "helping" - they're building reputation, recruiting talent, and staying connected |
 | **Trust Layer** | Verified DTU identity means alumni know exactly who they're talking to |
 | **Knowledge Compounding** | Community discussions, career threads, and shared experiences create institutional memory |
 
@@ -75,97 +75,97 @@ AlumioDTU is a **full-stack, real-time alumni-student networking platform** purp
 
 ### 🔐 Authentication & Identity
 
-- **Role-Based Registration** — Separate flows for Students, Alumni, and Admins with distinct onboarding journeys
-- **Email Verification** — Nodemailer-powered verification with secure tokenized links
-- **Password Recovery** — Forgot password flow with time-limited reset tokens
-- **JWT Authentication** — Secure access + refresh token rotation stored in HTTP-only cookies
-- **Alumni Verification** — Admin-reviewed verification system to ensure alumni authenticity
-- **Guided Onboarding** — Role-specific onboarding that walks users through profile setup step by step
+- **Role-Based Registration** - Separate flows for Students, Alumni, and Admins with distinct onboarding journeys
+- **Email Verification** - Nodemailer-powered verification with secure tokenized links
+- **Password Recovery** - Forgot password flow with time-limited reset tokens
+- **JWT Authentication** - Secure access + refresh token rotation stored in HTTP-only cookies
+- **Alumni Verification** - Admin-reviewed verification system to ensure alumni authenticity
+- **Guided Onboarding** - Role-specific onboarding that walks users through profile setup step by step
 
 ### 🔍 Smart Alumni Directory
 
-- **Advanced Search & Filtering** — Search alumni by name, batch year, branch (CSE, IT, ECE, EE, ME, CE, and 8 more), company, industry, location, and skills
-- **Rich Alumni Profiles** — Full career journey, current designation, mentorship availability, skills, social links, and LinkedIn integration
-- **Student Profiles** — Academic details, skills, career goals, projects portfolio, resume upload, and achievements
-- **Profile Completion Score** — Gamified progress tracking that encourages users to build complete profiles
+- **Advanced Search & Filtering** - Search alumni by name, batch year, branch (CSE, IT, ECE, EE, ME, CE, and 8 more), company, industry, location, and skills
+- **Rich Alumni Profiles** - Full career journey, current designation, mentorship availability, skills, social links, and LinkedIn integration
+- **Student Profiles** - Academic details, skills, career goals, projects portfolio, resume upload, and achievements
+- **Profile Completion Score** - Gamified progress tracking that encourages users to build complete profiles
 
 ### 🎯 Mentorship Hub
 
-- **Mentorship Requests** — Students can send personalized mentorship requests to available alumni with a clear message about what they need
-- **Capacity Management** — Alumni set their mentoring capacity (default: 3 mentees) so they're never overwhelmed
-- **Session Scheduling** — Structured mentorship sessions with date, time, duration, topic, and meeting link
-- **Session Tracking** — Complete status management: scheduled → completed/cancelled
-- **Feedback & Ratings** — Mentees rate mentors after sessions; alumni build visible mentor ratings
-- **Session Notes** — Both sides can document takeaways, action items, and next steps
+- **Mentorship Requests** - Students can send personalized mentorship requests to available alumni with a clear message about what they need
+- **Capacity Management** - Alumni set their mentoring capacity (default: 3 mentees) so they're never overwhelmed
+- **Session Scheduling** - Structured mentorship sessions with date, time, duration, topic, and meeting link
+- **Session Tracking** - Complete status management: scheduled → completed/cancelled
+- **Feedback & Ratings** - Mentees rate mentors after sessions; alumni build visible mentor ratings
+- **Session Notes** - Both sides can document takeaways, action items, and next steps
 
 ### 💼 Jobs & Opportunities Board
 
-- **Alumni-Posted Opportunities** — Internships, full-time roles, part-time positions, and contract work posted directly by alumni from their companies
-- **Detailed Listings** — Job type, work mode (remote/onsite/hybrid), location, salary/stipend ranges, required skills, experience level, and application deadlines
-- **In-Platform Applications** — Students apply with resume and optional cover letter without leaving the platform
-- **Referral Tracking** — Alumni can refer applicants, creating a visible referral chain
-- **Application Pipeline** — Full status tracking: Applied → Reviewed → Shortlisted → Hired (or Rejected)
-- **Save Jobs** — Bookmark interesting opportunities to apply later
-- **My Applications** — Dashboard view of all submitted applications and their current status
+- **Alumni-Posted Opportunities** - Internships, full-time roles, part-time positions, and contract work posted directly by alumni from their companies
+- **Detailed Listings** - Job type, work mode (remote/onsite/hybrid), location, salary/stipend ranges, required skills, experience level, and application deadlines
+- **In-Platform Applications** - Students apply with resume and optional cover letter without leaving the platform
+- **Referral Tracking** - Alumni can refer applicants, creating a visible referral chain
+- **Application Pipeline** - Full status tracking: Applied → Reviewed → Shortlisted → Hired (or Rejected)
+- **Save Jobs** - Bookmark interesting opportunities to apply later
+- **My Applications** - Dashboard view of all submitted applications and their current status
 
 ### 💬 Real-Time Messaging
 
-- **Socket.io-Powered Chat** — Instant messaging with real-time delivery using WebSocket connections
-- **Conversation Threading** — Organized conversation list with last message preview and timestamps
-- **Unread Counts** — Per-conversation unread message tracking
-- **Online Presence** — Real-time online/offline/away status indicators
-- **File Attachments** — Share documents, images, and files within conversations
-- **Read Receipts** — Track which messages have been read by participants
+- **Socket.io-Powered Chat** - Instant messaging with real-time delivery using WebSocket connections
+- **Conversation Threading** - Organized conversation list with last message preview and timestamps
+- **Unread Counts** - Per-conversation unread message tracking
+- **Online Presence** - Real-time online/offline/away status indicators
+- **File Attachments** - Share documents, images, and files within conversations
+- **Read Receipts** - Track which messages have been read by participants
 
 ### 🌐 Community Forums
 
-- **Categorized Discussions** — Posts organized into Placements, Internships, Higher Studies, Startups, and General categories
-- **Rich Content** — Full text posts with tags for easy discovery
-- **Upvote System** — Community-driven content curation; best advice rises to the top
-- **Threaded Comments** — Nested reply system with parent-child comment relationships
-- **Comment Upvotes** — Individual comment voting for granular content quality signals
-- **Pinned Posts** — Admins can pin important announcements and resources
-- **Content Moderation** — Flag and review system to maintain discussion quality
+- **Categorized Discussions** - Posts organized into Placements, Internships, Higher Studies, Startups, and General categories
+- **Rich Content** - Full text posts with tags for easy discovery
+- **Upvote System** - Community-driven content curation; best advice rises to the top
+- **Threaded Comments** - Nested reply system with parent-child comment relationships
+- **Comment Upvotes** - Individual comment voting for granular content quality signals
+- **Pinned Posts** - Admins can pin important announcements and resources
+- **Content Moderation** - Flag and review system to maintain discussion quality
 
 ### 📅 Events & Reunions
 
-- **Event Types** — Alumni Talks, Webinars, Networking Sessions, Workshops, and Meetups
-- **Event Creation** — Organizers set title, description, date/time, location (online or physical), meeting link, cover image, and attendee cap
-- **Registration System** — One-click registration with automatic attendee counting
-- **Event Reminders** — Opt-in reminder notifications for registered attendees
-- **Registration Status** — Track: Registered → Attended / Cancelled
+- **Event Types** - Alumni Talks, Webinars, Networking Sessions, Workshops, and Meetups
+- **Event Creation** - Organizers set title, description, date/time, location (online or physical), meeting link, cover image, and attendee cap
+- **Registration System** - One-click registration with automatic attendee counting
+- **Event Reminders** - Opt-in reminder notifications for registered attendees
+- **Registration Status** - Track: Registered → Attended / Cancelled
 
 ### 🏆 Achievements & Gamification
 
-- **Badge System** — Earn badges for platform engagement (mentoring, posting, helping others)
-- **Points System** — Accumulate points for different activities
-- **Achievement Showcase** — Display earned badges and titles on your profile
-- **Engagement Incentives** — Gamification that encourages consistent participation
+- **Badge System** - Earn badges for platform engagement (mentoring, posting, helping others)
+- **Points System** - Accumulate points for different activities
+- **Achievement Showcase** - Display earned badges and titles on your profile
+- **Engagement Incentives** - Gamification that encourages consistent participation
 
 ### 🔔 Notifications
 
-- **Real-Time Notifications** — Instant alerts delivered via Socket.io
-- **Comprehensive Coverage** — Notifications for mentorship requests/responses, new messages, job postings, application updates, event reminders, community replies & upvotes, achievement unlocks, and system announcements
-- **Read/Unread Management** — Mark individual or bulk notifications as read
-- **Deep Linking** — Click any notification to jump directly to the relevant content
+- **Real-Time Notifications** - Instant alerts delivered via Socket.io
+- **Comprehensive Coverage** - Notifications for mentorship requests/responses, new messages, job postings, application updates, event reminders, community replies & upvotes, achievement unlocks, and system announcements
+- **Read/Unread Management** - Mark individual or bulk notifications as read
+- **Deep Linking** - Click any notification to jump directly to the relevant content
 
 ### 🛡️ Admin Panel
 
-- **User Management** — View, search, ban/unban users across all roles
-- **Alumni Verification Queue** — Review and approve/reject alumni verification requests
-- **Content Moderation** — Review reported content (spam, harassment, inappropriate, misinformation) with status tracking (pending → reviewed → resolved/dismissed)
-- **Platform Analytics** — Dashboard with user growth metrics, engagement data, and platform health indicators
+- **User Management** - View, search, ban/unban users across all roles
+- **Alumni Verification Queue** - Review and approve/reject alumni verification requests
+- **Content Moderation** - Review reported content (spam, harassment, inappropriate, misinformation) with status tracking (pending → reviewed → resolved/dismissed)
+- **Platform Analytics** - Dashboard with user growth metrics, engagement data, and platform health indicators
 
 ### 🎨 UI/UX Highlights
 
-- **Lamp Effect Landing Page** — Stunning animated hero section with Three.js-powered 3D effects
-- **3D Marquee** — Immersive visual elements on the landing page
-- **Animated Testimonials** — Social proof section with smooth transitions
-- **Moving Border Buttons** — Premium micro-interaction effects
-- **Shine Buttons** — Polished CTA elements with shimmer animations
-- **Responsive Sidebar & Topbar** — Adaptive navigation that works across devices
-- **Left Drawer** — Collapsible navigation drawer for mobile
-- **Framer Motion Animations** — Smooth page transitions and component animations throughout
+- **Lamp Effect Landing Page** - Stunning animated hero section with Three.js-powered 3D effects
+- **3D Marquee** - Immersive visual elements on the landing page
+- **Animated Testimonials** - Social proof section with smooth transitions
+- **Moving Border Buttons** - Premium micro-interaction effects
+- **Shine Buttons** - Polished CTA elements with shimmer animations
+- **Responsive Sidebar & Topbar** - Adaptive navigation that works across devices
+- **Left Drawer** - Collapsible navigation drawer for mobile
+- **Framer Motion Animations** - Smooth page transitions and component animations throughout
 
 ---
 
@@ -274,7 +274,7 @@ The platform uses **PostgreSQL** with **Prisma ORM** and includes **14 models**:
 
 | Model | Purpose |
 |---|---|
-| `User` | Core identity — email, role (student/alumni/admin), auth tokens, online status, social links |
+| `User` | Core identity - email, role (student/alumni/admin), auth tokens, online status, social links |
 | `StudentProfile` | Branch, year, skills, interests, career goals, resume, projects, achievements |
 | `AlumniProfile` | Company, designation, industry, location, experience, mentorship availability & ratings |
 | `MentorshipRequest` | Mentee → Mentor connection with status tracking and feedback |
@@ -295,7 +295,7 @@ The platform uses **PostgreSQL** with **Prisma ORM** and includes **14 models**:
 
 ## 📡 API Endpoints
 
-### Authentication — `/api/auth`
+### Authentication - `/api/auth`
 | Method | Endpoint | Description |
 |---|---|---|
 | POST | `/register` | Register a new user (student/alumni) |
@@ -304,7 +304,7 @@ The platform uses **PostgreSQL** with **Prisma ORM** and includes **14 models**:
 | POST | `/reset-password/:token` | Reset password with token |
 | GET | `/verify-email/:token` | Verify email address |
 
-### Users — `/api/users`
+### Users - `/api/users`
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/me` | Get current user profile |
@@ -313,7 +313,7 @@ The platform uses **PostgreSQL** with **Prisma ORM** and includes **14 models**:
 | GET | `/directory` | Browse alumni/student directory with filters |
 | PUT | `/settings` | Update account settings |
 
-### Mentorship — `/api/mentorship`
+### Mentorship - `/api/mentorship`
 | Method | Endpoint | Description |
 |---|---|---|
 | POST | `/request` | Send mentorship request |
@@ -323,7 +323,7 @@ The platform uses **PostgreSQL** with **Prisma ORM** and includes **14 models**:
 | PUT | `/session/:id` | Update session status |
 | POST | `/feedback` | Submit mentor feedback and rating |
 
-### Chat — `/api/chat`
+### Chat - `/api/chat`
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/conversations` | List user conversations |
@@ -331,7 +331,7 @@ The platform uses **PostgreSQL** with **Prisma ORM** and includes **14 models**:
 | GET | `/conversations/:id/messages` | Get conversation messages |
 | POST | `/conversations/:id/messages` | Send a message |
 
-### Jobs — `/api/jobs`
+### Jobs - `/api/jobs`
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/` | List all active jobs with filters |
@@ -341,7 +341,7 @@ The platform uses **PostgreSQL** with **Prisma ORM** and includes **14 models**:
 | GET | `/my-applications` | View submitted applications |
 | POST | `/:id/save` | Save/unsave a job |
 
-### Community — `/api/community`
+### Community - `/api/community`
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/posts` | List community posts with category filter |
@@ -351,7 +351,7 @@ The platform uses **PostgreSQL** with **Prisma ORM** and includes **14 models**:
 | POST | `/posts/:id/comments` | Add a comment |
 | POST | `/comments/:id/upvote` | Upvote a comment |
 
-### Events — `/api/events`
+### Events - `/api/events`
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/` | List upcoming events |
@@ -360,14 +360,14 @@ The platform uses **PostgreSQL** with **Prisma ORM** and includes **14 models**:
 | POST | `/:id/register` | Register for an event |
 | PUT | `/:id` | Update event details |
 
-### Notifications — `/api/notifications`
+### Notifications - `/api/notifications`
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/` | Get user notifications |
 | PUT | `/:id/read` | Mark notification as read |
 | PUT | `/read-all` | Mark all as read |
 
-### Admin — `/api/admin`
+### Admin - `/api/admin`
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/users` | List all users with filters |
@@ -385,9 +385,9 @@ The platform uses **PostgreSQL** with **Prisma ORM** and includes **14 models**:
 ### Prerequisites
 
 - **Node.js** v20 or higher
-- **PostgreSQL** database (local or hosted — e.g., Supabase, Neon, Railway)
+- **PostgreSQL** database (local or hosted - e.g., Supabase, Neon, Railway)
 - **Cloudinary** account (for file uploads)
-- **SMTP credentials** (for email — e.g., Gmail App Password, Resend, SendGrid)
+- **SMTP credentials** (for email - e.g., Gmail App Password, Resend, SendGrid)
 
 ### 1. Clone the Repository
 
@@ -432,10 +432,10 @@ npx prisma studio
 ### 5. Start Development Servers
 
 ```bash
-# Terminal 1 — Frontend (from project root)
+# Terminal 1 - Frontend (from project root)
 npm run dev
 
-# Terminal 2 — Backend (from server/)
+# Terminal 2 - Backend (from server/)
 cd server
 npm run dev
 ```
@@ -608,7 +608,7 @@ AlumioDTU/
 
 ## 🤝 Contributing
 
-Contributions are welcome! Whether it's fixing a bug, adding a feature, improving documentation, or suggesting an idea — all contributions are appreciated.
+Contributions are welcome! Whether it's fixing a bug, adding a feature, improving documentation, or suggesting an idea - all contributions are appreciated.
 
 1. **Fork** the repository
 2. **Create** a feature branch: `git checkout -b feature/your-feature-name`
@@ -627,7 +627,7 @@ Contributions are welcome! Whether it's fixing a bug, adding a feature, improvin
 
 ## 📜 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ---
 
@@ -635,10 +635,10 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 Built with ❤️ for the DTU community.
 
-If you've ever felt lost trying to navigate your career without guidance — this platform is for you.  
-If you're an alumni who wishes someone had helped you when you were starting out — this platform is your chance to pay it forward.
+If you've ever felt lost trying to navigate your career without guidance - this platform is for you.  
+If you're an alumni who wishes someone had helped you when you were starting out - this platform is your chance to pay it forward.
 
-**AlumioDTU — Because your potential shouldn't be limited by your network.**
+**AlumioDTU - Because your potential shouldn't be limited by your network.**
 
 ---
 
