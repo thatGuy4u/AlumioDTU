@@ -1,4 +1,4 @@
-<![CDATA[# AlumioDTU 🎓
+# AlumioDTU 🎓
 
 **The Alumni-Student Networking Platform DTU Deserved — But Never Had.**
 
@@ -645,4 +645,4 @@ If you're an alumni who wishes someone had helped you when you were starting out
 <p align="center">
   <strong>⭐ Star this repo if you believe every student deserves equal access to opportunities.</strong>
 </p>
-]]>
+
