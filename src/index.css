@@ -25,7 +25,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; }
+/* Syne only on landing page headings; app headings inherit Inter from body */
+.landing-page h1, .landing-page h2, .landing-page h3, .landing-page h4, .landing-page h5,
+.hero-section h1, .features-section h2, .how-section h2, .testi-section h2,
+.footer h2, .footer h3 {
+  font-family: 'Syne', sans-serif;
+}
 
 /* ===== Light Theme — Global Overrides ===== */
 [data-theme="light"] {

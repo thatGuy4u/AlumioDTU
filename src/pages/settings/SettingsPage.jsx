@@ -2,11 +2,10 @@ import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import toast from 'react-hot-toast';
-import { selectCurrentUser, selectToken, clearCredentials } from '../../store/slices/authSlice';
+import { selectCurrentUser, clearCredentials } from '../../store/slices/authSlice';
 import { selectTheme, toggleTheme } from '../../store/slices/uiSlice';
-import { API_URL } from '../../utils/constants';
+import api from '../../utils/apiClient';
 import {
   HiOutlineSun, HiOutlineMoon, HiOutlineBell,
   HiOutlineShieldCheck, HiOutlineLockClosed,
@@ -20,7 +19,6 @@ const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 export default function SettingsPage() {
   const user = useSelector(selectCurrentUser);
-  const token = useSelector(selectToken);
   const theme = useSelector(selectTheme);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -50,10 +48,7 @@ export default function SettingsPage() {
 
     setChangingPassword(true);
     try {
-      await axios.put(`${API_URL}/users/change-password`, {
-        currentPassword,
-        newPassword,
-      }, { headers: { Authorization: `Bearer ${token}` } });
+      await api.put('/users/change-password', { currentPassword, newPassword });
       toast.success('Password changed successfully!');
       setCurrentPassword('');
       setNewPassword('');
@@ -71,9 +66,7 @@ export default function SettingsPage() {
     }
     setDeletingAccount(true);
     try {
-      await axios.delete(`${API_URL}/users/account`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete('/users/account');
       dispatch(clearCredentials());
       toast.success('Account deleted successfully');
       navigate('/');

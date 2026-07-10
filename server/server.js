@@ -7,6 +7,9 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 
+// TODO [PRODUCTION]: In production, load env vars from hosting provider (e.g., Vercel, Railway)
+// rather than dotenv. Consider using dotenv-safe for validation.
+
 import prisma from './config/db.js';
 import { initializeSocket } from './config/socket.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
@@ -27,6 +30,7 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
+// TODO [PRODUCTION]: Restrict CORS origin to your production domain only
 const io = new SocketServer(httpServer, {
   cors: {
     origin: process.env.CLIENT_URL || 'http://localhost:5173',
@@ -39,12 +43,16 @@ initializeSocket(io);
 app.set('io', io);
 app.set('prisma', prisma);
 
+// TODO [PRODUCTION]: Tighten helmet settings, enable HSTS, configure CSP
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+// TODO [PRODUCTION]: Set exact production origin, not a fallback
 app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true }));
+// TODO [PRODUCTION]: Use a structured logger (e.g., pino, winston) instead of morgan
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+// TODO [PRODUCTION]: Consider stricter rate limits and per-route limits for auth endpoints
 app.use('/api/', apiLimiter);
 
 app.get('/api/health', (req, res) => {
@@ -86,7 +94,13 @@ async function startServer() {
 startServer();
 
 // Graceful shutdown
+// TODO [PRODUCTION]: Add SIGTERM handler for container orchestration (Docker, Kubernetes)
 process.on('SIGINT', async () => {
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
   await prisma.$disconnect();
   process.exit(0);
 });

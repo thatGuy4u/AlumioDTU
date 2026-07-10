@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { selectToken, selectCurrentUser } from '../../store/slices/authSlice';
-import { API_URL } from '../../utils/constants';
+import { selectCurrentUser } from '../../store/slices/authSlice';
+import api from '../../utils/apiClient';
 import { HiOutlineTrophy, HiOutlineSparkles } from 'react-icons/hi2';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 export default function AchievementsPage() {
-  const token = useSelector(selectToken);
   const user = useSelector(selectCurrentUser);
   const [achievements, setAchievements] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -18,21 +16,21 @@ export default function AchievementsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
         if (tab === 'my') {
-          const res = await axios.get(`${API_URL}/users/profile`, { headers: { Authorization: `Bearer ${token}` } });
+          const res = await api.get('/users/profile');
           setAchievements(res.data.data.achievements || []);
         } else {
-          const res = await axios.get(`${API_URL}/users/leaderboard?limit=20`, { headers: { Authorization: `Bearer ${token}` } });
+          const res = await api.get('/users/leaderboard?limit=20');
           setLeaderboard(res.data.data.leaderboard || []);
         }
       } catch (e) { console.error(e); }
       setLoading(false);
     };
-    fetch();
-  }, [tab, token]);
+    fetchData();
+  }, [tab]);
 
   const totalPoints = achievements.reduce((s, a) => s + (a.points || 0), 0);
 

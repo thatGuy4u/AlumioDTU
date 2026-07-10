@@ -1,53 +1,154 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import axios from 'axios';
-import { selectToken, selectCurrentUser } from '../../store/slices/authSlice';
-import { API_URL } from '../../utils/constants';
+import { selectCurrentUser } from '../../store/slices/authSlice';
+import { useSocket, useSocketEvent } from '../../hooks/useSocket';
+import api from '../../utils/apiClient';
 import { HiOutlinePaperAirplane, HiOutlineMagnifyingGlass } from 'react-icons/hi2';
 
 export default function MessagesPage() {
-  const token = useSelector(selectToken);
   const currentUser = useSelector(selectCurrentUser);
+  const { conversationId: urlConvoId } = useParams();
   const [conversations, setConversations] = useState([]);
-  const [activeConvo, setActiveConvo] = useState(null);
+  const [activeConvo, setActiveConvo] = useState(urlConvoId || null);
   const [messages, setMessages] = useState([]);
   const [newMsg, setNewMsg] = useState('');
   const [loading, setLoading] = useState(true);
   const [msgLoading, setMsgLoading] = useState(false);
   const [search, setSearch] = useState('');
+  const [typingUsers, setTypingUsers] = useState({});
   const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
+  // Socket.io integration
+  const { socket, isConnected } = useSocket();
+
+  // Fetch conversations on mount
   useEffect(() => {
-    axios.get(`${API_URL}/chat/conversations`, { headers: { Authorization: `Bearer ${token}` } })
+    api.get('/chat/conversations')
       .then(r => { setConversations(r.data.data); setLoading(false); })
       .catch(() => setLoading(false));
-  }, [token]);
+  }, []);
+
+  // Auto-open URL conversation
+  useEffect(() => {
+    if (urlConvoId && conversations.length > 0) {
+      loadMessages(urlConvoId);
+    }
+  }, [urlConvoId, conversations.length]);
 
   const loadMessages = async (convoId) => {
     setActiveConvo(convoId);
     setMsgLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/chat/conversations/${convoId}/messages`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await api.get(`/chat/conversations/${convoId}/messages`);
       setMessages(res.data.data.messages);
-      await axios.put(`${API_URL}/chat/conversations/${convoId}/read`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      await api.put(`/chat/conversations/${convoId}/read`);
       setConversations(prev => prev.map(c => c.id === convoId ? { ...c, myUnreadCount: 0 } : c));
+
+      // Join socket room for real-time
+      if (socket) {
+        socket.emit('join_conversation', convoId);
+        socket.emit('mark_read', convoId);
+      }
     } catch (e) { console.error(e); }
     setMsgLoading(false);
     setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   };
 
+  // Leave previous room when switching conversations
+  const prevConvoRef = useRef(null);
+  useEffect(() => {
+    if (socket && prevConvoRef.current && prevConvoRef.current !== activeConvo) {
+      socket.emit('leave_conversation', prevConvoRef.current);
+    }
+    prevConvoRef.current = activeConvo;
+  }, [activeConvo, socket]);
+
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!newMsg.trim() || !activeConvo) return;
-    try {
-      const res = await axios.post(`${API_URL}/chat/conversations/${activeConvo}/messages`, { content: newMsg.trim() }, { headers: { Authorization: `Bearer ${token}` } });
-      setMessages(prev => [...prev, res.data.data]);
-      setNewMsg('');
-      setConversations(prev => prev.map(c => c.id === activeConvo ? { ...c, lastContent: newMsg.trim(), lastMsgAt: new Date().toISOString() } : c));
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
-    } catch (e) { console.error(e); }
+
+    const content = newMsg.trim();
+    setNewMsg('');
+
+    // Optimistic update
+    const optimisticMsg = {
+      id: `temp-${Date.now()}`,
+      senderId: currentUser?.id,
+      content,
+      createdAt: new Date().toISOString(),
+      _optimistic: true,
+    };
+    setMessages(prev => [...prev, optimisticMsg]);
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+
+    // Send via socket if connected, otherwise fall back to REST
+    if (socket && isConnected) {
+      socket.emit('send_message', { conversationId: activeConvo, content });
+      socket.emit('stop_typing', activeConvo);
+    } else {
+      try {
+        const res = await api.post(`/chat/conversations/${activeConvo}/messages`, { content });
+        // Replace optimistic message with real one
+        setMessages(prev => prev.map(m => m._optimistic && m.content === content ? res.data.data : m));
+      } catch (e) {
+        console.error(e);
+        // Remove failed optimistic message
+        setMessages(prev => prev.filter(m => !m._optimistic));
+      }
+    }
+
+    setConversations(prev => prev.map(c => c.id === activeConvo ? { ...c, lastContent: content, lastMsgAt: new Date().toISOString() } : c));
   };
+
+  // Handle typing indicators
+  const handleTyping = useCallback(() => {
+    if (!socket || !activeConvo) return;
+    socket.emit('typing', activeConvo);
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      socket.emit('stop_typing', activeConvo);
+    }, 2000);
+  }, [socket, activeConvo]);
+
+  // Socket event listeners
+  useSocketEvent(socket, 'new_message', useCallback((message) => {
+    // Replace optimistic message or add new one
+    setMessages(prev => {
+      const hasOptimistic = prev.find(m => m._optimistic && m.content === message.content && m.senderId === message.senderId);
+      if (hasOptimistic) {
+        return prev.map(m => m === hasOptimistic ? message : m);
+      }
+      return [...prev, message];
+    });
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+  }, []));
+
+  useSocketEvent(socket, 'user_typing', useCallback(({ conversationId, userId }) => {
+    if (conversationId === activeConvo && userId !== currentUser?.id) {
+      setTypingUsers(prev => ({ ...prev, [userId]: true }));
+    }
+  }, [activeConvo, currentUser?.id]));
+
+  useSocketEvent(socket, 'user_stop_typing', useCallback(({ conversationId, userId }) => {
+    if (conversationId === activeConvo) {
+      setTypingUsers(prev => { const next = { ...prev }; delete next[userId]; return next; });
+    }
+  }, [activeConvo]));
+
+  // Listen for message notifications for non-active conversations (update unread badges)
+  useSocketEvent(socket, 'message_notification', useCallback(({ conversationId, message }) => {
+    if (conversationId !== activeConvo) {
+      setConversations(prev => prev.map(c =>
+        c.id === conversationId
+          ? { ...c, lastContent: message.content, lastMsgAt: message.createdAt, myUnreadCount: (c.myUnreadCount || 0) + 1 }
+          : c
+      ));
+    }
+  }, [activeConvo]));
 
   const getOtherUser = (convo) => {
     const other = convo.participants?.find(p => p.user?.id !== currentUser?.id);
@@ -56,6 +157,7 @@ export default function MessagesPage() {
 
   const activeConvoData = conversations.find(c => c.id === activeConvo);
   const otherUser = activeConvoData ? getOtherUser(activeConvoData) : null;
+  const isTyping = Object.keys(typingUsers).length > 0;
 
   const filteredConvos = conversations.filter(c => {
     if (!search) return true;
@@ -69,6 +171,7 @@ export default function MessagesPage() {
       <div className="messages-sidebar">
         <div className="messages-sidebar-header">
           <h2>Messages</h2>
+          {isConnected && <span className="socket-connected-dot" title="Real-time connected" />}
         </div>
         <div className="messages-search">
           <HiOutlineMagnifyingGlass size={16} />
@@ -107,7 +210,10 @@ export default function MessagesPage() {
           <>
             <div className="messages-chat-header">
               <div className="message-convo-avatar">{otherUser?.avatar ? <img src={otherUser.avatar} alt="" /> : <span>{otherUser?.name?.[0]}</span>}</div>
-              <div><strong>{otherUser?.name}</strong></div>
+              <div>
+                <strong>{otherUser?.name}</strong>
+                {isTyping && <span className="typing-indicator">typing...</span>}
+              </div>
             </div>
 
             <div className="messages-body">
@@ -116,7 +222,13 @@ export default function MessagesPage() {
                   {messages.map((msg, i) => {
                     const isMine = msg.senderId === currentUser?.id || msg.sender?.id === currentUser?.id;
                     return (
-                      <motion.div key={msg.id || i} className={`message-bubble ${isMine ? 'mine' : 'theirs'}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.02 }}>
+                      <motion.div
+                        key={msg.id || i}
+                        className={`message-bubble ${isMine ? 'mine' : 'theirs'}${msg._optimistic ? ' optimistic' : ''}`}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.02 }}
+                      >
                         <p>{msg.content}</p>
                         <span className="message-time">{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                       </motion.div>
@@ -128,7 +240,12 @@ export default function MessagesPage() {
             </div>
 
             <form className="messages-input" onSubmit={sendMessage}>
-              <input placeholder="Type a message..." value={newMsg} onChange={e => setNewMsg(e.target.value)} autoFocus />
+              <input
+                placeholder="Type a message..."
+                value={newMsg}
+                onChange={e => { setNewMsg(e.target.value); handleTyping(); }}
+                autoFocus
+              />
               <button type="submit" disabled={!newMsg.trim()}><HiOutlinePaperAirplane size={20} /></button>
             </form>
           </>

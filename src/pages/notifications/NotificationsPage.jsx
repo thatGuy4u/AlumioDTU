@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-import { selectToken } from '../../store/slices/authSlice';
-import { API_URL } from '../../utils/constants';
+import { useNavigate } from 'react-router-dom';
+import api from '../../utils/apiClient';
 import { HiOutlineBell, HiOutlineCheckCircle, HiOutlineTrash } from 'react-icons/hi2';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.03 } } };
@@ -17,7 +15,7 @@ const typeIcons = {
 };
 
 export default function NotificationsPage() {
-  const token = useSelector(selectToken);
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -25,29 +23,29 @@ export default function NotificationsPage() {
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/notifications?limit=50`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await api.get('/notifications?limit=50');
       setNotifications(res.data.data.notifications);
       setUnreadCount(res.data.data.unreadCount);
     } catch (e) { console.error(e); }
     setLoading(false);
   };
 
-  useEffect(() => { fetchNotifications(); }, [token]);
+  useEffect(() => { fetchNotifications(); }, []);
 
   const markRead = async (id) => {
-    await axios.put(`${API_URL}/notifications/${id}/read`, {}, { headers: { Authorization: `Bearer ${token}` } });
+    await api.put(`/notifications/${id}/read`);
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
     setUnreadCount(prev => Math.max(0, prev - 1));
   };
 
   const markAllRead = async () => {
-    await axios.put(`${API_URL}/notifications/read-all`, {}, { headers: { Authorization: `Bearer ${token}` } });
+    await api.put('/notifications/read-all');
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     setUnreadCount(0);
   };
 
   const deleteNotif = async (id) => {
-    await axios.delete(`${API_URL}/notifications/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+    await api.delete(`/notifications/${id}`);
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
@@ -85,7 +83,7 @@ export default function NotificationsPage() {
           {notifications.map(n => (
             <motion.div key={n.id} className={`notification-card ${!n.isRead ? 'unread' : ''}`} variants={item}>
               <div className="notification-icon">{typeIcons[n.type] || '🔔'}</div>
-              <div className="notification-content" onClick={() => !n.isRead && markRead(n.id)} style={{ cursor: !n.isRead ? 'pointer' : 'default' }}>
+              <div className="notification-content" onClick={() => { if (!n.isRead) markRead(n.id); navigate(n.link || '/app/notifications'); }} style={{ cursor: 'pointer' }}>
                 <strong>{n.title}</strong>
                 <p>{n.message}</p>
                 <span className="notification-time">{timeAgo(n.createdAt)}</span>

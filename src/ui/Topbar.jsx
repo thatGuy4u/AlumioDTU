@@ -2,11 +2,11 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
-import { selectCurrentUser, clearCredentials, selectToken } from '../store/slices/authSlice';
+import { selectCurrentUser, clearCredentials } from '../store/slices/authSlice';
 import { toggleTheme, selectTheme } from '../store/slices/uiSlice';
 import { useLogoutMutation } from '../store/api/authApi';
-import { API_URL } from '../utils/constants';
+import { useSocket, useSocketEvent } from '../hooks/useSocket';
+import api from '../utils/apiClient';
 import {
   HiOutlineMagnifyingGlass, HiOutlineBell,
   HiOutlineSun, HiOutlineMoon,
@@ -16,14 +16,14 @@ import {
 } from 'react-icons/hi2';
 
 const typeIcons = {
-  mentorship_request: '🎓', message: '💬', job_posted: '💼',
-  event_reminder: '📅', community_reply: '💬', verification: '✅',
-  system_notification: '🔔',
+  mentorship_request: '🎓', mentorship_accepted: '🎉', mentorship_rejected: '📋',
+  message: '💬', job_posted: '💼', application_update: '📄',
+  event_reminder: '📅', community_reply: '💬', community_upvote: '👍',
+  achievement_unlocked: '🏆', verification: '✅', system_notification: '🔔',
 };
 
 export default function Topbar({ onMenuToggle, isMobileNav = false, mobileOpen = false }) {
   const user = useSelector(selectCurrentUser);
-  const token = useSelector(selectToken);
   const theme = useSelector(selectTheme);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -36,24 +36,31 @@ export default function Topbar({ onMenuToggle, isMobileNav = false, mobileOpen =
   const dropdownRef = useRef(null);
   const notifRef = useRef(null);
 
+  // Socket.io integration for real-time notifications
+  const { socket } = useSocket();
+
   const fetchNotifications = useCallback(async () => {
-    if (!token) return;
     try {
-      const res = await axios.get(`${API_URL}/notifications?limit=8`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get('/notifications?limit=8');
       setNotifications(res.data.data.notifications || []);
       setUnreadCount(res.data.data.unreadCount || 0);
     } catch {
       /* keep previous state on transient errors */
     }
-  }, [token]);
+  }, []);
 
+  // Initial fetch + periodic refresh (fallback for when socket misses events)
   useEffect(() => {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
   }, [fetchNotifications]);
+
+  // Real-time: listen for new notifications via socket
+  useSocketEvent(socket, 'new_notification', useCallback((notification) => {
+    setNotifications((prev) => [notification, ...prev].slice(0, 8));
+    setUnreadCount((prev) => prev + 1);
+  }, []));
 
   useEffect(() => {
     const handler = (e) => {
@@ -87,11 +94,8 @@ export default function Topbar({ onMenuToggle, isMobileNav = false, mobileOpen =
   };
 
   const markRead = async (id) => {
-    if (!token) return;
     try {
-      await axios.put(`${API_URL}/notifications/${id}/read`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.put(`/notifications/${id}/read`);
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch {
@@ -100,11 +104,9 @@ export default function Topbar({ onMenuToggle, isMobileNav = false, mobileOpen =
   };
 
   const markAllRead = async () => {
-    if (!token || unreadCount === 0) return;
+    if (unreadCount === 0) return;
     try {
-      await axios.put(`${API_URL}/notifications/read-all`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.put('/notifications/read-all');
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch {
@@ -202,7 +204,7 @@ export default function Topbar({ onMenuToggle, isMobileNav = false, mobileOpen =
                       onClick={() => {
                         if (!n.isRead) markRead(n.id);
                         setNotifOpen(false);
-                        navigate('/app/notifications');
+                        navigate(n.link || '/app/notifications');
                       }}
                     >
                       <span className="topbar-notif-icon">{typeIcons[n.type] || '🔔'}</span>

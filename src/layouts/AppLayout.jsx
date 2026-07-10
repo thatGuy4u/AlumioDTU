@@ -3,8 +3,9 @@ import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { selectSidebarCollapsed, toggleSidebarCollapse } from '../store/slices/uiSlice';
-import { selectIsAuthenticated, selectCurrentUser } from '../store/slices/authSlice';
+import { selectIsAuthenticated, selectCurrentUser, selectToken } from '../store/slices/authSlice';
 import { BYPASS_AUTH_FOR_TESTING } from '../utils/constants';
+import { setAuthToken } from '../utils/apiClient';
 import { useMobileNav } from '../hooks/useMediaQuery';
 import Sidebar from '../ui/Sidebar';
 import Topbar from '../ui/Topbar';
@@ -13,10 +14,16 @@ export default function AppLayout() {
   const sidebarCollapsed = useSelector(selectSidebarCollapsed);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectCurrentUser);
+  const token = useSelector(selectToken);
   const dispatch = useDispatch();
   const location = useLocation();
   const isMobileNav = useMobileNav();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Keep the centralized API client in sync with the current auth token
+  useEffect(() => {
+    setAuthToken(token);
+  }, [token]);
 
   useEffect(() => {
     setMobileOpen(false);

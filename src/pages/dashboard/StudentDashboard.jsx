@@ -1,11 +1,15 @@
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { selectCurrentUser, selectProfile } from '../../store/slices/authSlice';
+import api from '../../utils/apiClient';
 import {
   HiOutlineAcademicCap, HiOutlineBriefcase, HiOutlineCalendarDays,
   HiOutlineUserGroup, HiOutlineChatBubbleOvalLeft, HiOutlineArrowTrendingUp,
-  HiOutlineSparkles, HiOutlineRocketLaunch,
+  HiOutlineSparkles, HiOutlineRocketLaunch, HiOutlineEnvelope,
+  HiOutlineExclamationCircle, HiOutlineCheckBadge,
+  HiOutlineBoltSlash, HiOutlineClock,
 } from 'react-icons/hi2';
 
 const container = {
@@ -22,11 +26,53 @@ export default function StudentDashboard() {
   const profile = useSelector(selectProfile);
   const completionScore = profile?.profileCompletionScore || 30;
 
+  const [alumni, setAlumni] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [jobs, setJobs] = useState([]);
+  const [posts, setPosts] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [stats, setStats] = useState({ connections: 0, mentors: 0, applications: 0, events: 0 });
+
+  useEffect(() => {
+    // Fetch real data from APIs — gracefully fall back to empty arrays
+    Promise.allSettled([
+      api.get('/users/dashboard-stats'),
+      api.get('/users/directory?limit=3'),
+      api.get('/events?upcoming=true&limit=3'),
+      api.get('/jobs?limit=3'),
+      api.get('/community/trending'),
+      api.get('/notifications?limit=6'),
+    ]).then(([statsRes, alumniRes, eventsRes, jobsRes, postsRes, activityRes]) => {
+      if (statsRes.status === 'fulfilled') setStats(statsRes.value.data.data);
+      if (alumniRes.status === 'fulfilled') setAlumni(alumniRes.value.data.data?.profiles || []);
+      if (eventsRes.status === 'fulfilled') setEvents(eventsRes.value.data.data?.events || []);
+      if (jobsRes.status === 'fulfilled') setJobs(jobsRes.value.data.data?.jobs || []);
+      if (postsRes.status === 'fulfilled') setPosts((postsRes.value.data.data || []).slice(0, 3));
+      if (activityRes.status === 'fulfilled') setRecentActivity(activityRes.value.data.data?.notifications || []);
+    });
+  }, []);
+
+  const timeAgo = (date) => {
+    const diff = Date.now() - new Date(date).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  };
+
   const quickActions = [
-    { to: '/app/directory', icon: HiOutlineUserGroup, label: 'Find Alumni', color: '#F5C842' },
+    { to: '/app/directory', icon: HiOutlineUserGroup, label: 'Find Alumni', color: '#2c87f6' },
     { to: '/app/mentorship', icon: HiOutlineAcademicCap, label: 'Get Mentored', color: '#00d4c8' },
     { to: '/app/jobs', icon: HiOutlineBriefcase, label: 'Browse Jobs', color: '#7c4dff' },
     { to: '/app/events', icon: HiOutlineCalendarDays, label: 'Events', color: '#ff6b6b' },
+  ];
+
+  const statCards = [
+    { label: 'Alumni Network', value: stats.connections, icon: HiOutlineUserGroup, color: '#2c87f6' },
+    { label: 'Active Mentors', value: stats.mentors, icon: HiOutlineAcademicCap, color: '#00d4c8' },
+    { label: 'Applications', value: stats.applications, icon: HiOutlineEnvelope, color: '#7c4dff' },
+    { label: 'Upcoming Events', value: stats.events, icon: HiOutlineCalendarDays, color: '#ff6b6b' },
   ];
 
   return (
@@ -53,6 +99,48 @@ export default function StudentDashboard() {
         </div>
       </motion.div>
 
+      {/* Info Banner — shows when profile incomplete or email unverified */}
+      {(completionScore < 100 || !user?.isEmailVerified) && (
+        <motion.div className="dash-info-banner" variants={item}>
+          <div className="dash-info-banner-icon">
+            {completionScore < 100 ? <HiOutlineExclamationCircle size={22} /> : <HiOutlineCheckBadge size={22} />}
+          </div>
+          <div className="dash-info-banner-text">
+            <strong>
+              {completionScore < 100
+                ? `Your profile is ${completionScore}% complete`
+                : 'Verify your email address'}
+            </strong>
+            <span>
+              {completionScore < 100
+                ? 'Complete your profile to unlock all features and improve visibility.'
+                : 'Check your inbox for a verification link to fully activate your account.'}
+            </span>
+          </div>
+          <Link
+            to={completionScore < 100 ? '/app/profile/edit' : '/app/settings'}
+            className="dash-info-banner-btn"
+          >
+            {completionScore < 100 ? 'Complete Profile' : 'Resend Email'}
+          </Link>
+        </motion.div>
+      )}
+
+      {/* Stats Row */}
+      <motion.div className="dash-stats-row" variants={item}>
+        {statCards.map((stat, i) => (
+          <div key={i} className="dash-stat-card">
+            <div className="dash-stat-icon" style={{ background: `${stat.color}15`, color: stat.color }}>
+              <stat.icon size={22} />
+            </div>
+            <div className="dash-stat-info">
+              <span className="dash-stat-value">{stat.value}</span>
+              <span className="dash-stat-label">{stat.label}</span>
+            </div>
+          </div>
+        ))}
+      </motion.div>
+
       {/* Quick Actions */}
       <motion.div className="dash-actions" variants={item}>
         {quickActions.map((action) => (
@@ -74,20 +162,20 @@ export default function StudentDashboard() {
             <h3>Recommended Alumni</h3>
           </div>
           <div className="dash-widget-body">
-            {[
-              { name: 'Priya Sharma', role: 'SDE at Google', branch: 'CSE 2019' },
-              { name: 'Rahul Verma', role: 'PM at Microsoft', branch: 'IT 2018' },
-              { name: 'Ananya Gupta', role: 'Data Scientist at Meta', branch: 'CSE 2020' },
-            ].map((alumni, i) => (
-              <div key={i} className="dash-alumni-card">
-                <div className="dash-alumni-avatar">{alumni.name[0]}</div>
-                <div className="dash-alumni-info">
-                  <strong>{alumni.name}</strong>
-                  <span>{alumni.role}</span>
-                  <span className="dash-alumni-branch">{alumni.branch}</span>
+            {alumni.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No alumni found yet</p>
+            ) : alumni.map((a) => (
+              <Link key={a.id} to={`/app/profile/${a.id}`} className="dash-alumni-card" style={{ textDecoration: 'none' }}>
+                <div className="dash-alumni-avatar">
+                  {a.avatar ? <img src={a.avatar} alt="" /> : a.name?.[0]}
                 </div>
-                <button className="dash-connect-btn">Connect</button>
-              </div>
+                <div className="dash-alumni-info">
+                  <strong>{a.name}</strong>
+                  <span>{a.alumniProfile?.company || a.alumniProfile?.designation || 'Alumni'}</span>
+                  <span className="dash-alumni-branch">{a.alumniProfile?.branch} {a.alumniProfile?.graduationYear ? `'${String(a.alumniProfile.graduationYear).slice(2)}` : ''}</span>
+                </div>
+                <button className="dash-connect-btn" onClick={(e) => e.preventDefault()}>View</button>
+              </Link>
             ))}
           </div>
           <Link to="/app/directory" className="dash-widget-link">View All Alumni →</Link>
@@ -100,22 +188,23 @@ export default function StudentDashboard() {
             <h3>Upcoming Events</h3>
           </div>
           <div className="dash-widget-body">
-            {[
-              { title: 'Resume Building Workshop', date: 'Jun 28', type: 'workshop' },
-              { title: 'Alumni Talk: Life at FAANG', date: 'Jul 2', type: 'alumni-talk' },
-              { title: 'DTU Startup Meetup', date: 'Jul 5', type: 'meetup' },
-            ].map((event, i) => (
-              <div key={i} className="dash-event-card">
-                <div className="dash-event-date">
-                  <span className="dash-event-day">{event.date.split(' ')[1]}</span>
-                  <span className="dash-event-month">{event.date.split(' ')[0]}</span>
-                </div>
-                <div className="dash-event-info">
-                  <strong>{event.title}</strong>
-                  <span className="dash-event-type">{event.type.replace('-', ' ')}</span>
-                </div>
-              </div>
-            ))}
+            {events.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No upcoming events</p>
+            ) : events.map((event) => {
+              const d = new Date(event.date);
+              return (
+                <Link key={event.id} to={`/app/events/${event.id}`} className="dash-event-card" style={{ textDecoration: 'none' }}>
+                  <div className="dash-event-date">
+                    <span className="dash-event-day">{d.getDate()}</span>
+                    <span className="dash-event-month">{d.toLocaleString('en', { month: 'short' })}</span>
+                  </div>
+                  <div className="dash-event-info">
+                    <strong>{event.title}</strong>
+                    <span className="dash-event-type">{event.type?.replace(/_/g, ' ')}</span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
           <Link to="/app/events" className="dash-widget-link">View All Events →</Link>
         </motion.div>
@@ -127,21 +216,19 @@ export default function StudentDashboard() {
             <h3>Latest Opportunities</h3>
           </div>
           <div className="dash-widget-body">
-            {[
-              { title: 'Frontend Intern', company: 'Zeta', type: 'Internship', mode: 'Remote' },
-              { title: 'SDE-1', company: 'Flipkart', type: 'Full-time', mode: 'Hybrid' },
-              { title: 'ML Engineer', company: 'Atlassian', type: 'Full-time', mode: 'Onsite' },
-            ].map((job, i) => (
-              <div key={i} className="dash-job-card">
+            {jobs.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No jobs posted yet</p>
+            ) : jobs.map((job) => (
+              <Link key={job.id} to={`/app/jobs/${job.id}`} className="dash-job-card" style={{ textDecoration: 'none' }}>
                 <div className="dash-job-info">
                   <strong>{job.title}</strong>
                   <span>{job.company}</span>
                 </div>
                 <div className="dash-job-tags">
-                  <span className="dash-tag">{job.type}</span>
-                  <span className="dash-tag secondary">{job.mode}</span>
+                  <span className="dash-tag">{job.type?.replace('_', ' ')}</span>
+                  <span className="dash-tag secondary">{job.workMode}</span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
           <Link to="/app/jobs" className="dash-widget-link">Browse All Jobs →</Link>
@@ -154,24 +241,56 @@ export default function StudentDashboard() {
             <h3>Trending Discussions</h3>
           </div>
           <div className="dash-widget-body">
-            {[
-              { title: 'How I cracked Google SDE-2 from DTU', votes: 142, category: 'placements' },
-              { title: 'Best ML resources for beginners', votes: 89, category: 'general' },
-              { title: 'DTU to IIM journey — my experience', votes: 76, category: 'higher-studies' },
-            ].map((post, i) => (
-              <div key={i} className="dash-post-card">
+            {posts.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No discussions yet</p>
+            ) : posts.map((post) => (
+              <Link key={post.id} to={`/app/community/${post.id}`} className="dash-post-card" style={{ textDecoration: 'none' }}>
                 <div className="dash-post-votes">
                   <HiOutlineArrowTrendingUp size={14} />
-                  <span>{post.votes}</span>
+                  <span>{post.upvoteCount}</span>
                 </div>
                 <div className="dash-post-info">
                   <strong>{post.title}</strong>
-                  <span className="dash-post-category">{post.category}</span>
+                  <span className="dash-post-category">{post.category?.replace(/_/g, ' ')}</span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
           <Link to="/app/community" className="dash-widget-link">Join Discussion →</Link>
+        </motion.div>
+
+        {/* Recent Activity Feed */}
+        <motion.div className="dash-widget" variants={item}>
+          <div className="dash-widget-header">
+            <HiOutlineClock size={18} className="text-gold" />
+            <h3>Recent Activity</h3>
+          </div>
+          <div className="dash-widget-body">
+            {recentActivity.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No recent activity yet. Start engaging!</p>
+            ) : (
+              <div className="dash-activity-feed">
+                {recentActivity.map((activity) => (
+                  <Link
+                    key={activity.id}
+                    to={activity.link || '/app/notifications'}
+                    className="dash-activity-item"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <span className="dash-activity-dot" />
+                    <div className="dash-activity-content">
+                      <strong>{activity.title}</strong>
+                      <span>{activity.message}</span>
+                      <span className="dash-activity-time">
+                        {timeAgo(activity.createdAt)}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+          <Link to="/app/notifications" className="dash-widget-link">View All Activity →</Link>
         </motion.div>
       </div>
 

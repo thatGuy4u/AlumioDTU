@@ -188,7 +188,7 @@
   width: 56px; height: 56px; border-radius: 14px;
   background: linear-gradient(135deg, var(--accent), var(--accent-dim));
   color: #ffffff; display: flex; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem;
+  font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.2rem;
   margin: 0 auto 12px; overflow: hidden;
 }
 .directory-card-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -223,7 +223,7 @@
   width: 88px; height: 88px; border-radius: 18px;
   background: linear-gradient(135deg, var(--accent), var(--accent-dim));
   color: #ffffff; display: flex; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2rem;
+  font-family: 'Inter', sans-serif; font-weight: 800; font-size: 2rem;
   border: 4px solid var(--bg-primary); overflow: hidden; flex-shrink: 0;
 }
 .profile-avatar-lg img { width: 100%; height: 100%; object-fit: cover; }
@@ -365,7 +365,7 @@
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 20px 16px; background: rgba(79,110,247,0.06); min-width: 72px;
 }
-.event-date-day { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; color: var(--accent); line-height: 1; }
+.event-date-day { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.5rem; color: var(--accent); line-height: 1; }
 .event-date-month { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
 .event-date-year { font-size: 0.65rem; color: var(--text-muted); }
 
@@ -422,7 +422,7 @@
   width: 42px; height: 42px; border-radius: 12px;
   background: linear-gradient(135deg, var(--accent), var(--accent-dim));
   color: #ffffff; display: flex; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.9rem;
+  font-family: 'Inter', sans-serif; font-weight: 800; font-size: 0.9rem;
   flex-shrink: 0; overflow: hidden;
 }
 .message-convo-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -498,6 +498,24 @@
 }
 .messages-input button:hover:not(:disabled) { box-shadow: 0 4px 12px rgba(79,110,247,0.3); }
 .messages-input button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Typing indicator */
+.typing-indicator {
+  font-size: 0.72rem; color: var(--accent); font-style: italic;
+  display: block; margin-top: 1px;
+  animation: typing-pulse 1.5s ease-in-out infinite;
+}
+@keyframes typing-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+/* Optimistic (pending) message */
+.message-bubble.optimistic { opacity: 0.6; }
+
+/* Socket connected dot */
+.socket-connected-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #4caf50; flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(76,175,80,0.5);
+}
 
 /* ===== Notifications ===== */
 .notifications-list { display: flex; flex-direction: column; gap: 8px; }
@@ -615,7 +633,7 @@
   width: 40px; height: 40px; border-radius: 10px;
   background: linear-gradient(135deg, var(--accent), var(--accent-dim));
   color: #ffffff; display: flex; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif; font-weight: 800; overflow: hidden; flex-shrink: 0;
+  font-family: 'Inter', sans-serif; font-weight: 800; overflow: hidden; flex-shrink: 0;
 }
 .leaderboard-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .leaderboard-info { flex: 1; display: flex; align-items: center; gap: 8px; }
@@ -652,7 +670,7 @@
   width: 80px; height: 80px; border-radius: 18px;
   background: linear-gradient(135deg, var(--accent), var(--accent-dim));
   color: #ffffff; display: flex; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.8rem;
+  font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1.8rem;
   overflow: hidden; position: relative; flex-shrink: 0;
 }
 .edit-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -960,7 +978,7 @@
   width: 48px; height: 48px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.analytics-stat-value { display: block; font-size: 1.4rem; font-weight: 800; color: var(--text-primary); font-family: 'Syne', sans-serif; }
+.analytics-stat-value { display: block; font-size: 1.4rem; font-weight: 800; color: var(--text-primary); font-family: 'Inter', sans-serif; }
 .analytics-stat-label { font-size: 0.78rem; color: var(--text-muted); }
 .analytics-section { margin-bottom: 32px; }
 .analytics-section h2 {

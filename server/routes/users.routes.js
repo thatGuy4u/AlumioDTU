@@ -183,4 +183,31 @@ router.delete('/account', asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Account deleted successfully' });
 }));
 
+// GET /dashboard-stats — aggregated stats for the logged-in user's dashboard
+router.get('/dashboard-stats', asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+  const role = req.user.role;
+
+  if (role === 'student') {
+    const [conversations, mentors, applications, registeredEvents] = await prisma.$transaction([
+      prisma.conversationParticipant.count({ where: { userId } }),
+      prisma.mentorshipRequest.count({ where: { menteeId: userId, status: 'accepted' } }),
+      prisma.jobApplication.count({ where: { applicantId: userId } }),
+      prisma.eventRegistration.count({ where: { userId } }),
+    ]);
+    res.json({ success: true, data: { connections: conversations, mentors, applications, events: registeredEvents } });
+  } else if (role === 'alumni') {
+    const [activeMentees, jobsPosted, eventsOrganized, studentsHelped] = await prisma.$transaction([
+      prisma.mentorshipRequest.count({ where: { mentorId: userId, status: 'accepted' } }),
+      prisma.job.count({ where: { postedById: userId } }),
+      prisma.event.count({ where: { organizerId: userId } }),
+      prisma.mentorshipRequest.count({ where: { mentorId: userId, status: { in: ['accepted', 'completed'] } } }),
+    ]);
+    res.json({ success: true, data: { activeMentees, jobsPosted, eventsOrganized, studentsHelped } });
+  } else {
+    // Admin stats are served by /api/admin/stats
+    res.json({ success: true, data: {} });
+  }
+}));
+
 export default router;

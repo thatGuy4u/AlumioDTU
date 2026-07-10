@@ -127,6 +127,24 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
             location={location}
             onNavigate={undefined}
           />
+
+          {/* User card at bottom — matches reference design */}
+          {!collapsed && user && (
+            <div className="sidebar-user-card">
+              <div className="sidebar-user-avatar">
+                {user.avatar ? (
+                  <img src={user.avatar} alt={user.name} />
+                ) : (
+                  <span>{user.name?.charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+              <div className="sidebar-user-info">
+                <span className="sidebar-user-name">{user.name}</span>
+                <span className="sidebar-user-role">{user.role}</span>
+              </div>
+            </div>
+          )}
+
           <button type="button" className="sidebar-toggle" onClick={onToggle}>
             {collapsed ? <HiOutlineChevronRight size={16} /> : <HiOutlineChevronLeft size={16} />}
             {!collapsed && <span>Collapse</span>}
