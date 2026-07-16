@@ -30,10 +30,14 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
-// TODO [PRODUCTION]: Restrict CORS origin to your production domain only
+// Parse allowed origins from env (comma-separated) for CORS
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+  : [process.env.CLIENT_URL || 'http://localhost:5173'];
+
 const io = new SocketServer(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -45,8 +49,7 @@ app.set('prisma', prisma);
 
 // TODO [PRODUCTION]: Tighten helmet settings, enable HSTS, configure CSP
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-// TODO [PRODUCTION]: Set exact production origin, not a fallback
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true }));
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 // TODO [PRODUCTION]: Use a structured logger (e.g., pino, winston) instead of morgan
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: '10mb' }));
