@@ -76,7 +76,7 @@ AlumioDTU is a **full-stack, real-time alumni-student networking platform** purp
 ### 🔐 Authentication & Identity
 
 - **Role-Based Registration** - Separate flows for Students, Alumni, and Admins with distinct onboarding journeys
-- **Email Verification** - Nodemailer-powered verification with secure tokenized links
+- **Email Verification** - Resend-powered verification with secure tokenized links
 - **Password Recovery** - Forgot password flow with time-limited reset tokens
 - **JWT Authentication** - Secure access + refresh token rotation stored in HTTP-only cookies
 - **Alumni Verification** - Admin-reviewed verification system to ensure alumni authenticity
@@ -200,7 +200,7 @@ AlumioDTU is a **full-stack, real-time alumni-student networking platform** purp
 | **Socket.io** | WebSocket server for real-time features |
 | **JWT** | Access + refresh token authentication |
 | **bcryptjs** | Password hashing |
-| **Nodemailer** | Transactional email (verification, password reset) |
+| **Resend** | Transactional email (verification, password reset) |
 | **Cloudinary** | Cloud-based image/file storage |
 | **Multer** | File upload handling middleware |
 | **Joi** | Request validation schemas |
@@ -387,7 +387,7 @@ The platform uses **PostgreSQL** with **Prisma ORM** and includes **14 models**:
 - **Node.js** v20 or higher
 - **PostgreSQL** database (local or hosted - e.g., Supabase, Neon, Railway)
 - **Cloudinary** account (for file uploads)
-- **SMTP credentials** (for email - e.g., Gmail App Password, Resend, SendGrid)
+- **Resend** account (for transactional email — free at [resend.com](https://resend.com))
 
 ### 1. Clone the Repository
 
@@ -468,12 +468,9 @@ JWT_REFRESH_EXPIRES_IN=7d
 # Client
 CLIENT_URL=http://localhost:5173
 
-# Email (SMTP)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-password
-EMAIL_FROM=noreply@alumiodtu.com
+# Email (Resend)
+RESEND_API_KEY=re_your_resend_api_key
+EMAIL_FROM=AlumioDTU <onboarding@resend.dev>
 
 # Cloudinary
 CLOUDINARY_CLOUD_NAME=your-cloud-name
