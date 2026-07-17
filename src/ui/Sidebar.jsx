@@ -11,6 +11,7 @@ import {
   HiOutlineBell, HiOutlineCog6Tooth,
   HiOutlineShieldCheck, HiOutlineChartBarSquare,
   HiOutlineChevronLeft, HiOutlineChevronRight,
+  HiOutlineEnvelope,
 } from 'react-icons/hi2';
 
 const studentLinks = [
@@ -25,6 +26,7 @@ const studentLinks = [
   { to: '/app/achievements', icon: HiOutlineTrophy, label: 'Achievements' },
   { to: '/app/notifications', icon: HiOutlineBell, label: 'Notifications' },
   { to: '/app/settings', icon: HiOutlineCog6Tooth, label: 'Settings' },
+  { to: '/app/contact', icon: HiOutlineEnvelope, label: 'Contact Us' },
 ];
 
 const alumniLinks = [
@@ -38,6 +40,7 @@ const alumniLinks = [
   { to: '/app/achievements', icon: HiOutlineTrophy, label: 'Achievements' },
   { to: '/app/notifications', icon: HiOutlineBell, label: 'Notifications' },
   { to: '/app/settings', icon: HiOutlineCog6Tooth, label: 'Settings' },
+  { to: '/app/contact', icon: HiOutlineEnvelope, label: 'Contact Us' },
 ];
 
 const adminLinks = [
@@ -50,6 +53,7 @@ const adminLinks = [
   { to: '/app/events', icon: HiOutlineCalendarDays, label: 'Events' },
   { to: '/app/notifications', icon: HiOutlineBell, label: 'Notifications' },
   { to: '/app/settings', icon: HiOutlineCog6Tooth, label: 'Settings' },
+  { to: '/app/contact', icon: HiOutlineEnvelope, label: 'Contact Us' },
 ];
 
 function SidebarLinks({ links, collapsed, isMobile, location, onNavigate }) {

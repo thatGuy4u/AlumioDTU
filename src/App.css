@@ -126,7 +126,7 @@
 .btn-nav-secondary {
   background: transparent;
   color: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgb(255, 255, 255);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .btn-nav-secondary:hover {
@@ -480,19 +480,19 @@
   min-width: 100px;
   transition: all 0.3s ease;
   box-shadow:
-    0 0 12px rgba(255, 255, 255, 0.03),
-    0 4px 20px rgba(0, 0, 0, 0.3),
-    0 8px 32px rgba(0, 0, 0, 0.15);
+    0 0 5px rgba(255, 255, 255, 0.353),
+    0 4px 20px rgba(12, 166, 204, 0.3),
+    0 1px 3px rgba(221, 5, 5, 0.15);
 }
 
 .stat-item:hover {
   background: rgba(255, 255, 255, 0.07);
   border-color: rgba(255, 255, 255, 0.25);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow:
-    0 0 20px rgba(255, 255, 255, 0.06),
-    0 8px 30px rgba(0, 0, 0, 0.3),
-    0 16px 48px rgba(0, 0, 0, 0.15);
+    0 0 6px rgba(255, 255, 255, 0.553),
+    0 1px 20px rgba(3, 103, 128, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .stat-num {

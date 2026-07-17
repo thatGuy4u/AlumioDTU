@@ -24,7 +24,7 @@ const item = {
 export default function StudentDashboard() {
   const user = useSelector(selectCurrentUser);
   const profile = useSelector(selectProfile);
-  const completionScore = profile?.profileCompletionScore || 30;
+  const completionScore = profile?.profileCompletionScore ?? 0;
 
   const [alumni, setAlumni] = useState([]);
   const [events, setEvents] = useState([]);

@@ -72,6 +72,39 @@ app.use('/api/community', communityRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
 
+// Public contact form (no auth required) — for pre-login landing page
+app.post('/api/contact', async (req, res, next) => {
+  try {
+    const { name, email, subject, message } = req.body;
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ success: false, message: 'All fields are required' });
+    }
+    const { sendMail } = await import('./config/email.js');
+    await sendMail({
+      from: process.env.EMAIL_FROM,
+      to: 'alumiodtu@gmail.com',
+      subject: `[AlumioDTU Contact] ${subject}`,
+      html: `
+        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0f2e; color: #e8eaf6; padding: 40px; border-radius: 16px;">
+          <div style="text-align: center; margin-bottom: 32px;">
+            <h1 style="color: #F5C842; font-size: 28px; margin: 0;">Alumio<span style="color: #00d4c8;">DTU</span></h1>
+          </div>
+          <h2 style="color: #fff; margin-bottom: 8px;">New Contact Message (Public)</h2>
+          <p style="color: rgba(232,234,246,0.7);"><strong>From:</strong> ${name} (${email})</p>
+          <p style="color: rgba(232,234,246,0.7);"><strong>Subject:</strong> ${subject}</p>
+          <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;" />
+          <div style="color: rgba(232,234,246,0.7); line-height: 1.7;">${message.replace(/\n/g, '<br>')}</div>
+          <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 24px 0;" />
+          <p style="color: rgba(232,234,246,0.3); font-size: 12px; text-align: center;">AlumioDTU — Public Contact Form</p>
+        </div>
+      `,
+    });
+    res.json({ success: true, message: 'Message sent successfully' });
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.use(notFound);
 app.use(errorHandler);
 

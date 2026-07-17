@@ -143,7 +143,7 @@ export default function MovingBorderButton({
         cursor: 'pointer',
         border: 'none',
         display: 'inline-flex',
-        boxShadow: '0 0 15px rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.4)',
+        boxShadow: '0 2px 20px rgba(12, 166, 204, 0.45), 0 4px 20px rgba(0,0,0,0.4)',
         ...customStyle,
       }}
     >

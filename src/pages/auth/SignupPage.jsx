@@ -16,6 +16,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [acceptedPolicy, setAcceptedPolicy] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,6 +32,10 @@ export default function SignupPage() {
     }
     if (!/^[\w.-]+@dtu\.ac\.in$/.test(email)) {
       setError('Must use a valid @dtu.ac.in email address');
+      return;
+    }
+    if (!acceptedPolicy) {
+      setError('Please accept the Privacy Policy to continue');
       return;
     }
 
@@ -158,6 +163,18 @@ export default function SignupPage() {
               {showPassword ? <HiOutlineEyeSlash size={18} /> : <HiOutlineEye size={18} />}
             </button>
           </div>
+        </div>
+
+        <div className="auth-policy-check">
+          <input
+            type="checkbox"
+            id="signup-policy"
+            checked={acceptedPolicy}
+            onChange={(e) => setAcceptedPolicy(e.target.checked)}
+          />
+          <label htmlFor="signup-policy">
+            I accept the <Link to="/privacy-policy" target="_blank">Privacy Policy</Link> and agree to the collection and use of my data as described.
+          </label>
         </div>
 
         <button

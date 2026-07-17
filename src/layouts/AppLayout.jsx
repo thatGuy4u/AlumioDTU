@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { selectSidebarCollapsed, toggleSidebarCollapse } from '../store/slices/uiSlice';
 import { selectIsAuthenticated, selectCurrentUser, selectToken } from '../store/slices/authSlice';
+import { useGetMeQuery } from '../store/api/authApi';
 import { BYPASS_AUTH_FOR_TESTING } from '../utils/constants';
 import { setAuthToken } from '../utils/apiClient';
 import { useMobileNav } from '../hooks/useMediaQuery';
@@ -19,6 +20,9 @@ export default function AppLayout() {
   const location = useLocation();
   const isMobileNav = useMobileNav();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Fetch fresh user + profile data on mount (populates authSlice.profile)
+  useGetMeQuery(undefined, { skip: BYPASS_AUTH_FOR_TESTING || !isAuthenticated });
 
   // Keep the centralized API client in sync with the current auth token
   useEffect(() => {

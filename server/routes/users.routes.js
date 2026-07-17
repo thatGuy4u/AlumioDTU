@@ -7,6 +7,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { sanitizeUser } from '../utils/sanitize.js';
 import prisma from '../config/db.js';
 import bcrypt from 'bcryptjs';
+import { sendNotificationEmail } from '../services/email.service.js';
 
 const router = Router();
 router.use(protect);
@@ -163,6 +164,15 @@ router.put('/change-password', asyncHandler(async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(newPassword, 12);
   await prisma.user.update({ where: { id: req.user.id }, data: { password: hashedPassword } });
+
+  // Send confirmation email
+  sendNotificationEmail(
+    user.email,
+    'Your AlumioDTU password was changed',
+    user.name,
+    '<p>Your password was changed successfully. If you did not make this change, please reset your password immediately or contact support.</p>'
+  ).catch(e => console.error('Password change email error:', e.message));
+
   res.json({ success: true, message: 'Password changed successfully' });
 }));
 
@@ -208,6 +218,35 @@ router.get('/dashboard-stats', asyncHandler(async (req, res) => {
     // Admin stats are served by /api/admin/stats
     res.json({ success: true, data: {} });
   }
+}));
+
+// POST /contact — authenticated user contact form
+router.post('/contact', asyncHandler(async (req, res) => {
+  const { name, email, subject, message } = req.body;
+  if (!subject || !message) throw new ApiError(400, 'Subject and message are required');
+
+  const { sendMail } = await import('../config/email.js');
+  await sendMail({
+    from: process.env.EMAIL_FROM,
+    to: 'alumiodtu@gmail.com',
+    subject: `[AlumioDTU Contact] ${subject}`,
+    html: `
+      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0f2e; color: #e8eaf6; padding: 40px; border-radius: 16px;">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h1 style="color: #F5C842; font-size: 28px; margin: 0;">Alumio<span style="color: #00d4c8;">DTU</span></h1>
+        </div>
+        <h2 style="color: #fff; margin-bottom: 8px;">New Contact Message</h2>
+        <p style="color: rgba(232,234,246,0.7);"><strong>From:</strong> ${name || req.user.name} (${email || req.user.email})</p>
+        <p style="color: rgba(232,234,246,0.7);"><strong>Subject:</strong> ${subject}</p>
+        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;" />
+        <div style="color: rgba(232,234,246,0.7); line-height: 1.7;">${message.replace(/\n/g, '<br>')}</div>
+        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 24px 0;" />
+        <p style="color: rgba(232,234,246,0.3); font-size: 12px; text-align: center;">AlumioDTU — Contact Form Submission</p>
+      </div>
+    `,
+  });
+
+  res.json({ success: true, message: 'Message sent successfully' });
 }));
 
 export default router;

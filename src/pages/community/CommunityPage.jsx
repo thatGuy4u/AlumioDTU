@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { selectToken, selectCurrentUser } from '../../store/slices/authSlice';
 import { API_URL, POST_CATEGORIES } from '../../utils/constants';
-import { HiOutlineArrowTrendingUp, HiOutlineChatBubbleOvalLeft, HiOutlinePlusCircle, HiOutlineHandThumbUp } from 'react-icons/hi2';
+import { HiOutlineArrowTrendingUp, HiOutlineChatBubbleOvalLeft, HiOutlinePlusCircle, HiOutlineHandThumbUp, HiHandThumbUp } from 'react-icons/hi2';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
@@ -21,6 +21,7 @@ export default function CommunityPage() {
   const [pagination, setPagination] = useState({});
   const [showCreate, setShowCreate] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', content: '', category: 'general', tags: '' });
+  const [upvotedIds, setUpvotedIds] = useState(new Set());
 
   const fetchPosts = async (p = 1) => {
     setLoading(true);
@@ -36,6 +37,15 @@ export default function CommunityPage() {
   const handleUpvote = async (postId) => {
     const res = await axios.post(`${API_URL}/community/posts/${postId}/upvote`, {}, { headers: { Authorization: `Bearer ${token}` } });
     setPosts(prev => prev.map(p => p.id === postId ? { ...p, upvoteCount: res.data.data.upvoteCount } : p));
+    setUpvotedIds(prev => {
+      const next = new Set(prev);
+      if (res.data.data.upvoted) {
+        next.add(postId);
+      } else {
+        next.delete(postId);
+      }
+      return next;
+    });
   };
 
   const handleCreatePost = async (e) => {
@@ -83,25 +93,30 @@ export default function CommunityPage() {
 
       {loading ? <div className="page-loader"><span className="auth-spinner-large" /></div> : (
         <motion.div className="community-posts" variants={container} initial="hidden" animate="show">
-          {posts.map(p => (
-            <motion.div key={p.id} className="community-post-card" variants={item}>
-              <div className="post-vote-col">
-                <button className="post-upvote-btn" onClick={() => handleUpvote(p.id)}><HiOutlineHandThumbUp size={18} /></button>
-                <span className="post-vote-count">{p.upvoteCount}</span>
-              </div>
-              <div className="post-content-col">
-                <Link to={`/app/community/${p.id}`} className="post-title">{p.title}</Link>
-                <p className="post-excerpt">{p.content.slice(0, 160)}{p.content.length > 160 ? '...' : ''}</p>
-                <div className="post-meta">
-                  <span className="post-author">{p.author?.name}</span>
-                  <span className="dash-tag" style={{ fontSize: '0.68rem' }}>{p.category.replace('_', '-')}</span>
-                  <span className="post-comments"><HiOutlineChatBubbleOvalLeft size={12} /> {p.commentCount}</span>
-                  <span className="post-time">{new Date(p.createdAt).toLocaleDateString()}</span>
+          {posts.map(p => {
+            const isUpvoted = upvotedIds.has(p.id);
+            return (
+              <motion.div key={p.id} className="community-post-card" variants={item}>
+                <div className="post-vote-col">
+                  <button className={`post-upvote-btn ${isUpvoted ? 'active' : ''}`} onClick={() => handleUpvote(p.id)}>
+                    {isUpvoted ? <HiHandThumbUp size={18} /> : <HiOutlineHandThumbUp size={18} />}
+                  </button>
+                  <span className="post-vote-count">{p.upvoteCount}</span>
                 </div>
-                {p.tags?.length > 0 && <div className="post-tags">{p.tags.slice(0, 4).map((t, i) => <span key={i} className="post-tag">#{t}</span>)}</div>}
-              </div>
-            </motion.div>
-          ))}
+                <div className="post-content-col">
+                  <Link to={`/app/community/${p.id}`} className="post-title">{p.title}</Link>
+                  <p className="post-excerpt">{p.content.slice(0, 160)}{p.content.length > 160 ? '...' : ''}</p>
+                  <div className="post-meta">
+                    <span className="post-author">{p.author?.name}</span>
+                    <span className="dash-tag" style={{ fontSize: '0.68rem' }}>{p.category.replace('_', '-')}</span>
+                    <span className="post-comments"><HiOutlineChatBubbleOvalLeft size={12} /> {p.commentCount}</span>
+                    <span className="post-time">{new Date(p.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  {p.tags?.length > 0 && <div className="post-tags">{p.tags.slice(0, 4).map((t, i) => <span key={i} className="post-tag">#{t}</span>)}</div>}
+                </div>
+              </motion.div>
+            );
+          })}
           {posts.length === 0 && <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: 40 }}>No posts yet. Be the first to start a discussion!</p>}
         </motion.div>
       )}

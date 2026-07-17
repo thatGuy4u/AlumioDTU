@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [acceptedPolicy, setAcceptedPolicy] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,6 +25,11 @@ export default function LoginPage() {
 
     if (!email || !password) {
       setError('Please fill in all fields');
+      return;
+    }
+
+    if (!acceptedPolicy) {
+      setError('Please accept the Privacy Policy to continue');
       return;
     }
 
@@ -100,6 +106,18 @@ export default function LoginPage() {
               {showPassword ? <HiOutlineEyeSlash size={18} /> : <HiOutlineEye size={18} />}
             </button>
           </div>
+        </div>
+
+        <div className="auth-policy-check">
+          <input
+            type="checkbox"
+            id="login-policy"
+            checked={acceptedPolicy}
+            onChange={(e) => setAcceptedPolicy(e.target.checked)}
+          />
+          <label htmlFor="login-policy">
+            I accept the <Link to="/privacy-policy" target="_blank">Privacy Policy</Link> and agree to the collection and use of my data as described.
+          </label>
         </div>
 
         <div className="auth-extras">

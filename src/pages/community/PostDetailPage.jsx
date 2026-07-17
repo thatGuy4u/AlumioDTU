@@ -8,7 +8,8 @@ import { selectToken, selectCurrentUser } from '../../store/slices/authSlice';
 import { API_URL } from '../../utils/constants';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
-  HiOutlineArrowLeft, HiOutlineHandThumbUp, HiOutlineChatBubbleOvalLeft,
+  HiOutlineArrowLeft, HiOutlineHandThumbUp, HiHandThumbUp,
+  HiOutlineChatBubbleOvalLeft,
   HiOutlinePaperAirplane, HiOutlineTrash, HiOutlineArrowUturnLeft,
 } from 'react-icons/hi2';
 
@@ -82,8 +83,15 @@ export default function PostDetailPage() {
   const handleDeleteComment = async (commentId) => {
     try {
       await axios.delete(`${API_URL}/community/comments/${commentId}`, { headers: { Authorization: `Bearer ${token}` } });
-      setComments(prev => prev.filter(c => c.id !== commentId));
-      setPost(p => ({ ...p, commentCount: Math.max(0, (p.commentCount || 1) - 1) }));
+      // Remove the comment and all its descendants
+      const idsToRemove = new Set();
+      const collectIds = (id) => {
+        idsToRemove.add(id);
+        comments.filter(c => c.parentCommentId === id).forEach(c => collectIds(c.id));
+      };
+      collectIds(commentId);
+      setComments(prev => prev.filter(c => !idsToRemove.has(c.id)));
+      setPost(p => ({ ...p, commentCount: Math.max(0, (p.commentCount || 1) - idsToRemove.size) }));
       toast.success('Comment deleted');
     } catch { toast.error('Failed'); }
   };
@@ -91,15 +99,70 @@ export default function PostDetailPage() {
   if (loading) return <div className="page-loader"><span className="auth-spinner-large" /></div>;
   if (!post) return null;
 
-  // Build threaded comments
+  // Build comment tree
+  const commentMap = {};
+  comments.forEach(c => { commentMap[c.id] = c; });
+  const getChildren = (parentId) => comments.filter(c => c.parentCommentId === parentId);
   const topLevel = comments.filter(c => !c.parentCommentId);
-  const replies = comments.filter(c => c.parentCommentId);
-  const getReplies = (parentId) => replies.filter(r => r.parentCommentId === parentId);
 
   const roleBadge = (role) => {
     if (role === 'alumni') return <span className="topbar-role-badge role-alumni">Alumni</span>;
     if (role === 'admin') return <span className="topbar-role-badge role-admin">Admin</span>;
     return <span className="topbar-role-badge role-student">Student</span>;
+  };
+
+  // Recursive comment component for Reddit-style threading
+  const CommentThread = ({ comment, depth = 0 }) => {
+    const children = getChildren(comment.id);
+    const maxVisualDepth = 6;
+    const effectiveDepth = Math.min(depth, maxVisualDepth);
+
+    return (
+      <div className={`comment-thread depth-${effectiveDepth}`} style={{ marginLeft: depth > 0 ? 20 : 0 }}>
+        <div className="post-comment">
+          <div className="post-comment-header">
+            <Link to={`/app/profile/${comment.author?.id}`} className="post-author-link">
+              <div className="directory-card-avatar tiny">
+                {comment.author?.avatar ? <img src={comment.author.avatar} alt="" /> : <span>{comment.author?.name?.[0]}</span>}
+              </div>
+              <span className="poster-name">{comment.author?.name}</span>
+              {roleBadge(comment.author?.role)}
+            </Link>
+            <span className="post-detail-date">{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>
+          </div>
+          <p className="post-comment-content">{comment.content}</p>
+          <div className="post-comment-actions">
+            <button onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}>
+              <HiOutlineArrowUturnLeft size={14} /> Reply
+            </button>
+            {(comment.author?.id === user?.id || user?.role === 'admin') && (
+              <button onClick={() => handleDeleteComment(comment.id)}>
+                <HiOutlineTrash size={14} /> Delete
+              </button>
+            )}
+          </div>
+
+          {/* Reply Form */}
+          {replyTo === comment.id && (
+            <div className="post-reply-form">
+              <input className="onboarding-input" value={replyText} onChange={e => setReplyText(e.target.value)} placeholder={`Reply to ${comment.author?.name}...`} onKeyDown={e => e.key === 'Enter' && handleReply(comment.id)} />
+              <button className="profile-edit-btn" onClick={() => handleReply(comment.id)} disabled={submitting || !replyText.trim()}>
+                <HiOutlinePaperAirplane size={14} />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Recursive children */}
+        {children.length > 0 && (
+          <div className="comment-children">
+            {children.map(child => (
+              <CommentThread key={child.id} comment={child} depth={depth + 1} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -142,7 +205,7 @@ export default function PostDetailPage() {
         {/* Actions */}
         <div className="post-detail-actions">
           <button className={`post-action-btn ${hasUpvoted ? 'active' : ''}`} onClick={handleUpvote}>
-            <HiOutlineHandThumbUp size={18} />
+            {hasUpvoted ? <HiHandThumbUp size={18} /> : <HiOutlineHandThumbUp size={18} />}
             <span>{post.upvoteCount || 0} Upvote{post.upvoteCount !== 1 ? 's' : ''}</span>
           </button>
           <span className="post-action-btn disabled">
@@ -166,66 +229,13 @@ export default function PostDetailPage() {
             </button>
           </form>
 
-          {/* Comment Thread */}
+          {/* Threaded Comments — Reddit-style */}
           <div className="post-comments-list">
             {topLevel.length === 0 && (
               <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: 24 }}>No comments yet. Be the first!</p>
             )}
             {topLevel.map(c => (
-              <div key={c.id} className="post-comment">
-                <div className="post-comment-header">
-                  <Link to={`/app/profile/${c.author?.id}`} className="post-author-link">
-                    <div className="directory-card-avatar tiny">
-                      {c.author?.avatar ? <img src={c.author.avatar} alt="" /> : <span>{c.author?.name?.[0]}</span>}
-                    </div>
-                    <span className="poster-name">{c.author?.name}</span>
-                    {roleBadge(c.author?.role)}
-                  </Link>
-                  <span className="post-detail-date">{formatDistanceToNow(new Date(c.createdAt), { addSuffix: true })}</span>
-                </div>
-                <p className="post-comment-content">{c.content}</p>
-                <div className="post-comment-actions">
-                  <button onClick={() => setReplyTo(replyTo === c.id ? null : c.id)}>
-                    <HiOutlineArrowUturnLeft size={14} /> Reply
-                  </button>
-                  {(c.author?.id === user?.id || user?.role === 'admin') && (
-                    <button onClick={() => handleDeleteComment(c.id)}>
-                      <HiOutlineTrash size={14} /> Delete
-                    </button>
-                  )}
-                </div>
-
-                {/* Reply Form */}
-                {replyTo === c.id && (
-                  <div className="post-reply-form">
-                    <input className="onboarding-input" value={replyText} onChange={e => setReplyText(e.target.value)} placeholder={`Reply to ${c.author?.name}...`} onKeyDown={e => e.key === 'Enter' && handleReply(c.id)} />
-                    <button className="profile-edit-btn" onClick={() => handleReply(c.id)} disabled={submitting || !replyText.trim()}>
-                      <HiOutlinePaperAirplane size={14} />
-                    </button>
-                  </div>
-                )}
-
-                {/* Replies */}
-                {getReplies(c.id).map(r => (
-                  <div key={r.id} className="post-comment reply">
-                    <div className="post-comment-header">
-                      <Link to={`/app/profile/${r.author?.id}`} className="post-author-link">
-                        <div className="directory-card-avatar tiny">
-                          {r.author?.avatar ? <img src={r.author.avatar} alt="" /> : <span>{r.author?.name?.[0]}</span>}
-                        </div>
-                        <span className="poster-name">{r.author?.name}</span>
-                      </Link>
-                      <span className="post-detail-date">{formatDistanceToNow(new Date(r.createdAt), { addSuffix: true })}</span>
-                    </div>
-                    <p className="post-comment-content">{r.content}</p>
-                    {(r.author?.id === user?.id || user?.role === 'admin') && (
-                      <div className="post-comment-actions">
-                        <button onClick={() => handleDeleteComment(r.id)}><HiOutlineTrash size={14} /> Delete</button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <CommentThread key={c.id} comment={c} depth={0} />
             ))}
           </div>
         </div>

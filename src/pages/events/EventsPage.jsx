@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { selectToken } from '../../store/slices/authSlice';
 import { API_URL } from '../../utils/constants';
-import { HiOutlineCalendarDays, HiOutlineMapPin, HiOutlineUserGroup, HiOutlinePlusCircle } from 'react-icons/hi2';
+import { HiOutlineCalendarDays, HiOutlineMapPin, HiOutlineUserGroup, HiOutlinePlusCircle, HiOutlineCheckCircle } from 'react-icons/hi2';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
@@ -17,6 +18,7 @@ export default function EventsPage() {
   const [tab, setTab] = useState('upcoming');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({});
+  const [registeredIds, setRegisteredIds] = useState(new Set());
 
   const fetchEvents = async (p = 1) => {
     setLoading(true);
@@ -33,7 +35,17 @@ export default function EventsPage() {
     try {
       await axios.post(`${API_URL}/events/${eventId}/register`, {}, { headers: { Authorization: `Bearer ${token}` } });
       setEvents(prev => prev.map(e => e.id === eventId ? { ...e, registeredCount: e.registeredCount + 1 } : e));
-    } catch (e) { console.error(e); }
+      setRegisteredIds(prev => new Set(prev).add(eventId));
+      toast.success('Registered! 🎉');
+    } catch (e) {
+      const msg = e.response?.data?.message || '';
+      if (msg.toLowerCase().includes('already registered')) {
+        setRegisteredIds(prev => new Set(prev).add(eventId));
+        toast('You are already registered', { icon: '✓' });
+      } else {
+        toast.error(msg || 'Failed to register');
+      }
+    }
   };
 
   const typeColors = { alumni_talk: '#F5C842', webinar: '#00d4c8', networking: '#7c4dff', workshop: '#ff6b6b', meetup: '#4caf50' };
@@ -53,22 +65,31 @@ export default function EventsPage() {
       {loading ? <div className="page-loader"><span className="auth-spinner-large" /></div> : (
         <>
           <motion.div className="events-grid" variants={container} initial="hidden" animate="show">
-            {events.map(ev => (
-              <motion.div key={ev.id} className="event-card" variants={item}>
-                <div className="event-card-badge" style={{ background: typeColors[ev.type] || '#F5C842' }}>{ev.type.replace('_', ' ')}</div>
-                <div className="event-card-date"><span className="event-date-day">{new Date(ev.date).getDate()}</span><span className="event-date-month">{new Date(ev.date).toLocaleString('default', { month: 'short' })}</span><span className="event-date-year">{new Date(ev.date).getFullYear()}</span></div>
-                <div className="event-card-body">
-                  <h3><Link to={`/app/events/${ev.id}`}>{ev.title}</Link></h3>
-                  <p className="event-desc">{ev.description?.slice(0, 100)}{ev.description?.length > 100 ? '...' : ''}</p>
-                  <div className="event-meta"><HiOutlineMapPin size={14} /><span>{ev.location}</span></div>
-                  <div className="event-meta"><HiOutlineUserGroup size={14} /><span>{ev.registeredCount}/{ev.maxAttendees} registered</span></div>
-                  <div className="event-card-footer">
-                    <span className="event-organizer">By {ev.organizer?.name}</span>
-                    <button className="dash-connect-btn" onClick={() => handleRegister(ev.id)}>Register</button>
+            {events.map(ev => {
+              const isRegistered = registeredIds.has(ev.id);
+              return (
+                <motion.div key={ev.id} className="event-card" variants={item}>
+                  <div className="event-card-badge" style={{ background: typeColors[ev.type] || '#F5C842' }}>{ev.type.replace('_', ' ')}</div>
+                  <div className="event-card-date"><span className="event-date-day">{new Date(ev.date).getDate()}</span><span className="event-date-month">{new Date(ev.date).toLocaleString('default', { month: 'short' })}</span><span className="event-date-year">{new Date(ev.date).getFullYear()}</span></div>
+                  <div className="event-card-body">
+                    <h3><Link to={`/app/events/${ev.id}`}>{ev.title}</Link></h3>
+                    <p className="event-desc">{ev.description?.slice(0, 100)}{ev.description?.length > 100 ? '...' : ''}</p>
+                    <div className="event-meta"><HiOutlineMapPin size={14} /><span>{ev.location}</span></div>
+                    <div className="event-meta"><HiOutlineUserGroup size={14} /><span>{ev.registeredCount}/{ev.maxAttendees} registered</span></div>
+                    <div className="event-card-footer">
+                      <span className="event-organizer">By {ev.organizer?.name}</span>
+                      {isRegistered ? (
+                        <button className="dash-connect-btn event-registered-btn" disabled>
+                          <HiOutlineCheckCircle size={14} /> Registered
+                        </button>
+                      ) : (
+                        <button className="dash-connect-btn" onClick={() => handleRegister(ev.id)}>Register</button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
             {events.length === 0 && <p style={{ color: 'var(--text-muted)', gridColumn: '1/-1', textAlign: 'center', padding: 40 }}>No events found.</p>}
           </motion.div>
           {pagination.pages > 1 && <div className="pagination"><button disabled={page <= 1} onClick={() => setPage(page - 1)}>← Prev</button><span>Page {page} of {pagination.pages}</span><button disabled={page >= pagination.pages} onClick={() => setPage(page + 1)}>Next →</button></div>}

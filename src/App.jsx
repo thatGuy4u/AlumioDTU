@@ -49,6 +49,8 @@ import EventDetailPage from './pages/events/EventDetailPage';
 import CreateEventPage from './pages/events/CreateEventPage';
 import AchievementsPage from './pages/achievements/AchievementsPage';
 import NotificationsPage from './pages/notifications/NotificationsPage';
+import ContactUsPage from './pages/settings/ContactUsPage';
+import PrivacyPolicyPage from './pages/auth/PrivacyPolicyPage';
 
 // Admin pages
 import AdminUsersPage from './pages/admin/AdminUsersPage';
@@ -110,6 +112,9 @@ function App() {
       {/* Landing Page */}
       <Route path="/" element={<LandingPage />} />
 
+      {/* Public Pages */}
+      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+
       {/* Auth Pages */}
       <Route path="/auth" element={<AuthLayout />}>
         <Route path="login" element={<LoginPage />} />
@@ -160,6 +165,7 @@ function App() {
         <Route path="achievements" element={<AchievementsPage />} />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        <Route path="contact" element={<ContactUsPage />} />
 
         {/* Admin */}
         <Route path="admin/users" element={<AdminUsersPage />} />
