@@ -75,16 +75,16 @@ export default function Footer() {
           <div style={{ padding: '24px 0', borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: 16 }}>
             <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 460 }}>
               <h4 style={{ color: '#F5C842', fontSize: '1rem', marginBottom: 4 }}>📧 Send us a Message</h4>
-              <div style={{ display: 'flex', gap: 12 }}>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <input
-                  style={{ flex: 1, padding: '10px 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#e8eaf6', fontSize: '0.85rem' }}
+                  style={{ flex: 1, minWidth: 180, padding: '10px 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#e8eaf6', fontSize: '0.85rem' }}
                   placeholder="Your name"
                   value={contactForm.name}
                   onChange={e => setContactForm(p => ({ ...p, name: e.target.value }))}
                   required
                 />
                 <input
-                  style={{ flex: 1, padding: '10px 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#e8eaf6', fontSize: '0.85rem' }}
+                  style={{ flex: 1, minWidth: 180, padding: '10px 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#e8eaf6', fontSize: '0.85rem' }}
                   type="email"
                   placeholder="your@email.com"
                   value={contactForm.email}

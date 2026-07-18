@@ -5,7 +5,8 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { selectCurrentUser, selectToken, selectProfile } from '../../store/slices/authSlice';
 import { API_URL } from '../../utils/constants';
-import { HiOutlineEnvelope, HiOutlineMapPin, HiOutlineBriefcase, HiOutlineAcademicCap, HiOutlineChatBubbleLeftRight, HiOutlinePencilSquare, HiOutlineTrophy, HiOutlineLink } from 'react-icons/hi2';
+import { HiOutlineEnvelope, HiOutlineMapPin, HiOutlineBriefcase, HiOutlineAcademicCap, HiOutlineChatBubbleLeftRight, HiOutlinePencilSquare, HiOutlineTrophy, HiOutlineLink, HiOutlineFlag } from 'react-icons/hi2';
+import ReportModal from '../../components/ReportModal';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
@@ -20,6 +21,7 @@ export default function ProfilePage() {
   const [userData, setUserData] = useState(null);
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(!isOwn);
+  const [showReport, setShowReport] = useState(false);
 
   useEffect(() => {
     if (!isOwn) {
@@ -59,6 +61,7 @@ export default function ProfilePage() {
               <>
                 <Link to={`/app/messages?to=${u.id}`} className="profile-edit-btn"><HiOutlineChatBubbleLeftRight size={16} /> Message</Link>
                 {u.role === 'alumni' && <Link to={`/app/mentorship/${u.id}`} className="auth-submit-btn" style={{ width: 'auto', padding: '8px 20px', fontSize: '0.82rem' }}>Request Mentorship</Link>}
+                <button className="profile-report-btn" onClick={() => setShowReport(true)}><HiOutlineFlag size={16} /> Report</button>
               </>
             )}
           </div>
@@ -104,6 +107,17 @@ export default function ProfilePage() {
           </motion.div>
         )}
       </div>
+
+      {/* Report User Modal */}
+      {!isOwn && (
+        <ReportModal
+          isOpen={showReport}
+          onClose={() => setShowReport(false)}
+          contentType="user"
+          contentId={u.id}
+          targetName={u.name}
+        />
+      )}
     </motion.div>
   );
 }

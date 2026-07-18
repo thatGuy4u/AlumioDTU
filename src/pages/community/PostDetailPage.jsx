@@ -11,7 +11,9 @@ import {
   HiOutlineArrowLeft, HiOutlineHandThumbUp, HiHandThumbUp,
   HiOutlineChatBubbleOvalLeft,
   HiOutlinePaperAirplane, HiOutlineTrash, HiOutlineArrowUturnLeft,
+  HiOutlineFlag,
 } from 'react-icons/hi2';
+import ReportModal from '../../components/ReportModal';
 
 const categoryLabels = { placements: '🎯 Placements', internships: '💼 Internships', higher_studies: '🎓 Higher Studies', startups: '🚀 Startups', general: '💬 General' };
 
@@ -27,6 +29,7 @@ function CommentItem({ comment, userId, userRole, onReply, onDelete }) {
   const [showReply, setShowReply] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   const handleSubmitReply = async () => {
     if (!replyText.trim()) return;
@@ -59,6 +62,11 @@ function CommentItem({ comment, userId, userRole, onReply, onDelete }) {
             <HiOutlineTrash size={14} /> Delete
           </button>
         )}
+        {comment.author?.id !== userId && (
+          <button className="report-btn" onClick={() => setShowReport(true)}>
+            <HiOutlineFlag size={14} /> Report
+          </button>
+        )}
       </div>
 
       {/* Reply form — state is LOCAL to this component, no parent re-render on keystroke */}
@@ -77,6 +85,15 @@ function CommentItem({ comment, userId, userRole, onReply, onDelete }) {
           </button>
         </div>
       )}
+
+      {/* Report modal for this comment */}
+      <ReportModal
+        isOpen={showReport}
+        onClose={() => setShowReport(false)}
+        contentType="comment"
+        contentId={comment.id}
+        targetName={`${comment.author?.name}'s comment`}
+      />
     </div>
   );
 }
@@ -86,7 +103,7 @@ function CommentThread({ comment, allComments, userId, userRole, onReply, onDele
   const children = allComments.filter(c => c.parentCommentId === comment.id);
 
   return (
-    <div className={`comment-thread depth-${Math.min(depth, 6)}`} style={{ marginLeft: depth > 0 ? 20 : 0 }}>
+    <div className={`comment-thread depth-${Math.min(depth, 6)}`}>
       <CommentItem
         comment={comment}
         userId={userId}
@@ -128,6 +145,7 @@ export default function PostDetailPage() {
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showReportPost, setShowReportPost] = useState(false);
 
   const fetchPost = async () => {
     try {
@@ -244,7 +262,22 @@ export default function PostDetailPage() {
             <HiOutlineChatBubbleOvalLeft size={18} />
             <span>{post.commentCount || 0} Comment{post.commentCount !== 1 ? 's' : ''}</span>
           </span>
+          {post.author?.id !== user?.id && (
+            <button className="post-action-btn" onClick={() => setShowReportPost(true)}>
+              <HiOutlineFlag size={18} />
+              <span>Report</span>
+            </button>
+          )}
         </div>
+
+        {/* Report Post Modal */}
+        <ReportModal
+          isOpen={showReportPost}
+          onClose={() => setShowReportPost(false)}
+          contentType="post"
+          contentId={post.id}
+          targetName={post.title}
+        />
 
         {/* Comments */}
         <div className="post-comments-section">
