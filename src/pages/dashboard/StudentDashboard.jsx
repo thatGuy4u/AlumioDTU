@@ -24,7 +24,28 @@ const item = {
 export default function StudentDashboard() {
   const user = useSelector(selectCurrentUser);
   const profile = useSelector(selectProfile);
-  const completionScore = profile?.profileCompletionScore ?? 0;
+
+  // Compute profile completion dynamically from filled fields
+  const completionScore = (() => {
+    if (!profile && !user) return 0;
+    let score = 0;
+    // User-level fields (20%)
+    if (user?.name) score += 10;
+    if (user?.avatar) score += 10;
+    // Profile-level fields (80%)
+    if (profile) {
+      if (profile.branch) score += 10;
+      if (profile.year) score += 5;
+      if (profile.graduationYear) score += 5;
+      if (profile.rollNumber) score += 5;
+      if (profile.bio && profile.bio.length > 0) score += 10;
+      if (profile.skills && profile.skills.length > 0) score += 15;
+      if (profile.interests && profile.interests.length > 0) score += 10;
+      if (profile.careerGoals && profile.careerGoals.length > 0) score += 10;
+      if (profile.resume && profile.resume.length > 0) score += 10;
+    }
+    return Math.min(score, 100);
+  })();
 
   const [alumni, setAlumni] = useState([]);
   const [events, setEvents] = useState([]);

@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { selectToken, selectCurrentUser } from '../../store/slices/authSlice';
 import { API_URL } from '../../utils/constants';
-import { HiOutlineAcademicCap, HiOutlineStar, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineClock, HiOutlinePaperAirplane } from 'react-icons/hi2';
+import { HiOutlineAcademicCap, HiOutlineStar, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineClock } from 'react-icons/hi2';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
@@ -22,61 +22,74 @@ export default function MentorshipPage() {
   const [loading, setLoading] = useState(true);
   const [requestedMentorIds, setRequestedMentorIds] = useState(new Set());
   const [requestingId, setRequestingId] = useState(null);
-  const [messageModal, setMessageModal] = useState(null); // mentorId to show modal for
-  const [requestMessage, setRequestMessage] = useState('');
 
   // Fetch existing requests to pre-mark already-requested mentors
   useEffect(() => {
-    if (isStudent) {
+    if (isStudent && token) {
       axios.get(`${API_URL}/mentorship/requests`, { headers: { Authorization: `Bearer ${token}` } })
         .then(res => {
+          const reqs = res.data.data?.requests || [];
           const ids = new Set();
-          (res.data.data?.requests || []).forEach(r => {
+          reqs.forEach(r => {
             if (r.status === 'pending' || r.status === 'accepted') {
-              ids.add(r.mentor?.id || r.mentorId);
+              // r.mentorId is the user ID (from the relation), r.mentor?.id is also the user ID
+              const mid = r.mentorId || r.mentor?.id;
+              if (mid) ids.add(mid);
             }
           });
           setRequestedMentorIds(ids);
         })
-        .catch(() => {});
+        .catch(err => {
+          console.error('Failed to pre-fetch requests:', err);
+        });
     }
   }, [token, isStudent]);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
         if (tab === 'browse' && isStudent) {
           const res = await axios.get(`${API_URL}/mentorship/mentors`, { headers: { Authorization: `Bearer ${token}` } });
-          setMentors(res.data.data.mentors);
+          setMentors(res.data.data.mentors || []);
         } else if (tab === 'requests') {
           const res = await axios.get(`${API_URL}/mentorship/requests`, { headers: { Authorization: `Bearer ${token}` } });
-          setRequests(res.data.data.requests);
+          setRequests(res.data.data.requests || []);
         } else if (tab === 'sessions') {
           const res = await axios.get(`${API_URL}/mentorship/sessions`, { headers: { Authorization: `Bearer ${token}` } });
-          setSessions(res.data.data);
+          setSessions(res.data.data || []);
         }
       } catch (e) { console.error(e); }
       setLoading(false);
     };
-    fetch();
+    fetchData();
   }, [tab, token, isStudent]);
 
-  const handleRequestMentorship = async (mentorId) => {
-    setRequestingId(mentorId);
+  // Direct request — no modal, just send immediately
+  const handleRequestMentorship = async (mentorUserId) => {
+    setRequestingId(mentorUserId);
     try {
       await axios.post(`${API_URL}/mentorship/request`, {
-        mentorId,
-        message: requestMessage || 'I would love to be mentored by you!'
+        mentorId: mentorUserId,
+        message: 'I would love to be mentored by you!'
       }, { headers: { Authorization: `Bearer ${token}` } });
-      setRequestedMentorIds(prev => new Set(prev).add(mentorId));
-      setMessageModal(null);
-      setRequestMessage('');
+
+      // Mark as requested in state
+      setRequestedMentorIds(prev => {
+        const next = new Set(prev);
+        next.add(mentorUserId);
+        return next;
+      });
       toast.success('Mentorship request sent! 🎉');
     } catch (e) {
       const msg = e.response?.data?.message || 'Failed to send request';
       if (msg.toLowerCase().includes('already')) {
-        setRequestedMentorIds(prev => new Set(prev).add(mentorId));
+        // Already requested — mark it in state anyway
+        setRequestedMentorIds(prev => {
+          const next = new Set(prev);
+          next.add(mentorUserId);
+          return next;
+        });
         toast('You already have a request with this mentor', { icon: '✓' });
       } else {
         toast.error(msg);
@@ -92,6 +105,7 @@ export default function MentorshipPage() {
       toast.success('Mentorship request accepted!');
     } catch (e) { toast.error(e.response?.data?.message || 'Failed'); }
   };
+
   const handleReject = async (id) => {
     try {
       await axios.put(`${API_URL}/mentorship/requests/${id}/reject`, {}, { headers: { Authorization: `Bearer ${token}` } });
@@ -118,7 +132,7 @@ export default function MentorshipPage() {
             <div className="directory-grid">
               {mentors.map(m => {
                 const mentorUserId = m.user?.id;
-                const alreadyRequested = requestedMentorIds.has(mentorUserId);
+                const alreadyRequested = mentorUserId ? requestedMentorIds.has(mentorUserId) : false;
                 return (
                   <motion.div key={m.id} className="directory-card" variants={item}>
                     <div className="directory-card-avatar">{m.user?.avatar ? <img src={m.user.avatar} alt="" /> : <span>{m.user?.name?.[0]}</span>}</div>
@@ -126,6 +140,7 @@ export default function MentorshipPage() {
                     {m.company && <p className="directory-card-meta"><span>{m.designation}, {m.company}</span></p>}
                     <div className="directory-card-meta"><HiOutlineStar size={14} /><span>{m.mentorRatingAvg > 0 ? `${m.mentorRatingAvg} ★ (${m.mentorRatingCount})` : 'New Mentor'}</span></div>
                     {m.skills?.length > 0 && <div className="directory-card-skills">{m.skills.slice(0, 4).map((s, i) => <span key={i} className="dash-tag">{s}</span>)}</div>}
+
                     {alreadyRequested ? (
                       <button className="mentor-request-sent-btn" disabled>
                         <HiOutlineCheckCircle size={16} /> Request Sent
@@ -134,7 +149,7 @@ export default function MentorshipPage() {
                       <button
                         className="auth-submit-btn"
                         style={{ width: '100%', marginTop: 12, padding: '8px', fontSize: '0.82rem' }}
-                        onClick={() => { setMessageModal(mentorUserId); setRequestMessage(''); }}
+                        onClick={() => handleRequestMentorship(mentorUserId)}
                         disabled={requestingId === mentorUserId}
                       >
                         {requestingId === mentorUserId ? <span className="auth-spinner" /> : 'Request Mentorship'}
@@ -182,41 +197,6 @@ export default function MentorshipPage() {
             </div>
           )}
         </motion.div>
-      )}
-
-      {/* Request Message Modal */}
-      {messageModal && (
-        <div className="modal-overlay" onClick={() => setMessageModal(null)}>
-          <motion.div
-            className="modal-content"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            onClick={e => e.stopPropagation()}
-            style={{ maxWidth: 440, padding: 28 }}
-          >
-            <h3 style={{ marginBottom: 12, color: 'var(--text-primary)' }}>Send Mentorship Request</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: 16 }}>Add a personal message to your request (optional)</p>
-            <textarea
-              className="onboarding-textarea"
-              rows={3}
-              placeholder="Hi! I would love to learn from your experience..."
-              value={requestMessage}
-              onChange={e => setRequestMessage(e.target.value)}
-              style={{ marginBottom: 16 }}
-            />
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button className="onboarding-back-btn" onClick={() => setMessageModal(null)}>Cancel</button>
-              <button
-                className="auth-submit-btn"
-                style={{ width: 'auto', padding: '10px 24px' }}
-                onClick={() => handleRequestMentorship(messageModal)}
-                disabled={requestingId === messageModal}
-              >
-                {requestingId === messageModal ? <span className="auth-spinner" /> : <><HiOutlinePaperAirplane size={16} /> Send Request</>}
-              </button>
-            </div>
-          </motion.div>
-        </div>
       )}
     </div>
   );

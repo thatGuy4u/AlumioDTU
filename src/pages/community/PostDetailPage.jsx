@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { selectToken, selectCurrentUser } from '../../store/slices/authSlice';
 import { API_URL } from '../../utils/constants';
-import { format, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import {
   HiOutlineArrowLeft, HiOutlineHandThumbUp, HiHandThumbUp,
   HiOutlineChatBubbleOvalLeft,
@@ -15,6 +15,107 @@ import {
 
 const categoryLabels = { placements: '🎯 Placements', internships: '💼 Internships', higher_studies: '🎓 Higher Studies', startups: '🚀 Startups', general: '💬 General' };
 
+// ─── Role badge helper (stable, outside component) ───
+function RoleBadge({ role }) {
+  if (role === 'alumni') return <span className="topbar-role-badge role-alumni">Alumni</span>;
+  if (role === 'admin') return <span className="topbar-role-badge role-admin">Admin</span>;
+  return <span className="topbar-role-badge role-student">Student</span>;
+}
+
+// ─── Single Comment (extracted, stable component) ───
+function CommentItem({ comment, userId, userRole, onReply, onDelete }) {
+  const [showReply, setShowReply] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmitReply = async () => {
+    if (!replyText.trim()) return;
+    setSubmitting(true);
+    await onReply(comment.id, replyText);
+    setReplyText('');
+    setShowReply(false);
+    setSubmitting(false);
+  };
+
+  return (
+    <div className="post-comment">
+      <div className="post-comment-header">
+        <Link to={`/app/profile/${comment.author?.id}`} className="post-author-link">
+          <div className="directory-card-avatar tiny">
+            {comment.author?.avatar ? <img src={comment.author.avatar} alt="" /> : <span>{comment.author?.name?.[0]}</span>}
+          </div>
+          <span className="poster-name">{comment.author?.name}</span>
+          <RoleBadge role={comment.author?.role} />
+        </Link>
+        <span className="post-detail-date">{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>
+      </div>
+      <p className="post-comment-content">{comment.content}</p>
+      <div className="post-comment-actions">
+        <button onClick={() => setShowReply(!showReply)}>
+          <HiOutlineArrowUturnLeft size={14} /> Reply
+        </button>
+        {(comment.author?.id === userId || userRole === 'admin') && (
+          <button onClick={() => onDelete(comment.id)}>
+            <HiOutlineTrash size={14} /> Delete
+          </button>
+        )}
+      </div>
+
+      {/* Reply form — state is LOCAL to this component, no parent re-render on keystroke */}
+      {showReply && (
+        <div className="post-reply-form">
+          <input
+            className="onboarding-input"
+            value={replyText}
+            onChange={e => setReplyText(e.target.value)}
+            placeholder={`Reply to ${comment.author?.name}...`}
+            onKeyDown={e => e.key === 'Enter' && handleSubmitReply()}
+            autoFocus
+          />
+          <button className="profile-edit-btn" onClick={handleSubmitReply} disabled={submitting || !replyText.trim()}>
+            <HiOutlinePaperAirplane size={14} />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Recursive comment thread (extracted, stable component) ───
+function CommentThread({ comment, allComments, userId, userRole, onReply, onDelete, depth = 0 }) {
+  const children = allComments.filter(c => c.parentCommentId === comment.id);
+
+  return (
+    <div className={`comment-thread depth-${Math.min(depth, 6)}`} style={{ marginLeft: depth > 0 ? 20 : 0 }}>
+      <CommentItem
+        comment={comment}
+        userId={userId}
+        userRole={userRole}
+        onReply={onReply}
+        onDelete={onDelete}
+      />
+
+      {children.length > 0 && (
+        <div className="comment-children">
+          {children.map(child => (
+            <CommentThread
+              key={child.id}
+              comment={child}
+              allComments={allComments}
+              userId={userId}
+              userRole={userRole}
+              onReply={onReply}
+              onDelete={onDelete}
+              depth={depth + 1}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Page Component ───
 export default function PostDetailPage() {
   const { postId } = useParams();
   const token = useSelector(selectToken);
@@ -26,8 +127,6 @@ export default function PostDetailPage() {
   const [hasUpvoted, setHasUpvoted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState('');
-  const [replyTo, setReplyTo] = useState(null);
-  const [replyText, setReplyText] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const fetchPost = async () => {
@@ -67,103 +166,36 @@ export default function PostDetailPage() {
     setSubmitting(false);
   };
 
-  const handleReply = async (parentId) => {
-    if (!replyText.trim()) return;
-    setSubmitting(true);
+  // Callback for nested replies — stable reference via useCallback
+  const handleReply = useCallback(async (parentId, replyContent) => {
     try {
-      const res = await axios.post(`${API_URL}/community/posts/${postId}/comments`, { content: replyText, parentCommentId: parentId }, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.post(`${API_URL}/community/posts/${postId}/comments`, { content: replyContent, parentCommentId: parentId }, { headers: { Authorization: `Bearer ${token}` } });
       setComments(prev => [...prev, res.data.data]);
       setPost(p => ({ ...p, commentCount: (p.commentCount || 0) + 1 }));
-      setReplyTo(null);
-      setReplyText('');
     } catch { toast.error('Failed'); }
-    setSubmitting(false);
-  };
+  }, [postId, token]);
 
-  const handleDeleteComment = async (commentId) => {
+  const handleDeleteComment = useCallback(async (commentId) => {
     try {
       await axios.delete(`${API_URL}/community/comments/${commentId}`, { headers: { Authorization: `Bearer ${token}` } });
-      // Remove the comment and all its descendants
-      const idsToRemove = new Set();
-      const collectIds = (id) => {
-        idsToRemove.add(id);
-        comments.filter(c => c.parentCommentId === id).forEach(c => collectIds(c.id));
-      };
-      collectIds(commentId);
-      setComments(prev => prev.filter(c => !idsToRemove.has(c.id)));
-      setPost(p => ({ ...p, commentCount: Math.max(0, (p.commentCount || 1) - idsToRemove.size) }));
+      setComments(prev => {
+        const idsToRemove = new Set();
+        const collectIds = (id) => {
+          idsToRemove.add(id);
+          prev.filter(c => c.parentCommentId === id).forEach(c => collectIds(c.id));
+        };
+        collectIds(commentId);
+        return prev.filter(c => !idsToRemove.has(c.id));
+      });
+      setPost(p => ({ ...p, commentCount: Math.max(0, (p.commentCount || 1) - 1) }));
       toast.success('Comment deleted');
     } catch { toast.error('Failed'); }
-  };
+  }, [token]);
 
   if (loading) return <div className="page-loader"><span className="auth-spinner-large" /></div>;
   if (!post) return null;
 
-  // Build comment tree
-  const commentMap = {};
-  comments.forEach(c => { commentMap[c.id] = c; });
-  const getChildren = (parentId) => comments.filter(c => c.parentCommentId === parentId);
   const topLevel = comments.filter(c => !c.parentCommentId);
-
-  const roleBadge = (role) => {
-    if (role === 'alumni') return <span className="topbar-role-badge role-alumni">Alumni</span>;
-    if (role === 'admin') return <span className="topbar-role-badge role-admin">Admin</span>;
-    return <span className="topbar-role-badge role-student">Student</span>;
-  };
-
-  // Recursive comment component for Reddit-style threading
-  const CommentThread = ({ comment, depth = 0 }) => {
-    const children = getChildren(comment.id);
-    const maxVisualDepth = 6;
-    const effectiveDepth = Math.min(depth, maxVisualDepth);
-
-    return (
-      <div className={`comment-thread depth-${effectiveDepth}`} style={{ marginLeft: depth > 0 ? 20 : 0 }}>
-        <div className="post-comment">
-          <div className="post-comment-header">
-            <Link to={`/app/profile/${comment.author?.id}`} className="post-author-link">
-              <div className="directory-card-avatar tiny">
-                {comment.author?.avatar ? <img src={comment.author.avatar} alt="" /> : <span>{comment.author?.name?.[0]}</span>}
-              </div>
-              <span className="poster-name">{comment.author?.name}</span>
-              {roleBadge(comment.author?.role)}
-            </Link>
-            <span className="post-detail-date">{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>
-          </div>
-          <p className="post-comment-content">{comment.content}</p>
-          <div className="post-comment-actions">
-            <button onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}>
-              <HiOutlineArrowUturnLeft size={14} /> Reply
-            </button>
-            {(comment.author?.id === user?.id || user?.role === 'admin') && (
-              <button onClick={() => handleDeleteComment(comment.id)}>
-                <HiOutlineTrash size={14} /> Delete
-              </button>
-            )}
-          </div>
-
-          {/* Reply Form */}
-          {replyTo === comment.id && (
-            <div className="post-reply-form">
-              <input className="onboarding-input" value={replyText} onChange={e => setReplyText(e.target.value)} placeholder={`Reply to ${comment.author?.name}...`} onKeyDown={e => e.key === 'Enter' && handleReply(comment.id)} />
-              <button className="profile-edit-btn" onClick={() => handleReply(comment.id)} disabled={submitting || !replyText.trim()}>
-                <HiOutlinePaperAirplane size={14} />
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Recursive children */}
-        {children.length > 0 && (
-          <div className="comment-children">
-            {children.map(child => (
-              <CommentThread key={child.id} comment={child} depth={depth + 1} />
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <div className="post-detail-page">
@@ -183,7 +215,7 @@ export default function PostDetailPage() {
               </div>
               <div>
                 <span className="poster-name">{post.author?.name}</span>
-                {roleBadge(post.author?.role)}
+                <RoleBadge role={post.author?.role} />
               </div>
             </Link>
             <span className="post-detail-date">{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</span>
@@ -235,7 +267,16 @@ export default function PostDetailPage() {
               <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: 24 }}>No comments yet. Be the first!</p>
             )}
             {topLevel.map(c => (
-              <CommentThread key={c.id} comment={c} depth={0} />
+              <CommentThread
+                key={c.id}
+                comment={c}
+                allComments={comments}
+                userId={user?.id}
+                userRole={user?.role}
+                onReply={handleReply}
+                onDelete={handleDeleteComment}
+                depth={0}
+              />
             ))}
           </div>
         </div>
