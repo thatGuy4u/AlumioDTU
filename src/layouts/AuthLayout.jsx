@@ -44,13 +44,6 @@ export default function AuthLayout() {
         ))}
       </div>
 
-      {/* Branding */}
-      <div className="auth-brand">
-        <a href="/" className="auth-logo">
-          Alumio<span>DTU</span>
-        </a>
-      </div>
-
       {/* Auth Content */}
       <motion.div
         className="auth-content"

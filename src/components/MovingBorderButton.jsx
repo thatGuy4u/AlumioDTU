@@ -137,13 +137,13 @@ export default function MovingBorderButton({
       style={{
         position: 'relative',
         borderRadius,
-        padding: '2px',
+        padding: '1.6px',
         background: 'transparent',
         overflow: 'hidden',
         cursor: 'pointer',
         border: 'none',
         display: 'inline-flex',
-        boxShadow: '0 2px 20px rgba(12, 166, 204, 0.45), 0 4px 20px rgba(0,0,0,0.4)',
+        boxShadow: '0 2px 5px rgba(12, 166, 204, 0.5), 0 2px 20px rgba(0,110,0,0.9)',
         ...customStyle,
       }}
     >

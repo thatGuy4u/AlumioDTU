@@ -63,7 +63,7 @@ export default function Footer() {
             ))}
             <div className="footer-col">
               <h4>Connect</h4>
-              <a href="#" onClick={(e) => { e.preventDefault(); window.open('https://dtu.ac.in', '_blank'); }}>About DTU</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); window.open('https://en.wikipedia.org/wiki/Delhi_Technological_University', '_blank'); }}>About DTU</a>
               <a href="#" onClick={(e) => { e.preventDefault(); setShowContact(!showContact); }}>Contact Us</a>
               <Link to="/privacy-policy">Privacy Policy</Link>
             </div>

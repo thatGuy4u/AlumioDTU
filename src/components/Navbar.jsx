@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { HiOutlineBars3, HiOutlineXMark } from 'react-icons/hi2';
 import { useMobileNav } from '../hooks/useMediaQuery';
 import LeftDrawer from '../ui/LeftDrawer';
+import logo from "../assets/logo.png";
 
 const NAV_LINKS = [
   { href: '#features', label: 'Features' },
@@ -59,7 +60,7 @@ export default function Navbar({ isLoggedIn, userName, onOpenModal, onLogout }) 
               {menuOpen ? <HiOutlineXMark size={20} /> : <HiOutlineBars3 size={20} />}
             </button>
           )}
-          <div className="nav-logo">Alumio<span>DTU</span></div>
+          <div className="nav-logo"><img src={logo} alt="Logo" />Alumio<span>DTU</span></div>
         </div>
 
         <div className="nav-links">

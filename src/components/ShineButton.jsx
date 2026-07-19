@@ -55,7 +55,7 @@ export default function ShineButton({
         fontSize: '0.92rem',
         color: '#ffffff',
         transition: 'border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease',
-        boxShadow: '0 4px 20px rgba(12, 166, 204, 0.4), 0 4px 20px rgba(0,0,0,0.4)',
+        boxShadow: '0 2px 10px rgba(12, 166, 204, 0.5), 0 2px 10px rgba(260,110,10,0.9)',
         ...customStyle,
       }}
       onMouseEnter={(e) => {

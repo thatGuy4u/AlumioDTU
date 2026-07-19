@@ -96,19 +96,6 @@
   margin-bottom: 32px;
 }
 
-.auth-logo {
-  font-family: 'Inter', sans-serif;
-  font-size: 2rem;
-  font-weight: 800;
-  color: #ffffff;
-  text-decoration: none;
-  letter-spacing: -1px;
-}
-
-.auth-logo span {
-  color: var(--text-muted);
-}
-
 .auth-content {
   position: relative;
   z-index: 2;
@@ -2031,8 +2018,6 @@
 
 [data-theme="light"] .auth-card-header h1 { color: #1a1a2e; }
 [data-theme="light"] .auth-card-header p { color: #555570; }
-[data-theme="light"] .auth-logo { color: #1a1a2e; }
-[data-theme="light"] .auth-logo span { color: #8888a0; }
 
 [data-theme="light"] .auth-field label { color: #8888a0; }
 [data-theme="light"] .auth-input-icon { color: #8888a0; }
