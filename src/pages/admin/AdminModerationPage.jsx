@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -29,6 +29,7 @@ const reasonLabels = {
 
 export default function AdminModerationPage() {
   const token = useSelector(selectToken);
+  const navigate = useNavigate();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('pending');
@@ -52,6 +53,23 @@ export default function AdminModerationPage() {
       await axios.put(`${API_URL}/admin/posts/${postId}/moderate`, {}, { headers: { Authorization: `Bearer ${token}` } });
       toast.success('Post moderation toggled');
     } catch { toast.error('Failed'); }
+  };
+
+  const handleUpdateReport = async (reportId, status) => {
+    try {
+      await axios.put(`${API_URL}/admin/reports/${reportId}`, { status }, { headers: { Authorization: `Bearer ${token}` } });
+      toast.success(`Report ${status}`);
+      // Remove from current view since status changed
+      setReports(prev => prev.filter(r => r.id !== reportId));
+    } catch { toast.error('Failed to update report'); }
+  };
+
+  const handleViewContent = (report) => {
+    if (report.contentType === 'post' && report.contentId) {
+      navigate(`/app/community/${report.contentId}`);
+    } else if (report.contentType === 'user' && report.reportedUser) {
+      navigate(`/app/profile/${report.reportedUser.id}`);
+    }
   };
 
   return (
@@ -129,6 +147,28 @@ export default function AdminModerationPage() {
                       )}
                     </div>
                   )}
+
+                  {/* Action buttons */}
+                  <div className="moderation-actions">
+                    <button className="moderation-action-btn view" onClick={() => handleViewContent(report)}>
+                      <HiOutlineEye size={14} /> View Content
+                    </button>
+                    {(statusFilter === 'pending' || statusFilter === 'reviewed') && (
+                      <>
+                        <button className="moderation-action-btn resolve" onClick={() => handleUpdateReport(report.id, 'resolved')}>
+                          <HiOutlineCheckCircle size={14} /> Resolve
+                        </button>
+                        <button className="moderation-action-btn dismiss" onClick={() => handleUpdateReport(report.id, 'dismissed')}>
+                          <HiOutlineXCircle size={14} /> Dismiss
+                        </button>
+                      </>
+                    )}
+                    {(statusFilter === 'resolved' || statusFilter === 'dismissed') && (
+                      <button className="moderation-action-btn reopen" onClick={() => handleUpdateReport(report.id, 'pending')}>
+                        <HiOutlineFlag size={14} /> Re-open
+                      </button>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             ))}

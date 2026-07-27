@@ -7,7 +7,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 
-// TODO [PRODUCTION]: In production, load env vars from hosting provider (e.g., Vercel, Railway)
+// TODO [PRODUCTION]: In production, load env vars from hosting provider (e.g., Vercel, Render)
 // rather than dotenv. Consider using dotenv-safe for validation.
 
 import prisma from './config/db.js';

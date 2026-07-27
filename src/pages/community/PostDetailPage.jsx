@@ -40,6 +40,21 @@ function CommentItem({ comment, userId, userRole, onReply, onDelete }) {
     setSubmitting(false);
   };
 
+  // Soft-deleted comment — show placeholder, preserve thread structure
+  if (comment.isDeleted) {
+    const byAdmin = comment.content === '[deleted by admin]';
+    return (
+      <div className={`post-comment deleted ${byAdmin ? 'deleted-by-admin' : ''}`}>
+        <div className="post-comment-header">
+          <span className="deleted-comment-label">{byAdmin ? '🛡️ [removed]' : '🗑️ [deleted]'}</span>
+        </div>
+        <p className="post-comment-content deleted-text">
+          {byAdmin ? 'This comment has been removed by a moderator' : 'This comment has been deleted by the user'}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="post-comment">
       <div className="post-comment-header">
@@ -195,16 +210,30 @@ export default function PostDetailPage() {
 
   const handleDeleteComment = useCallback(async (commentId) => {
     try {
-      await axios.delete(`${API_URL}/community/comments/${commentId}`, { headers: { Authorization: `Bearer ${token}` } });
-      setComments(prev => {
-        const idsToRemove = new Set();
-        const collectIds = (id) => {
-          idsToRemove.add(id);
-          prev.filter(c => c.parentCommentId === id).forEach(c => collectIds(c.id));
-        };
-        collectIds(commentId);
-        return prev.filter(c => !idsToRemove.has(c.id));
-      });
+      const res = await axios.delete(`${API_URL}/community/comments/${commentId}`, { headers: { Authorization: `Bearer ${token}` } });
+      const wasSoftDeleted = res.data.data?.softDeleted;
+
+      if (wasSoftDeleted) {
+        // Soft-delete: mark as deleted in state, keep in array to preserve thread hierarchy
+        const deletedContent = res.data.data?.deletedByAdmin ? '[deleted by admin]' : '[deleted]';
+        setComments(prev => prev.map(c =>
+          c.id === commentId
+            ? { ...c, isDeleted: true, content: deletedContent, author: null }
+            : c
+        ));
+      } else {
+        // Hard-delete: remove from array (and any orphaned children)
+        setComments(prev => {
+          const idsToRemove = new Set();
+          const collectIds = (id) => {
+            idsToRemove.add(id);
+            prev.filter(c => c.parentCommentId === id).forEach(c => collectIds(c.id));
+          };
+          collectIds(commentId);
+          return prev.filter(c => !idsToRemove.has(c.id));
+        });
+      }
+
       setPost(p => ({ ...p, commentCount: Math.max(0, (p.commentCount || 1) - 1) }));
       toast.success('Comment deleted');
     } catch { toast.error('Failed'); }

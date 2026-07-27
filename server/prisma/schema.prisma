@@ -431,6 +431,7 @@ model Comment {
   authorId        String
   author          User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   content         String
+  isDeleted       Boolean  @default(false)
   parentCommentId String?
   parentComment   Comment? @relation("CommentReplies", fields: [parentCommentId], references: [id])
   replies         Comment[] @relation("CommentReplies")

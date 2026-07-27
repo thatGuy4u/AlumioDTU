@@ -37,7 +37,7 @@ export default function ReportModal({ isOpen, onClose, contentType, contentId, t
     }
     setSending(true);
     try {
-      await api.post('/reports', {
+      await api.post('/community/reports', {
         reason,
         description: description.trim() || undefined,
         contentType,
@@ -66,7 +66,7 @@ export default function ReportModal({ isOpen, onClose, contentType, contentId, t
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="modal-overlay"
+          className="report-overlay"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

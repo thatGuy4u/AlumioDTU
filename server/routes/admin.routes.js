@@ -101,4 +101,31 @@ router.get('/reports', asyncHandler(async (req, res) => {
   res.json({ success: true, data: { reports, pagination: { page: parseInt(page), total, pages: Math.ceil(total / parseInt(limit)) } } });
 }));
 
+// PUT /reports/:id — update report status (resolve, dismiss, review)
+router.put('/reports/:id', asyncHandler(async (req, res) => {
+  const { status, adminNotes } = req.body;
+  const validStatuses = ['pending', 'reviewed', 'resolved', 'dismissed'];
+  if (!status || !validStatuses.includes(status)) {
+    throw new ApiError(400, 'Invalid status. Must be one of: ' + validStatuses.join(', '));
+  }
+
+  const report = await prisma.report.findUnique({ where: { id: req.params.id } });
+  if (!report) throw new ApiError(404, 'Report not found');
+
+  const updated = await prisma.report.update({
+    where: { id: req.params.id },
+    data: {
+      status,
+      adminNotes: adminNotes || report.adminNotes,
+      resolvedById: (status === 'resolved' || status === 'dismissed') ? req.user.id : report.resolvedById,
+    },
+    include: {
+      reporter: { select: { id: true, name: true, avatar: true } },
+      reportedUser: { select: { id: true, name: true, avatar: true } },
+    },
+  });
+
+  res.json({ success: true, data: updated });
+}));
+
 export default router;

@@ -84,14 +84,32 @@ router.post('/posts/:id/comments', asyncHandler(async (req, res) => {
   res.status(201).json({ success: true, data: comment });
 }));
 
-// DELETE /comments/:id
+// DELETE /comments/:id — Reddit-style soft-delete
 router.delete('/comments/:id', asyncHandler(async (req, res) => {
   const comment = await prisma.comment.findUnique({ where: { id: req.params.id } });
   if (!comment) throw new ApiError(404, 'Comment not found');
   if (comment.authorId !== req.user.id && req.user.role !== 'admin') throw new ApiError(403, 'Not authorized');
-  await prisma.post.update({ where: { id: comment.postId }, data: { commentCount: { decrement: 1 } } });
-  await prisma.comment.delete({ where: { id: req.params.id } });
-  res.json({ success: true, message: 'Comment deleted' });
+
+  const deletedByAdmin = comment.authorId !== req.user.id && req.user.role === 'admin';
+
+  // Check if the comment has any child replies
+  const childCount = await prisma.comment.count({ where: { parentCommentId: comment.id } });
+
+  if (childCount > 0) {
+    // Soft-delete: preserve thread hierarchy, blank out content
+    const deletedContent = deletedByAdmin ? '[deleted by admin]' : '[deleted]';
+    await prisma.comment.update({
+      where: { id: req.params.id },
+      data: { isDeleted: true, content: deletedContent },
+    });
+    await prisma.post.update({ where: { id: comment.postId }, data: { commentCount: { decrement: 1 } } });
+    res.json({ success: true, message: 'Comment deleted', data: { softDeleted: true, deletedByAdmin } });
+  } else {
+    // Hard-delete: no children, safe to remove completely
+    await prisma.post.update({ where: { id: comment.postId }, data: { commentCount: { decrement: 1 } } });
+    await prisma.comment.delete({ where: { id: req.params.id } });
+    res.json({ success: true, message: 'Comment deleted', data: { softDeleted: false, deletedByAdmin } });
+  }
 }));
 
 // GET /trending
@@ -107,6 +125,60 @@ router.get('/tags', asyncHandler(async (req, res) => {
   posts.forEach(p => p.tags.forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; }));
   const tags = Object.entries(tagCounts).map(([tag, count]) => ({ tag, count })).sort((a, b) => b.count - a.count).slice(0, 30);
   res.json({ success: true, data: tags });
+}));
+
+// POST /reports — submit a report and notify admins
+router.post('/reports', asyncHandler(async (req, res) => {
+  const { reason, description, contentType, contentId } = req.body;
+  if (!reason || !contentType || !contentId) {
+    throw new ApiError(400, 'Reason, contentType, and contentId are required');
+  }
+
+  // Look up the owner of the reported content to set reportedUserId
+  let reportedUserId = null;
+  if (contentType === 'post') {
+    const post = await prisma.post.findUnique({ where: { id: contentId }, select: { authorId: true } });
+    if (post) reportedUserId = post.authorId;
+  } else if (contentType === 'comment') {
+    const comment = await prisma.comment.findUnique({ where: { id: contentId }, select: { authorId: true } });
+    if (comment) reportedUserId = comment.authorId;
+  } else if (contentType === 'user') {
+    reportedUserId = contentId;
+  }
+
+  // Prevent self-reporting
+  if (reportedUserId === req.user.id) {
+    throw new ApiError(400, 'You cannot report your own content');
+  }
+
+  // Create the report
+  const report = await prisma.report.create({
+    data: {
+      reporterId: req.user.id,
+      reportedUserId,
+      contentId,
+      contentType,
+      reason,
+      description: description || null,
+    },
+  });
+
+  // Notify all admin users
+  const admins = await prisma.user.findMany({ where: { role: 'admin' }, select: { id: true } });
+  if (admins.length > 0) {
+    await prisma.notification.createMany({
+      data: admins.map(admin => ({
+        recipientId: admin.id,
+        type: 'system_notification',
+        title: `New ${contentType} report`,
+        message: `${req.user.name} reported a ${contentType} for ${reason}${description ? ': ' + description.slice(0, 100) : ''}`,
+        link: '/app/admin/moderation',
+        relatedId: report.id,
+      })),
+    });
+  }
+
+  res.status(201).json({ success: true, message: 'Report submitted successfully' });
 }));
 
 export default router;

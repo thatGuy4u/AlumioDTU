@@ -385,7 +385,7 @@ The platform uses **PostgreSQL** with **Prisma ORM** and includes **14 models**:
 ### Prerequisites
 
 - **Node.js** v20 or higher
-- **PostgreSQL** database (local or hosted - e.g., Supabase, Neon, Railway)
+- **PostgreSQL** database (local or hosted - e.g., Supabase, Neon, Render)
 - **Cloudinary** account (for file uploads)
 - **Resend** account (for transactional email — free at [resend.com](https://resend.com))
 

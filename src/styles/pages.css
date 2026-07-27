@@ -916,6 +916,28 @@
 .post-reply-form { display: flex; gap: 8px; margin-top: 8px; margin-left: 24px; }
 .post-reply-form .onboarding-input { flex: 1; padding: 8px 12px; font-size: 0.82rem; min-width: 0; }
 
+/* ===== Deleted Comment (Reddit-style soft-delete) ===== */
+.post-comment.deleted {
+  background: rgba(128, 128, 128, 0.04);
+  border: 1px dashed var(--border-color);
+  opacity: 0.65;
+}
+.deleted-comment-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.deleted-text {
+  font-style: italic;
+  color: var(--text-muted) !important;
+  font-size: 0.82rem !important;
+}
+.post-comment.deleted-by-admin {
+  border-color: rgba(244, 67, 54, 0.2);
+  background: rgba(244, 67, 54, 0.03);
+}
+
 /* ===== Event Detail ===== */
 .event-detail-page { padding-bottom: 40px; }
 .event-detail-content { max-width: 800px; }
@@ -1087,6 +1109,48 @@
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 14px; border-radius: 8px; background: var(--glass-bg);
   font-size: 0.82rem; color: var(--text-muted);
+}
+
+/* Moderation action buttons */
+.moderation-actions {
+  display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;
+}
+.moderation-action-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 600;
+  border: 1px solid var(--border-color); background: var(--glass-bg);
+  color: var(--text-secondary); cursor: pointer; transition: all 0.2s;
+}
+.moderation-action-btn:hover {
+  border-color: var(--accent); color: var(--accent);
+}
+.moderation-action-btn.resolve {
+  background: rgba(76, 175, 80, 0.08); border-color: rgba(76, 175, 80, 0.25);
+  color: #4caf50;
+}
+.moderation-action-btn.resolve:hover {
+  background: rgba(76, 175, 80, 0.18); border-color: #4caf50;
+}
+.moderation-action-btn.dismiss {
+  background: rgba(244, 67, 54, 0.08); border-color: rgba(244, 67, 54, 0.25);
+  color: #f44336;
+}
+.moderation-action-btn.dismiss:hover {
+  background: rgba(244, 67, 54, 0.18); border-color: #f44336;
+}
+.moderation-action-btn.view {
+  background: rgba(79, 110, 247, 0.08); border-color: rgba(79, 110, 247, 0.25);
+  color: #4f6ef7;
+}
+.moderation-action-btn.view:hover {
+  background: rgba(79, 110, 247, 0.18); border-color: #4f6ef7;
+}
+.moderation-action-btn.reopen {
+  background: rgba(255, 152, 0, 0.08); border-color: rgba(255, 152, 0, 0.25);
+  color: #ff9800;
+}
+.moderation-action-btn.reopen:hover {
+  background: rgba(255, 152, 0, 0.18); border-color: #ff9800;
 }
 
 /* ===== Mobile Responsive ===== */
@@ -1472,6 +1536,17 @@ select.onboarding-input option {
 .auth-policy-check label a:hover { text-decoration: underline; }
 
 /* ===== Report Modal ===== */
+.report-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(5, 8, 30, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
 .report-modal { max-width: 520px; }
 .report-modal-header {
   display: flex; align-items: center; justify-content: space-between;
