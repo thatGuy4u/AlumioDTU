@@ -176,21 +176,26 @@ router.put('/change-password', asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Password changed successfully' });
 }));
 
-// DELETE /account
+// DELETE /account — sends deletion request to admin instead of immediate delete
 router.delete('/account', asyncHandler(async (req, res) => {
   const userId = req.user.id;
 
-  // Delete related data in order (child records first)
-  await prisma.message.deleteMany({ where: { senderId: userId } });
-  await prisma.conversationParticipant.deleteMany({ where: { userId } });
-  await prisma.notification.deleteMany({ where: { userId } });
-  await prisma.achievement.deleteMany({ where: { userId } });
-  await prisma.studentProfile.deleteMany({ where: { userId } });
-  await prisma.alumniProfile.deleteMany({ where: { userId } });
-  await prisma.user.delete({ where: { id: userId } });
+  // Notify all admins about the account deletion request
+  const admins = await prisma.user.findMany({ where: { role: 'admin' }, select: { id: true } });
+  if (admins.length > 0) {
+    await prisma.notification.createMany({
+      data: admins.map(admin => ({
+        recipientId: admin.id,
+        type: 'system_notification',
+        title: 'Account Deletion Request',
+        message: `${req.user.name} (${req.user.email}) has requested to delete their account.`,
+        link: '/app/admin/users',
+        relatedId: userId,
+      })),
+    });
+  }
 
-  res.cookie('refreshToken', '', { httpOnly: true, expires: new Date(0) });
-  res.json({ success: true, message: 'Account deleted successfully' });
+  res.json({ success: true, message: 'Account deletion request sent to admin' });
 }));
 
 // GET /dashboard-stats — aggregated stats for the logged-in user's dashboard

@@ -235,14 +235,16 @@ export default function Topbar({ onMenuToggle, isMobileNav = false, mobileOpen =
             onClick={() => setDropdownOpen(!dropdownOpen)}
           >
             <div className="topbar-avatar">
-              {user?.avatar ? (
+              {user?.role === 'admin' ? (
+                <span>A</span>
+              ) : user?.avatar ? (
                 <img src={user.avatar} alt={user.name} />
               ) : (
                 <span>{user?.name?.charAt(0).toUpperCase()}</span>
               )}
             </div>
             <div className="topbar-user-info">
-              <span className="topbar-user-name">{user?.name}</span>
+              <span className="topbar-user-name">{user?.role === 'admin' ? 'Admin' : user?.name}</span>
               <span className={`topbar-role-badge ${role.className}`}>{role.label}</span>
             </div>
             <HiOutlineChevronDown

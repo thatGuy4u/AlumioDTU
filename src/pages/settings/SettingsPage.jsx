@@ -67,11 +67,10 @@ export default function SettingsPage() {
     setDeletingAccount(true);
     try {
       await api.delete('/users/account');
-      dispatch(clearCredentials());
-      toast.success('Account deleted successfully');
-      navigate('/');
+      toast.success('Your account deletion request has been sent to admin and will be processed soon.', { duration: 5000 });
+      setDeleteConfirm('');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to delete account');
+      toast.error(err.response?.data?.message || 'Failed to send deletion request');
     }
     setDeletingAccount(false);
   };
@@ -235,8 +234,8 @@ export default function SettingsPage() {
           <h3><HiOutlineExclamationTriangle size={18} /> Danger Zone</h3>
           <div className="settings-danger-content">
             <div className="settings-option-info">
-              <strong>Delete Account</strong>
-              <span>Permanently delete your account and all associated data. This action cannot be undone.</span>
+              <strong>Request Account Deletion</strong>
+              <span>Submit a request to permanently delete your account. An admin will review and process your request.</span>
             </div>
             <div className="settings-danger-confirm">
               <input
@@ -252,7 +251,7 @@ export default function SettingsPage() {
                 disabled={deletingAccount || deleteConfirm !== 'DELETE'}
               >
                 <HiOutlineTrash size={16} />
-                {deletingAccount ? 'Deleting...' : 'Delete Account'}
+                {deletingAccount ? 'Sending...' : 'Request Deletion'}
               </button>
             </div>
           </div>

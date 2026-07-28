@@ -1018,13 +1018,13 @@
 }
 
 .role-alumni {
-  color: var(--accent);
-  background: rgba(79, 110, 247, 0.1);
+  color: #b388ff;
+  background: rgba(179, 136, 255, 0.12);
 }
 
 .role-admin {
-  color: #7c4dff;
-  background: rgba(124, 77, 255, 0.1);
+  color: #ffb300;
+  background: rgba(255, 179, 0, 0.12);
 }
 
 .topbar-chevron {

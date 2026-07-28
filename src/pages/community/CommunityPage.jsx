@@ -107,7 +107,7 @@ export default function CommunityPage() {
                   <Link to={`/app/community/${p.id}`} className="post-title">{p.title}</Link>
                   <p className="post-excerpt">{p.content.slice(0, 160)}{p.content.length > 160 ? '...' : ''}</p>
                   <div className="post-meta">
-                    <span className="post-author">{p.author?.name}</span>
+                    <span className="post-author">{p.author?.role === 'admin' ? 'Admin' : p.author?.name}</span>
                     <span className="dash-tag" style={{ fontSize: '0.68rem' }}>{p.category.replace('_', '-')}</span>
                     <span className="post-comments"><HiOutlineChatBubbleOvalLeft size={12} /> {p.commentCount}</span>
                     <span className="post-time">{new Date(p.createdAt).toLocaleDateString()}</span>

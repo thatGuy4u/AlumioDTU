@@ -35,7 +35,36 @@ router.put('/users/:id/ban', asyncHandler(async (req, res) => {
 }));
 
 router.delete('/users/:id', asyncHandler(async (req, res) => {
-  await prisma.user.delete({ where: { id: req.params.id } });
+  const userId = req.params.id;
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new ApiError(404, 'User not found');
+  if (user.role === 'admin') throw new ApiError(403, 'Cannot delete an admin account');
+
+  // Clean up non-cascading references first
+  await prisma.report.updateMany({ where: { resolvedById: userId }, data: { resolvedById: null } });
+  await prisma.report.updateMany({ where: { reportedUserId: userId }, data: { reportedUserId: null } });
+  await prisma.report.deleteMany({ where: { reporterId: userId } });
+  await prisma.jobApplication.updateMany({ where: { referredById: userId }, data: { referredById: null } });
+  await prisma.mentorshipSession.deleteMany({ where: { OR: [{ menteeId: userId }, { mentorId: userId }] } });
+  await prisma.mentorshipRequest.deleteMany({ where: { OR: [{ menteeId: userId }, { mentorId: userId }] } });
+  await prisma.message.deleteMany({ where: { senderId: userId } });
+  await prisma.conversationParticipant.deleteMany({ where: { userId } });
+  await prisma.notification.deleteMany({ where: { recipientId: userId } });
+  await prisma.commentUpvote.deleteMany({ where: { userId } });
+  await prisma.postUpvote.deleteMany({ where: { userId } });
+  await prisma.comment.deleteMany({ where: { authorId: userId } });
+  await prisma.post.deleteMany({ where: { authorId: userId } });
+  await prisma.jobApplication.deleteMany({ where: { applicantId: userId } });
+  await prisma.job.deleteMany({ where: { postedById: userId } });
+  await prisma.eventRegistration.deleteMany({ where: { userId } });
+  await prisma.event.deleteMany({ where: { organizerId: userId } });
+  await prisma.savedJob.deleteMany({ where: { userId } });
+  await prisma.achievement.deleteMany({ where: { userId } });
+  await prisma.studentProfile.deleteMany({ where: { userId } });
+  await prisma.alumniProfile.deleteMany({ where: { userId } });
+
+  // Now safe to delete the user
+  await prisma.user.delete({ where: { id: userId } });
   res.json({ success: true, message: 'User deleted' });
 }));
 

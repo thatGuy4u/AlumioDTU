@@ -24,6 +24,18 @@ function RoleBadge({ role }) {
   return <span className="topbar-role-badge role-student">Student</span>;
 }
 
+// ─── Display name helper — admins show "Admin" instead of real name ───
+function getDisplayName(user) {
+  if (!user) return '';
+  if (user.role === 'admin') return 'Admin';
+  return user.name;
+}
+function getAvatarInitial(user) {
+  if (!user) return '?';
+  if (user.role === 'admin') return 'A';
+  return user.name?.[0] || '?';
+}
+
 // ─── Single Comment (extracted, stable component) ───
 function CommentItem({ comment, userId, userRole, onReply, onDelete }) {
   const [showReply, setShowReply] = useState(false);
@@ -60,9 +72,9 @@ function CommentItem({ comment, userId, userRole, onReply, onDelete }) {
       <div className="post-comment-header">
         <Link to={`/app/profile/${comment.author?.id}`} className="post-author-link">
           <div className="directory-card-avatar tiny">
-            {comment.author?.avatar ? <img src={comment.author.avatar} alt="" /> : <span>{comment.author?.name?.[0]}</span>}
+            {comment.author?.role === 'admin' ? <span>A</span> : comment.author?.avatar ? <img src={comment.author.avatar} alt="" /> : <span>{getAvatarInitial(comment.author)}</span>}
           </div>
-          <span className="poster-name">{comment.author?.name}</span>
+          <span className="poster-name">{getDisplayName(comment.author)}</span>
           <RoleBadge role={comment.author?.role} />
         </Link>
         <span className="post-detail-date">{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>
@@ -258,10 +270,10 @@ export default function PostDetailPage() {
           <div className="post-detail-author">
             <Link to={`/app/profile/${post.author?.id}`} className="post-author-link">
               <div className="directory-card-avatar small">
-                {post.author?.avatar ? <img src={post.author.avatar} alt="" /> : <span>{post.author?.name?.[0]}</span>}
+                {post.author?.role === 'admin' ? <span>A</span> : post.author?.avatar ? <img src={post.author.avatar} alt="" /> : <span>{getAvatarInitial(post.author)}</span>}
               </div>
               <div>
-                <span className="poster-name">{post.author?.name}</span>
+                <span className="poster-name">{getDisplayName(post.author)}</span>
                 <RoleBadge role={post.author?.role} />
               </div>
             </Link>
