@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { HiOutlineHeart, HiOutlinePaperAirplane } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
@@ -12,6 +12,22 @@ export default function Footer() {
   const [showContact, setShowContact] = useState(false);
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [sending, setSending] = useState(false);
+  const contactRef = useRef(null);
+  const nameInputRef = useRef(null);
+
+  // Scroll to contact form and focus name input when it opens
+  useEffect(() => {
+    if (showContact && contactRef.current) {
+      // Small delay to let DOM render the form before scrolling
+      requestAnimationFrame(() => {
+        contactRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Focus the name input after scroll animation settles
+        setTimeout(() => {
+          nameInputRef.current?.focus();
+        }, 400);
+      });
+    }
+  }, [showContact]);
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
@@ -72,11 +88,12 @@ export default function Footer() {
 
         {/* Contact Form — Pre-login */}
         {showContact && (
-          <div style={{ padding: '24px 0', borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: 16 }}>
+          <div ref={contactRef} style={{ padding: '24px 0', borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: 16 }}>
             <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 460 }}>
               <h4 style={{ color: '#F5C842', fontSize: '1rem', marginBottom: 4 }}>📧 Send us a Message</h4>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <input
+                  ref={nameInputRef}
                   style={{ flex: 1, minWidth: 180, padding: '10px 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#e8eaf6', fontSize: '0.85rem' }}
                   placeholder="Your name"
                   value={contactForm.name}

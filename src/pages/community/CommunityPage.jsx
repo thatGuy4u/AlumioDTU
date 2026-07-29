@@ -82,11 +82,11 @@ export default function CommunityPage() {
 
       {/* Category Tabs & Sort */}
       <div className="community-controls">
-        <div className="tab-bar" style={{ flex: 1 }}>
+        <div className="tab-bar">
           <button className={`tab-btn ${category === 'all' ? 'active' : ''}`} onClick={() => { setCategory('all'); setPage(1); }}>All</button>
           {POST_CATEGORIES.map(c => <button key={c.value} className={`tab-btn ${category === c.value ? 'active' : ''}`} onClick={() => { setCategory(c.value); setPage(1); }}>{c.icon} {c.label}</button>)}
         </div>
-        <select className="onboarding-input" style={{ width: 'auto' }} value={sort} onChange={e => { setSort(e.target.value); setPage(1); }}>
+        <select className="onboarding-input community-sort-select" value={sort} onChange={e => { setSort(e.target.value); setPage(1); }}>
           <option value="newest">Newest</option><option value="trending">Trending</option><option value="oldest">Oldest</option>
         </select>
       </div>

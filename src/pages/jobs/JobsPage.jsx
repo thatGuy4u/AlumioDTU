@@ -49,12 +49,14 @@ export default function JobsPage() {
         <form className="directory-search" onSubmit={e => { e.preventDefault(); setPage(1); fetchJobs(1); }}>
           <HiOutlineMagnifyingGlass size={18} /><input placeholder="Search jobs, companies..." value={search} onChange={e => setSearch(e.target.value)} /><button type="submit">Search</button>
         </form>
-        <select className="onboarding-input" style={{ width: 'auto' }} value={typeFilter} onChange={e => { setTypeFilter(e.target.value); setPage(1); setTimeout(() => fetchJobs(1), 0); }}>
-          <option value="">All Types</option>{Object.entries(typeLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-        </select>
-        <select className="onboarding-input" style={{ width: 'auto' }} value={modeFilter} onChange={e => { setModeFilter(e.target.value); setPage(1); setTimeout(() => fetchJobs(1), 0); }}>
-          <option value="">All Modes</option>{Object.entries(modeLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-        </select>
+        <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+          <select className="onboarding-input" style={{ flex: 1, minWidth: 0 }} value={typeFilter} onChange={e => { setTypeFilter(e.target.value); setPage(1); setTimeout(() => fetchJobs(1), 0); }}>
+            <option value="">All Types</option>{Object.entries(typeLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+          <select className="onboarding-input" style={{ flex: 1, minWidth: 0 }} value={modeFilter} onChange={e => { setModeFilter(e.target.value); setPage(1); setTimeout(() => fetchJobs(1), 0); }}>
+            <option value="">All Modes</option>{Object.entries(modeLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+        </div>
       </div>
 
       {loading ? <div className="page-loader"><span className="auth-spinner-large" /></div> : (
