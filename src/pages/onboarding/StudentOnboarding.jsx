@@ -7,9 +7,23 @@ import { BRANCHES } from '../../utils/constants';
 import axios from 'axios';
 import { API_URL } from '../../utils/constants';
 import { selectToken } from '../../store/slices/authSlice';
+import toast from 'react-hot-toast';
 import { HiOutlineAcademicCap, HiOutlineUser, HiOutlineCodeBracket, HiOutlineRocketLaunch, HiOutlineCheck, HiOutlineArrowRight, HiOutlineArrowLeft } from 'react-icons/hi2';
 
 const steps = ['Basic Info', 'Academics', 'Skills & Interests', 'Career Goals'];
+
+// Required fields per step
+const requiredByStep = [
+  ['bio'],                          // Step 0: Basic Info
+  ['branch', 'year', 'graduationYear', 'rollNumber'], // Step 1: Academics
+  ['skills'],                       // Step 2: Skills & Interests
+  ['careerGoals'],                  // Step 3: Career Goals
+];
+
+const fieldLabels = {
+  bio: 'Bio', branch: 'Branch', year: 'Current Year', graduationYear: 'Graduation Year',
+  rollNumber: 'Roll Number', skills: 'Skills', careerGoals: 'Career Goals',
+};
 
 export default function StudentOnboarding() {
   const navigate = useNavigate();
@@ -25,7 +39,21 @@ export default function StudentOnboarding() {
 
   const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
+  const validateStep = (s) => {
+    const missing = requiredByStep[s].filter(f => !form[f]?.toString().trim());
+    if (missing.length > 0) {
+      toast.error(`Please fill: ${missing.map(f => fieldLabels[f]).join(', ')}`);
+      return false;
+    }
+    return true;
+  };
+
+  const handleNext = () => {
+    if (validateStep(step)) setStep(step + 1);
+  };
+
   const handleSubmit = async () => {
+    if (!validateStep(step)) return;
     setLoading(true);
     try {
       const payload = {
@@ -49,6 +77,11 @@ export default function StudentOnboarding() {
   };
 
   const stepIcons = [HiOutlineUser, HiOutlineAcademicCap, HiOutlineCodeBracket, HiOutlineRocketLaunch];
+
+  // Helper to render label with required asterisk
+  const Label = ({ text, required }) => (
+    <label>{text}{required && <span className="required-mark"> *</span>}</label>
+  );
 
   return (
     <div className="onboarding-page">
@@ -76,10 +109,10 @@ export default function StudentOnboarding() {
           {step === 0 && (
             <div className="onboarding-fields">
               <h3>Tell us about yourself</h3>
-              <div className="auth-field"><label>BIO</label><textarea className="onboarding-textarea" placeholder="A short bio about yourself..." value={form.bio} onChange={e => update('bio', e.target.value)} rows={3} /></div>
+              <div className="auth-field"><Label text="BIO" required /><textarea className="onboarding-textarea" placeholder="A short bio about yourself..." value={form.bio} onChange={e => update('bio', e.target.value)} rows={3} /></div>
               <div className="onboarding-row">
-                <div className="auth-field"><label>LINKEDIN URL</label><input className="onboarding-input" placeholder="https://linkedin.com/in/..." value={form.linkedinUrl} onChange={e => update('linkedinUrl', e.target.value)} /></div>
-                <div className="auth-field"><label>GITHUB URL</label><input className="onboarding-input" placeholder="https://github.com/..." value={form.githubUrl} onChange={e => update('githubUrl', e.target.value)} /></div>
+                <div className="auth-field"><Label text="LINKEDIN URL" /><input className="onboarding-input" placeholder="https://linkedin.com/in/..." value={form.linkedinUrl} onChange={e => update('linkedinUrl', e.target.value)} /></div>
+                <div className="auth-field"><Label text="GITHUB URL" /><input className="onboarding-input" placeholder="https://github.com/..." value={form.githubUrl} onChange={e => update('githubUrl', e.target.value)} /></div>
               </div>
             </div>
           )}
@@ -87,31 +120,31 @@ export default function StudentOnboarding() {
             <div className="onboarding-fields">
               <h3>Academic Details</h3>
               <div className="onboarding-row">
-                <div className="auth-field"><label>BRANCH</label>
+                <div className="auth-field"><Label text="BRANCH" required />
                   <select className="onboarding-input" value={form.branch} onChange={e => update('branch', e.target.value)}>
                     <option value="">Select Branch</option>
                     {BRANCHES.map(b => <option key={b.value} value={b.value}>{b.label}</option>)}
                   </select>
                 </div>
-                <div className="auth-field"><label>CURRENT YEAR</label><input className="onboarding-input" type="number" min="1" max="5" placeholder="e.g. 3" value={form.year} onChange={e => update('year', e.target.value)} /></div>
+                <div className="auth-field"><Label text="CURRENT YEAR" required /><input className="onboarding-input" type="number" min="1" max="5" placeholder="e.g. 3" value={form.year} onChange={e => update('year', e.target.value)} /></div>
               </div>
               <div className="onboarding-row">
-                <div className="auth-field"><label>GRADUATION YEAR</label><input className="onboarding-input" type="number" min="2020" max="2035" placeholder="e.g. 2026" value={form.graduationYear} onChange={e => update('graduationYear', e.target.value)} /></div>
-                <div className="auth-field"><label>ROLL NUMBER</label><input className="onboarding-input" placeholder="e.g. 2K21/CO/123" value={form.rollNumber} onChange={e => update('rollNumber', e.target.value)} /></div>
+                <div className="auth-field"><Label text="GRADUATION YEAR" required /><input className="onboarding-input" type="number" min="2020" max="2035" placeholder="e.g. 2026" value={form.graduationYear} onChange={e => update('graduationYear', e.target.value)} /></div>
+                <div className="auth-field"><Label text="ROLL NUMBER" required /><input className="onboarding-input" placeholder="e.g. 2K21/CO/123" value={form.rollNumber} onChange={e => update('rollNumber', e.target.value)} /></div>
               </div>
             </div>
           )}
           {step === 2 && (
             <div className="onboarding-fields">
               <h3>Skills & Interests</h3>
-              <div className="auth-field"><label>SKILLS (comma-separated)</label><input className="onboarding-input" placeholder="React, Node.js, Python, ML..." value={form.skills} onChange={e => update('skills', e.target.value)} /></div>
-              <div className="auth-field"><label>INTERESTS (comma-separated)</label><input className="onboarding-input" placeholder="Web Dev, AI/ML, Open Source..." value={form.interests} onChange={e => update('interests', e.target.value)} /></div>
+              <div className="auth-field"><Label text="SKILLS (comma-separated)" required /><input className="onboarding-input" placeholder="React, Node.js, Python, ML..." value={form.skills} onChange={e => update('skills', e.target.value)} /></div>
+              <div className="auth-field"><Label text="INTERESTS (comma-separated)" /><input className="onboarding-input" placeholder="Web Dev, AI/ML, Open Source..." value={form.interests} onChange={e => update('interests', e.target.value)} /></div>
             </div>
           )}
           {step === 3 && (
             <div className="onboarding-fields">
               <h3>Career Goals</h3>
-              <div className="auth-field"><label>WHAT ARE YOUR CAREER ASPIRATIONS?</label><textarea className="onboarding-textarea" rows={4} placeholder="Tell us where you see yourself in 5 years..." value={form.careerGoals} onChange={e => update('careerGoals', e.target.value)} /></div>
+              <div className="auth-field"><Label text="WHAT ARE YOUR CAREER ASPIRATIONS?" required /><textarea className="onboarding-textarea" rows={4} placeholder="Tell us where you see yourself in 5 years..." value={form.careerGoals} onChange={e => update('careerGoals', e.target.value)} /></div>
             </div>
           )}
         </motion.div>
@@ -122,7 +155,7 @@ export default function StudentOnboarding() {
         {step > 0 && <button className="onboarding-back-btn" onClick={() => setStep(step - 1)}><HiOutlineArrowLeft size={16} /> Back</button>}
         <div style={{ flex: 1 }} />
         {step < steps.length - 1 ? (
-          <button className="auth-submit-btn" style={{ width: 'auto', padding: '12px 32px' }} onClick={() => setStep(step + 1)}>Next <HiOutlineArrowRight size={16} /></button>
+          <button className="auth-submit-btn" style={{ width: 'auto', padding: '12px 32px' }} onClick={handleNext}>Next <HiOutlineArrowRight size={16} /></button>
         ) : (
           <button className="auth-submit-btn" style={{ width: 'auto', padding: '12px 32px' }} onClick={handleSubmit} disabled={loading}>{loading ? <span className="auth-spinner" /> : 'Complete Profile →'}</button>
         )}
