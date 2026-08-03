@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -16,21 +16,65 @@ export default function ProfilePage() {
   const currentUser = useSelector(selectCurrentUser);
   const token = useSelector(selectToken);
   const myProfile = useSelector(selectProfile);
-  const isOwn = !userId || userId === currentUser?.id;
+
+  // Only declare "own profile" when we have a currentUser to compare against.
+  // Without userId param → own profile. With userId that matches currentUser → own profile.
+  // If currentUser hasn't loaded yet (null) but userId exists, treat as "other" and fetch.
+  const isOwn = !userId
+    ? true
+    : (currentUser ? userId === currentUser.id : false);
+
   const [profileData, setProfileData] = useState(null);
   const [userData, setUserData] = useState(null);
   const [achievements, setAchievements] = useState([]);
-  const [loading, setLoading] = useState(!isOwn);
+  const [loading, setLoading] = useState(true);
   const [showReport, setShowReport] = useState(false);
 
+  // Track the last fetched userId to avoid stale state when navigating between profiles
+  const lastFetchedId = useRef(null);
+
   useEffect(() => {
-    if (!isOwn) {
-      axios.get(`${API_URL}/users/profile/${userId}`, { headers: { Authorization: `Bearer ${token}` } })
-        .then(r => { setUserData(r.data.data.user); setProfileData(r.data.data.profile); setAchievements(r.data.data.achievements || []); })
-        .finally(() => setLoading(false));
+    // Reset state when the target user changes
+    const targetId = isOwn ? '__own__' : userId;
+    if (lastFetchedId.current !== targetId) {
+      setProfileData(null);
+      setUserData(null);
+      setAchievements([]);
+      setLoading(true);
+      lastFetchedId.current = targetId;
+    }
+
+    if (isOwn) {
+      // For own profile, wait until the Redux store has the user data
+      if (currentUser) {
+        setUserData(currentUser);
+        setProfileData(myProfile);
+        setLoading(false);
+      }
+      // If currentUser is null (still loading via getMe), keep loading=true
     } else {
-      setUserData(currentUser);
-      setProfileData(myProfile);
+      // Fetch the other user's profile
+      setLoading(true);
+      axios.get(`${API_URL}/users/profile/${userId}`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => {
+          // Only apply if we're still looking at the same user
+          if (lastFetchedId.current === userId) {
+            setUserData(r.data.data.user);
+            setProfileData(r.data.data.profile);
+            setAchievements(r.data.data.achievements || []);
+          }
+        })
+        .catch(() => {
+          if (lastFetchedId.current === userId) {
+            setUserData(null);
+            setProfileData(null);
+          }
+        })
+        .finally(() => {
+          if (lastFetchedId.current === userId) {
+            setLoading(false);
+          }
+        });
     }
   }, [userId, isOwn, currentUser, myProfile, token]);
 

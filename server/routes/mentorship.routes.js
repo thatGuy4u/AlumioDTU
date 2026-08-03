@@ -79,13 +79,22 @@ router.post('/requests/:id/feedback', roleGuard('student'), asyncHandler(async (
 }));
 
 router.get('/mentors', asyncHandler(async (req, res) => {
-  const { skill, industry, page = 1, limit = 12 } = req.query;
-  const where = { mentorshipAvailability: true };
+  const { skill, industry, available, page = 1, limit = 12 } = req.query;
+  const where = {};
+  // Only filter by availability when explicitly requested
+  if (available === 'true') where.mentorshipAvailability = true;
   if (skill) where.skills = { has: skill };
   if (industry) where.industry = industry;
   const skip = (parseInt(page) - 1) * parseInt(limit);
   const [mentors, total] = await prisma.$transaction([
-    prisma.alumniProfile.findMany({ where, skip, take: parseInt(limit), orderBy: { mentorRatingAvg: 'desc' }, include: { user: { select: { id: true, name: true, email: true, avatar: true, isVerified: true } } } }),
+    prisma.alumniProfile.findMany({
+      where, skip, take: parseInt(limit),
+      orderBy: [
+        { mentorshipAvailability: 'desc' },  // available mentors first
+        { mentorRatingAvg: 'desc' },
+      ],
+      include: { user: { select: { id: true, name: true, email: true, avatar: true, isVerified: true } } },
+    }),
     prisma.alumniProfile.count({ where }),
   ]);
   res.json({ success: true, data: { mentors, pagination: { page: parseInt(page), total, pages: Math.ceil(total / parseInt(limit)) } } });

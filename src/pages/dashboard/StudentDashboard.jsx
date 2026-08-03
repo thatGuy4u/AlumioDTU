@@ -104,20 +104,6 @@ export default function StudentDashboard() {
           <h1>Welcome back, <span className="text-gold">{user?.name?.split(' ')[0]}</span> 👋</h1>
           <p>Your DTU network is growing. Here's what's happening today.</p>
         </div>
-        <div className="dash-hero-stat">
-          <div className="completion-ring">
-            <svg viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="42" className="ring-bg" />
-              <circle
-                cx="50" cy="50" r="42"
-                className="ring-progress"
-                style={{ strokeDasharray: `${completionScore * 2.64} 264` }}
-              />
-            </svg>
-            <span className="ring-label">{completionScore}%</span>
-          </div>
-          <span className="ring-text">Profile Complete</span>
-        </div>
       </motion.div>
 
       {/* Info Banner — shows when profile incomplete or email unverified */}
@@ -186,14 +172,14 @@ export default function StudentDashboard() {
             {alumni.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No alumni found yet</p>
             ) : alumni.map((a) => (
-              <Link key={a.id} to={`/app/profile/${a.id}`} className="dash-alumni-card" style={{ textDecoration: 'none' }}>
+              <Link key={a.id} to={`/app/profile/${a.user?.id}`} className="dash-alumni-card" style={{ textDecoration: 'none' }}>
                 <div className="dash-alumni-avatar">
-                  {a.avatar ? <img src={a.avatar} alt="" /> : a.name?.[0]}
+                  {a.user?.avatar ? <img src={a.user.avatar} alt="" /> : a.user?.name?.[0]}
                 </div>
                 <div className="dash-alumni-info">
-                  <strong>{a.name}</strong>
-                  <span>{a.alumniProfile?.company || a.alumniProfile?.designation || 'Alumni'}</span>
-                  <span className="dash-alumni-branch">{a.alumniProfile?.branch} {a.alumniProfile?.graduationYear ? `'${String(a.alumniProfile.graduationYear).slice(2)}` : ''}</span>
+                  <strong>{a.user?.name}</strong>
+                  <span>{a.company || a.designation || 'Alumni'}</span>
+                  <span className="dash-alumni-branch">{a.branch} {a.graduationYear ? `'${String(a.graduationYear).slice(2)}` : ''}</span>
                 </div>
                 <button className="dash-connect-btn" onClick={(e) => e.preventDefault()}>View</button>
               </Link>

@@ -59,7 +59,10 @@ export default function MentorshipPage() {
           const res = await axios.get(`${API_URL}/mentorship/sessions`, { headers: { Authorization: `Bearer ${token}` } });
           setSessions(res.data.data || []);
         }
-      } catch (e) { console.error(e); }
+      } catch (e) {
+        console.error(e);
+        if (tab === 'browse') toast.error('Failed to load mentors. Please try again.');
+      }
       setLoading(false);
     };
     fetchData();
@@ -139,6 +142,7 @@ export default function MentorshipPage() {
                     <h3>{m.user?.name}</h3>
                     {m.company && <p className="directory-card-meta"><span>{m.designation}, {m.company}</span></p>}
                     <div className="directory-card-meta"><HiOutlineStar size={14} /><span>{m.mentorRatingAvg > 0 ? `${m.mentorRatingAvg} ★ (${m.mentorRatingCount})` : 'New Mentor'}</span></div>
+                    {m.mentorshipAvailability && <div className="directory-card-meta" style={{ color: '#00d4c8' }}><HiOutlineCheckCircle size={14} /><span>Available for mentorship</span></div>}
                     {m.skills?.length > 0 && <div className="directory-card-skills">{m.skills.slice(0, 4).map((s, i) => <span key={i} className="dash-tag">{s}</span>)}</div>}
 
                     {alreadyRequested ? (
