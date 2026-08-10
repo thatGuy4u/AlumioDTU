@@ -395,9 +395,51 @@
   display: flex;
   gap: 10px;
   margin-top: 26px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-start;
   width: 100%;
+}
+
+/* === Base button sizes (desktop default) === */
+.moving-border-btn-inner {
+  padding: 15px 36px;
+  font-size: 0.92rem;
+}
+
+.shine-btn {
+  padding: 15px 36px;
+  font-size: 0.92rem;
+}
+
+/* === Small screens — compact buttons in one row === */
+@media (max-width: 479px) {
+  .hero-cta {
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .moving-border-btn {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* 8.4px top/bottom compensates for the 1.6px outer wrapper padding
+     so total visual height matches ShineButton's 10px */
+  .moving-border-btn-inner {
+    padding: 8.4px 14px;
+    font-size: 0.75rem;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .shine-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 14px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
 }
 
 .btn-primary {

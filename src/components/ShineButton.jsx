@@ -37,25 +37,22 @@ export default function ShineButton({
     <button
       ref={btnRef}
       onClick={onClick}
-      className={className}
+      className={`shine-btn ${className}`}
       style={{
         position: 'relative',
         borderRadius,
-        padding: '15px 36px',
         background: 'transparent',
         overflow: 'hidden',
         cursor: 'pointer',
-        border: '1px solid rgba(255,255,255,0.2)',
+        border: '1px solid rgba(160,110,10,0.9)',
         display: 'inline-flex',
         alignItems: 'center',
         gap: '8px',
         justifyContent: 'center',
         fontFamily: "'Inter', sans-serif",
         fontWeight: 600,
-        fontSize: '0.92rem',
         color: '#ffffff',
         transition: 'border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease',
-        boxShadow: '0 2px 10px rgba(12, 166, 204, 0.5), 0 2px 10px rgba(260,110,10,0.9)',
         ...customStyle,
       }}
       onMouseEnter={(e) => {
@@ -63,7 +60,7 @@ export default function ShineButton({
         e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+        e.currentTarget.style.borderColor = 'rgba(160,110,10,0.9)';
         e.currentTarget.style.background = 'transparent';
       }}
     >

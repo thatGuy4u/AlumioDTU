@@ -133,7 +133,7 @@ export default function MovingBorderButton({
   return (
     <button
       onClick={onClick}
-      className={className}
+      className={`moving-border-btn ${className}`}
       style={{
         position: 'relative',
         borderRadius,
@@ -143,7 +143,6 @@ export default function MovingBorderButton({
         cursor: 'pointer',
         border: 'none',
         display: 'inline-flex',
-        boxShadow: '0 2px 5px rgba(12, 166, 204, 0.5), 0 2px 20px rgba(0,110,0,0.9)',
         ...customStyle,
       }}
     >
@@ -166,7 +165,7 @@ export default function MovingBorderButton({
           position: 'absolute',
           inset: 0,
           borderRadius,
-          border: '1px solid rgba(255,255,255,0.2)',
+          border: '1px solid rgba(255, 255, 255, 0.51)',
           pointerEvents: 'none',
           zIndex: 0,
         }}
@@ -174,6 +173,7 @@ export default function MovingBorderButton({
 
       {/* Inner content */}
       <span
+        className="moving-border-btn-inner"
         style={{
           position: 'relative',
           zIndex: 2,
@@ -182,10 +182,8 @@ export default function MovingBorderButton({
           gap: '8px',
           borderRadius: `calc(${borderRadius} - 2px)`,
           background: '#000000',
-          padding: '15px 36px',
           fontFamily: "'Inter', sans-serif",
           fontWeight: 600,
-          fontSize: '0.92rem',
           color: '#ffffff',
           width: '100%',
           justifyContent: 'center',
