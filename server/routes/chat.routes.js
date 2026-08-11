@@ -15,7 +15,7 @@ router.get('/conversations', asyncHandler(async (req, res) => {
       conversation: {
         include: {
           participants: {
-            include: { user: { select: { id: true, name: true, avatar: true, onlineStatus: true, lastSeen: true } } },
+            include: { user: { select: { id: true, name: true, avatar: true, role: true, onlineStatus: true, lastSeen: true, studentProfile: { select: { rollNumber: true, graduationYear: true } }, alumniProfile: { select: { graduationYear: true, company: true } } } } },
           },
         },
       },
@@ -34,6 +34,11 @@ router.post('/conversations', asyncHandler(async (req, res) => {
   const { recipientId } = req.body;
   if (!recipientId) throw new ApiError(400, 'Recipient ID is required');
 
+  // Block messaging admin users
+  const recipient = await prisma.user.findUnique({ where: { id: recipientId }, select: { role: true } });
+  if (!recipient) throw new ApiError(404, 'User not found');
+  if (recipient.role === 'admin') throw new ApiError(403, 'You cannot send messages to administrators');
+
   // Check if conversation already exists
   const existingParticipants = await prisma.conversationParticipant.findMany({
     where: { userId: req.user.id },
@@ -49,7 +54,7 @@ router.post('/conversations', asyncHandler(async (req, res) => {
         conversation: {
           include: {
             participants: {
-              include: { user: { select: { id: true, name: true, avatar: true, onlineStatus: true, lastSeen: true } } },
+              include: { user: { select: { id: true, name: true, avatar: true, role: true, onlineStatus: true, lastSeen: true, studentProfile: { select: { rollNumber: true, graduationYear: true } }, alumniProfile: { select: { graduationYear: true, company: true } } } } },
             },
           },
         },
@@ -71,7 +76,7 @@ router.post('/conversations', asyncHandler(async (req, res) => {
     },
     include: {
       participants: {
-        include: { user: { select: { id: true, name: true, avatar: true, onlineStatus: true, lastSeen: true } } },
+        include: { user: { select: { id: true, name: true, avatar: true, role: true, onlineStatus: true, lastSeen: true, studentProfile: { select: { rollNumber: true, graduationYear: true } }, alumniProfile: { select: { graduationYear: true, company: true } } } } },
       },
     },
   });

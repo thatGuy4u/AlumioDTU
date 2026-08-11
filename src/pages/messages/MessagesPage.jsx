@@ -224,7 +224,10 @@ export default function MessagesPage() {
 
   const getOtherUser = (convo) => {
     const other = convo.participants?.find(p => p.user?.id !== currentUser?.id);
-    return other?.user || { name: 'Unknown', avatar: '' };
+    const user = other?.user || { name: 'Unknown', avatar: '' };
+    // Extract profile info (works for both students and alumni)
+    const profile = user.studentProfile || user.alumniProfile || {};
+    return { ...user, rollNumber: user.studentProfile?.rollNumber, graduationYear: profile.graduationYear, company: user.alumniProfile?.company };
   };
 
   const activeConvoData = conversations.find(c => c.id === activeConvo);
@@ -263,7 +266,14 @@ export default function MessagesPage() {
                   <button key={c.id} className={`message-convo-btn ${activeConvo === c.id ? 'active' : ''}`} onClick={() => loadMessages(c.id)}>
                     <div className="message-convo-avatar">{other.avatar ? <img src={other.avatar} alt="" /> : <span>{other.name?.[0]}</span>}</div>
                     <div className="message-convo-info">
-                      <strong>{other.name}</strong>
+                      <div className="message-convo-name-row">
+                        <strong>{other.name}</strong>
+                        {(other.rollNumber || other.graduationYear) && (
+                          <span className="message-convo-meta">
+                            {other.rollNumber}{other.rollNumber && other.graduationYear ? ' · ' : ''}{other.graduationYear && `Class of ${other.graduationYear}`}
+                          </span>
+                        )}
+                      </div>
                       <p>{c.lastContent || 'Start a conversation'}</p>
                     </div>
                     {c.myUnreadCount > 0 && <span className="message-unread-badge">{c.myUnreadCount}</span>}
@@ -290,8 +300,15 @@ export default function MessagesPage() {
           <>
             <div className="messages-chat-header">
               <div className="message-convo-avatar">{otherUser?.avatar ? <img src={otherUser.avatar} alt="" /> : <span>{otherUser?.name?.[0]}</span>}</div>
-              <div>
-                <strong>{otherUser?.name}</strong>
+              <div className="messages-chat-header-info">
+                <div className="messages-chat-header-name-row">
+                  <strong>{otherUser?.name}</strong>
+                  {(otherUser?.rollNumber || otherUser?.graduationYear) && (
+                    <span className="messages-chat-header-meta">
+                      {otherUser?.rollNumber}{otherUser?.rollNumber && otherUser?.graduationYear ? ' · ' : ''}{otherUser?.graduationYear && `${otherUser.graduationYear}`}
+                    </span>
+                  )}
+                </div>
                 {isTyping && <span className="typing-indicator">typing...</span>}
               </div>
             </div>
