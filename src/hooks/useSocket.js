@@ -1,66 +1,15 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { useSelector } from 'react-redux';
-import { io } from 'socket.io-client';
-import { selectToken, selectIsAuthenticated } from '../store/slices/authSlice';
-import { SOCKET_URL } from '../utils/constants';
+import { useContext, useEffect, useRef } from 'react';
+import { SocketContext } from '../contexts/SocketProvider';
 
 /**
- * Custom hook to manage a single Socket.io connection for the current user.
+ * Custom hook to access the shared Socket.io connection.
  *
  * Returns { socket, isConnected }.
  * - `socket` is null until authentication succeeds.
- * - Auto-disconnects on logout or unmount.
+ * - The connection is managed by SocketProvider (single instance app-wide).
  */
 export function useSocket() {
-  const token = useSelector(selectToken);
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const [isConnected, setIsConnected] = useState(false);
-  const socketRef = useRef(null);
-
-  useEffect(() => {
-    // Don't connect if user isn't authenticated
-    if (!isAuthenticated || !token) {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-        setIsConnected(false);
-      }
-      return;
-    }
-
-    // Create socket connection with auth token
-    const socket = io(SOCKET_URL, {
-      auth: { token },
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-    });
-
-    socket.on('connect', () => {
-      setIsConnected(true);
-    });
-
-    socket.on('disconnect', () => {
-      setIsConnected(false);
-    });
-
-    socket.on('connect_error', (err) => {
-      console.warn('Socket connection error:', err.message);
-      setIsConnected(false);
-    });
-
-    socketRef.current = socket;
-
-    return () => {
-      socket.disconnect();
-      socketRef.current = null;
-      setIsConnected(false);
-    };
-  }, [token, isAuthenticated]);
-
-  return { socket: socketRef.current, isConnected };
+  return useContext(SocketContext);
 }
 
 /**

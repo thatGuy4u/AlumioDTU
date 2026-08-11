@@ -30,6 +30,7 @@ import DashboardRouter from './pages/dashboard/DashboardRouter';
 // Onboarding
 import StudentOnboarding from './pages/onboarding/StudentOnboarding';
 import AlumniOnboarding from './pages/onboarding/AlumniOnboarding';
+import AlumniTransitionPage from './pages/onboarding/AlumniTransitionPage';
 
 // Core pages
 import ProfilePage from './pages/profile/ProfilePage';
@@ -128,6 +129,7 @@ function App() {
       <Route path="/app" element={<AppLayout />}>
         <Route path="dashboard" element={<DashboardRouter />} />
         <Route path="onboarding" element={<OnboardingRouter />} />
+        <Route path="transition" element={<AlumniTransitionPage />} />
 
         {/* Profile */}
         <Route path="profile" element={<ProfilePage />} />

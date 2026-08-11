@@ -14,6 +14,7 @@ import prisma from './config/db.js';
 import { initializeSocket } from './config/socket.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
+import { runGraduationCheck } from './services/graduationCron.js';
 
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/users.routes.js';
@@ -120,6 +121,10 @@ async function startServer() {
       console.log(`📡 Socket.io ready`);
       console.log(`🗄️  Database: PostgreSQL (Prisma ORM)`);
       console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}\n`);
+
+      // Run graduation check on startup (delayed 10s) + every 24 hours
+      setTimeout(() => runGraduationCheck(io), 10_000);
+      setInterval(() => runGraduationCheck(io), 24 * 60 * 60 * 1000);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

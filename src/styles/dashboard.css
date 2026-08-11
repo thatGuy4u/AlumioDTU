@@ -1989,6 +1989,193 @@
   box-shadow: 0 4px 16px rgba(255, 183, 77, 0.3);
 }
 
+/* ===== Graduation Warning Banner (Dashboard) ===== */
+.graduation-warning-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255, 183, 77, 0.10), rgba(255, 152, 0, 0.06));
+  border: 1px solid rgba(255, 183, 77, 0.25);
+  animation: gradBannerPulse 2.5s ease-in-out infinite;
+}
+.graduation-warning-banner.urgent {
+  background: linear-gradient(135deg, rgba(255, 82, 82, 0.12), rgba(255, 23, 68, 0.06));
+  border-color: rgba(255, 82, 82, 0.35);
+  animation: gradBannerUrgentPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes gradBannerPulse {
+  0%, 100% { border-color: rgba(255, 183, 77, 0.25); }
+  50% { border-color: rgba(255, 183, 77, 0.45); }
+}
+@keyframes gradBannerUrgentPulse {
+  0%, 100% { border-color: rgba(255, 82, 82, 0.35); box-shadow: 0 0 0 0 rgba(255, 82, 82, 0); }
+  50% { border-color: rgba(255, 82, 82, 0.6); box-shadow: 0 0 20px rgba(255, 82, 82, 0.15); }
+}
+
+.graduation-warning-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+.graduation-warning-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.graduation-warning-text strong {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+.graduation-warning-banner.urgent .graduation-warning-text strong {
+  color: #ff5252;
+}
+.graduation-warning-text span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.graduation-warning-btn {
+  padding: 10px 24px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffb74d, #ff9800);
+  color: #1a1a2e;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.graduation-warning-banner.urgent .graduation-warning-btn {
+  background: linear-gradient(135deg, #ff5252, #ff1744);
+  color: #ffffff;
+}
+.graduation-warning-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.35);
+}
+
+@media (min-width: 768px) {
+  .graduation-warning-banner {
+    flex-direction: row;
+    text-align: left;
+    align-items: center;
+    padding: 16px 24px;
+  }
+  .graduation-warning-text { align-items: flex-start; }
+}
+
+/* ===== Graduation Warning Strip (Global — AppLayout) ===== */
+.graduation-warning-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(255, 183, 77, 0.15), rgba(255, 152, 0, 0.10));
+  border-bottom: 1px solid rgba(255, 183, 77, 0.25);
+  font-size: 0.78rem;
+  color: #ffb74d;
+  text-align: center;
+  flex-wrap: wrap;
+}
+.graduation-warning-strip.urgent {
+  background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 23, 68, 0.10));
+  border-bottom-color: rgba(255, 82, 82, 0.3);
+  color: #ff5252;
+  animation: stripPulse 2s ease-in-out infinite;
+}
+@keyframes stripPulse {
+  0%, 100% { background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 23, 68, 0.10)); }
+  50% { background: linear-gradient(135deg, rgba(255, 82, 82, 0.22), rgba(255, 23, 68, 0.15)); }
+}
+.graduation-warning-strip a {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.graduation-warning-strip a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* ===== Transition Page Extras ===== */
+.graduation-transition-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 82, 82, 0.10), rgba(255, 23, 68, 0.05));
+  border: 1px solid rgba(255, 82, 82, 0.25);
+  margin-bottom: 8px;
+  color: #ff5252;
+}
+.graduation-transition-warning div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.graduation-transition-warning strong {
+  font-size: 0.85rem;
+  color: #ff5252;
+}
+.graduation-transition-warning span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.transition-data-summary {
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  margin-bottom: 8px;
+}
+.transition-data-summary h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.transition-data-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.transition-data-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--glass-bg);
+}
+.transition-data-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+.transition-data-value {
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.transition-data-note {
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: #4caf50;
+  font-weight: 500;
+}
+
 /* ===== Activity Feed ===== */
 .dash-activity-feed {
   display: flex;

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Outlet, Navigate, useLocation } from 'react-router-dom';
+import { Outlet, Navigate, useLocation, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { selectSidebarCollapsed, toggleSidebarCollapse } from '../store/slices/uiSlice';
-import { selectIsAuthenticated, selectCurrentUser, selectToken } from '../store/slices/authSlice';
+import { selectIsAuthenticated, selectCurrentUser, selectToken, selectProfile } from '../store/slices/authSlice';
 import { useGetMeQuery } from '../store/api/authApi';
 import { BYPASS_AUTH_FOR_TESTING } from '../utils/constants';
 import { setAuthToken } from '../utils/apiClient';
@@ -16,6 +16,7 @@ export default function AppLayout() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectCurrentUser);
   const token = useSelector(selectToken);
+  const profile = useSelector(selectProfile);
   const dispatch = useDispatch();
   const location = useLocation();
   const isMobileNav = useMobileNav();
@@ -72,6 +73,27 @@ export default function AppLayout() {
         isMobileNav={isMobileNav}
       />
       <div className="app-main">
+        {/* Persistent graduation warning strip for graduating students */}
+        {(() => {
+          if (user?.role !== 'student' || !profile?.graduationYear) return null;
+          const now = new Date();
+          const currentYear = now.getFullYear();
+          const currentMonth = now.getMonth() + 1;
+          const isGraduating = profile.graduationYear <= currentYear && currentMonth >= 6;
+          if (!isGraduating || location.pathname.includes('/transition')) return null;
+          const isUrgent = currentMonth >= 9;
+          return (
+            <div className={`graduation-warning-strip ${isUrgent ? 'urgent' : ''}`}>
+              <span>
+                {isUrgent ? '⚠️' : '🎓'}{' '}
+                {isUrgent
+                  ? 'Your student account will be deleted on September 30! '
+                  : `Class of ${profile.graduationYear} — Convert to alumni before Sept 30 to keep your account. `}
+              </span>
+              <Link to="/app/transition">Convert Now →</Link>
+            </div>
+          );
+        })()}
         <Topbar
           isMobileNav={isMobileNav}
           mobileOpen={mobileOpen}

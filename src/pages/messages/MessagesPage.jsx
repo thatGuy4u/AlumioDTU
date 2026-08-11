@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { selectCurrentUser } from '../../store/slices/authSlice';
 import { useSocket, useSocketEvent } from '../../hooks/useSocket';
 import api from '../../utils/apiClient';
-import { HiOutlinePaperAirplane, HiOutlineMagnifyingGlass } from 'react-icons/hi2';
+import { HiOutlinePaperAirplane, HiOutlineMagnifyingGlass, HiOutlinePlusCircle, HiOutlineXMark } from 'react-icons/hi2';
 
 export default function MessagesPage() {
   const currentUser = useSelector(selectCurrentUser);
   const { conversationId: urlConvoId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState([]);
   const [activeConvo, setActiveConvo] = useState(urlConvoId || null);
   const [messages, setMessages] = useState([]);
@@ -21,7 +22,14 @@ export default function MessagesPage() {
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
-  // Socket.io integration
+  // New Chat modal state
+  const [showNewChat, setShowNewChat] = useState(false);
+  const [userSearch, setUserSearch] = useState('');
+  const [userResults, setUserResults] = useState([]);
+  const [userSearchLoading, setUserSearchLoading] = useState(false);
+  const userSearchTimeoutRef = useRef(null);
+
+  // Socket.io integration (shared via context)
   const { socket, isConnected } = useSocket();
 
   // Fetch conversations on mount
@@ -31,12 +39,45 @@ export default function MessagesPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  // Auto-open URL conversation
+  // Handle ?to=userId query param — create/find conversation with that user
+  const toHandledRef = useRef(false);
+  useEffect(() => {
+    const toUserId = searchParams.get('to');
+    if (!toUserId || toHandledRef.current) return;
+    toHandledRef.current = true;
+
+    // Clear the query param from URL
+    setSearchParams({}, { replace: true });
+
+    startConversationWith(toUserId);
+  }, [searchParams]);
+
+  // Auto-open URL conversation (e.g., /app/messages/:conversationId)
   useEffect(() => {
     if (urlConvoId && conversations.length > 0) {
       loadMessages(urlConvoId);
     }
   }, [urlConvoId, conversations.length]);
+
+  // Start or find a conversation with a specific user
+  const startConversationWith = async (recipientId) => {
+    try {
+      const res = await api.post('/chat/conversations', { recipientId });
+      const convo = res.data.data;
+
+      // Add to conversations list if not already present
+      setConversations(prev => {
+        const exists = prev.find(c => c.id === convo.id);
+        if (exists) return prev;
+        return [convo, ...prev];
+      });
+
+      // Load messages for this conversation
+      loadMessages(convo.id);
+    } catch (e) {
+      console.error('Failed to start conversation:', e);
+    }
+  };
 
   const loadMessages = async (convoId) => {
     setActiveConvo(convoId);
@@ -150,6 +191,37 @@ export default function MessagesPage() {
     }
   }, [activeConvo]));
 
+  // ── New Chat: search users ──
+  const handleUserSearch = (query) => {
+    setUserSearch(query);
+    if (userSearchTimeoutRef.current) clearTimeout(userSearchTimeoutRef.current);
+
+    if (!query.trim()) {
+      setUserResults([]);
+      return;
+    }
+
+    userSearchTimeoutRef.current = setTimeout(async () => {
+      setUserSearchLoading(true);
+      try {
+        const res = await api.get(`/users/search?q=${encodeURIComponent(query)}&limit=10`);
+        // Filter out current user from results
+        const filtered = (res.data.data.users || []).filter(u => u.id !== currentUser?.id);
+        setUserResults(filtered);
+      } catch {
+        setUserResults([]);
+      }
+      setUserSearchLoading(false);
+    }, 300);
+  };
+
+  const handleSelectUser = (userId) => {
+    setShowNewChat(false);
+    setUserSearch('');
+    setUserResults([]);
+    startConversationWith(userId);
+  };
+
   const getOtherUser = (convo) => {
     const other = convo.participants?.find(p => p.user?.id !== currentUser?.id);
     return other?.user || { name: 'Unknown', avatar: '' };
@@ -171,7 +243,12 @@ export default function MessagesPage() {
       <div className="messages-sidebar">
         <div className="messages-sidebar-header">
           <h2>Messages</h2>
-          {isConnected && <span className="socket-connected-dot" title="Real-time connected" />}
+          <div className="messages-sidebar-header-actions">
+            {isConnected && <span className="socket-connected-dot" title="Real-time connected" />}
+            <button className="new-chat-btn" onClick={() => setShowNewChat(true)} title="New conversation">
+              <HiOutlinePlusCircle size={22} />
+            </button>
+          </div>
         </div>
         <div className="messages-search">
           <HiOutlineMagnifyingGlass size={16} />
@@ -204,7 +281,10 @@ export default function MessagesPage() {
           <div className="messages-no-active">
             <div className="messages-no-active-icon">💬</div>
             <h3>Select a conversation</h3>
-            <p>Choose a conversation from the sidebar to start chatting</p>
+            <p>Choose a conversation from the sidebar or start a new one</p>
+            <button className="new-chat-start-btn" onClick={() => setShowNewChat(true)}>
+              <HiOutlinePlusCircle size={18} /> Start a new chat
+            </button>
           </div>
         ) : (
           <>
@@ -219,6 +299,11 @@ export default function MessagesPage() {
             <div className="messages-body">
               {msgLoading ? <div className="page-loader"><span className="auth-spinner-large" /></div> : (
                 <>
+                  {messages.length === 0 && (
+                    <div className="messages-empty-chat">
+                      <p>No messages yet. Say hello! 👋</p>
+                    </div>
+                  )}
                   {messages.map((msg, i) => {
                     const isMine = msg.senderId === currentUser?.id || msg.sender?.id === currentUser?.id;
                     return (
@@ -251,6 +336,72 @@ export default function MessagesPage() {
           </>
         )}
       </div>
+
+      {/* New Chat Modal */}
+      <AnimatePresence>
+        {showNewChat && (
+          <motion.div
+            className="new-chat-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowNewChat(false)}
+          >
+            <motion.div
+              className="new-chat-modal"
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.2 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="new-chat-modal-header">
+                <h3>New Conversation</h3>
+                <button className="new-chat-close" onClick={() => setShowNewChat(false)}>
+                  <HiOutlineXMark size={20} />
+                </button>
+              </div>
+              <div className="new-chat-search">
+                <HiOutlineMagnifyingGlass size={16} />
+                <input
+                  placeholder="Search users by name..."
+                  value={userSearch}
+                  onChange={e => handleUserSearch(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div className="new-chat-results">
+                {userSearchLoading ? (
+                  <div className="new-chat-loading"><span className="auth-spinner-large" /></div>
+                ) : userSearch && userResults.length === 0 ? (
+                  <p className="new-chat-no-results">No users found</p>
+                ) : !userSearch ? (
+                  <p className="new-chat-hint">Type a name to search for users</p>
+                ) : (
+                  userResults.map(user => (
+                    <button
+                      key={user.id}
+                      className="new-chat-user-btn"
+                      onClick={() => handleSelectUser(user.id)}
+                    >
+                      <div className="message-convo-avatar">
+                        {user.avatar
+                          ? <img src={user.avatar} alt="" />
+                          : <span>{user.name?.[0]}</span>
+                        }
+                      </div>
+                      <div className="new-chat-user-info">
+                        <strong>{user.name}</strong>
+                        <span>{user.role}</span>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

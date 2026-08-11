@@ -106,6 +106,44 @@ export default function StudentDashboard() {
         </div>
       </motion.div>
 
+      {/* Graduation Transition Warning */}
+      {(() => {
+        const gradYear = profile?.graduationYear;
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+        const isGraduating = gradYear && gradYear <= currentYear && currentMonth >= 6;
+        const isUrgent = isGraduating && currentMonth >= 9;
+
+        if (!isGraduating) return null;
+
+        return (
+          <motion.div
+            className={`graduation-warning-banner ${isUrgent ? 'urgent' : ''}`}
+            variants={item}
+          >
+            <div className="graduation-warning-icon">
+              {isUrgent ? '⚠️' : '🎓'}
+            </div>
+            <div className="graduation-warning-text">
+              <strong>
+                {isUrgent
+                  ? 'URGENT: Your account will be deleted on September 30!'
+                  : 'Congratulations on graduating!'}
+              </strong>
+              <span>
+                {isUrgent
+                  ? 'Convert your student account to alumni NOW to keep all your data, posts, and connections.'
+                  : `As a Class of ${gradYear} graduate, please convert your account to alumni before September 30, ${gradYear} to continue using AlumioDTU.`}
+              </span>
+            </div>
+            <Link to="/app/transition" className="graduation-warning-btn">
+              Convert to Alumni →
+            </Link>
+          </motion.div>
+        );
+      })()}
+
       {/* Info Banner — shows when profile incomplete or email unverified */}
       {(completionScore < 100 || !user?.isEmailVerified) && (
         <motion.div className="dash-info-banner" variants={item}>

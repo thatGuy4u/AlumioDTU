@@ -90,6 +90,87 @@ router.put('/onboarding', asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Onboarding complete!', data: { user: sanitizeUser(user), profile } });
 }));
 
+// POST /convert-to-alumni — Graduate transition: student → alumni
+router.post('/convert-to-alumni', asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  // Verify user is a student
+  if (req.user.role !== 'student') {
+    throw new ApiError(400, 'Only student accounts can be converted to alumni');
+  }
+
+  // Get existing student profile
+  const studentProfile = await prisma.studentProfile.findUnique({ where: { userId } });
+  if (!studentProfile) {
+    throw new ApiError(404, 'Student profile not found');
+  }
+
+  // Verify graduation year has arrived
+  const currentYear = new Date().getFullYear();
+  if (studentProfile.graduationYear && studentProfile.graduationYear > currentYear) {
+    throw new ApiError(400, `You cannot convert before your graduation year (${studentProfile.graduationYear})`);
+  }
+
+  // Extract new alumni fields from request body
+  const { company, designation, industry, location, experience, linkedinProfile, mentorshipAvailability, mentorshipCapacity } = req.body;
+
+  if (!company || !designation || !industry || !location) {
+    throw new ApiError(400, 'Company, designation, industry, and location are required');
+  }
+
+  // Perform the transition in a transaction
+  const result = await prisma.$transaction(async (tx) => {
+    // 1. Create AlumniProfile with migrated + new data
+    const alumniProfile = await tx.alumniProfile.create({
+      data: {
+        userId,
+        branch: studentProfile.branch,
+        graduationYear: studentProfile.graduationYear,
+        bio: studentProfile.bio || '',
+        skills: studentProfile.skills || [],
+        company,
+        designation,
+        industry,
+        location,
+        experience: experience ? parseInt(experience) : 0,
+        linkedinProfile: linkedinProfile || '',
+        mentorshipAvailability: mentorshipAvailability || false,
+        mentorshipCapacity: mentorshipCapacity ? parseInt(mentorshipCapacity) : 3,
+      },
+    });
+
+    // 2. Delete old StudentProfile
+    await tx.studentProfile.delete({ where: { userId } });
+
+    // 3. Update User role to alumni
+    const updatedUser = await tx.user.update({
+      where: { id: userId },
+      data: { role: 'alumni', isProfileComplete: true },
+    });
+
+    return { user: updatedUser, profile: alumniProfile };
+  });
+
+  // Send a welcome-to-alumni notification
+  try {
+    const { createNotification } = await import('../services/notification.service.js');
+    await createNotification({
+      recipientId: userId,
+      type: 'system_notification',
+      title: '🎉 Welcome to the Alumni Network!',
+      message: 'Your account has been successfully converted. You can now mentor students, post jobs, and more!',
+      link: '/app/dashboard',
+      io: req.app.get('io'),
+    });
+  } catch { /* non-critical */ }
+
+  res.json({
+    success: true,
+    message: 'Account successfully converted to alumni!',
+    data: { user: sanitizeUser(result.user), profile: result.profile },
+  });
+}));
+
 // GET /directory — fixed search to use database-level filtering
 router.get('/directory', asyncHandler(async (req, res) => {
   const { search, company, industry, branch, graduationYear, location, skills, mentorshipAvailable, page = 1, limit = 12 } = req.query;
