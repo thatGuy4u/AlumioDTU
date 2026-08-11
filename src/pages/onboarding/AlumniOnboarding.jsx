@@ -7,6 +7,7 @@ import { BRANCHES, INDUSTRIES, API_URL } from '../../utils/constants';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { HiOutlineBriefcase, HiOutlineUser, HiOutlineAcademicCap, HiOutlineHeart, HiOutlineCheck, HiOutlineArrowRight, HiOutlineArrowLeft } from 'react-icons/hi2';
+import EmailVerificationPopup from '../../components/EmailVerificationPopup';
 
 const steps = ['About You', 'Work Experience', 'DTU Background', 'Mentorship'];
 
@@ -85,6 +86,7 @@ export default function AlumniOnboarding() {
 
   return (
     <div className="onboarding-page">
+      <EmailVerificationPopup />
       <div className="onboarding-header">
         <h1>Welcome back, <span className="text-gold">{user?.name?.split(' ')[0]}</span> 💼</h1>
         <p>Set up your alumni profile and start giving back to the DTU community</p>

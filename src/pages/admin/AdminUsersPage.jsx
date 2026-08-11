@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
-import { selectToken } from '../../store/slices/authSlice';
+import { selectToken, selectCurrentUser } from '../../store/slices/authSlice';
 import { API_URL } from '../../utils/constants';
 import { format } from 'date-fns';
 import {
@@ -16,6 +16,7 @@ const item = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } };
 
 export default function AdminUsersPage() {
   const token = useSelector(selectToken);
+  const currentUser = useSelector(selectCurrentUser);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -124,12 +125,16 @@ export default function AdminUsersPage() {
                       <HiOutlineCheckBadge size={16} />
                     </button>
                   )}
-                  <button className={`admin-action-btn ${u.isBanned ? 'unban' : 'ban'}`} onClick={() => handleBan(u.id)} title={u.isBanned ? 'Unban' : 'Ban'}>
-                    <HiOutlineNoSymbol size={16} />
-                  </button>
-                  <button className="admin-action-btn delete" onClick={() => handleDelete(u.id)} title="Delete">
-                    <HiOutlineTrash size={16} />
-                  </button>
+                  {u.id !== currentUser?.id && (
+                    <>
+                      <button className={`admin-action-btn ${u.isBanned ? 'unban' : 'ban'}`} onClick={() => handleBan(u.id)} title={u.isBanned ? 'Unban' : 'Ban'}>
+                        <HiOutlineNoSymbol size={16} />
+                      </button>
+                      <button className="admin-action-btn delete" onClick={() => handleDelete(u.id)} title="Delete">
+                        <HiOutlineTrash size={16} />
+                      </button>
+                    </>
+                  )}
                 </div>
               </motion.div>
             ))}

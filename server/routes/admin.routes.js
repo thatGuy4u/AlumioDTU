@@ -86,6 +86,20 @@ router.get('/pending-verifications', asyncHandler(async (req, res) => {
   res.json({ success: true, data: users });
 }));
 
+router.get('/unverified-emails', asyncHandler(async (req, res) => {
+  const users = await prisma.user.findMany({
+    where: { isEmailVerified: false, isBanned: false },
+    orderBy: { createdAt: 'asc' },
+    select: { id: true, name: true, email: true, role: true, avatar: true, createdAt: true },
+  });
+  const now = Date.now();
+  const data = users.map(u => ({
+    ...u,
+    daysSinceRegistration: Math.floor((now - new Date(u.createdAt).getTime()) / (1000 * 60 * 60 * 24)),
+  }));
+  res.json({ success: true, data });
+}));
+
 router.get('/growth', asyncHandler(async (req, res) => {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const users = await prisma.user.findMany({ where: { createdAt: { gte: thirtyDaysAgo } }, select: { createdAt: true, role: true } });

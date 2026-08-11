@@ -98,6 +98,26 @@ export const verifyEmail = asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Email verified successfully!' });
 });
 
+export const resendVerificationEmail = asyncHandler(async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  if (!user) throw new ApiError(404, 'User not found');
+  if (user.isEmailVerified) {
+    return res.json({ success: true, message: 'Email is already verified.' });
+  }
+
+  const verificationToken = generateRandomToken();
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      emailVerificationToken: verificationToken,
+      emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    },
+  });
+
+  sendVerificationEmail(user.email, user.name, verificationToken).catch(e => console.error('Email error:', e.message));
+  res.json({ success: true, message: 'Verification email resent! Check your inbox.' });
+});
+
 export const forgotPassword = asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({ where: { email: req.body.email } });
   if (user) {
