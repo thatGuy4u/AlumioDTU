@@ -145,4 +145,16 @@ router.put('/conversations/:id/read', asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Marked as read' });
 }));
 
+// DELETE /conversations/:id
+router.delete('/conversations/:id', asyncHandler(async (req, res) => {
+  const participant = await prisma.conversationParticipant.findUnique({
+    where: { conversationId_userId: { conversationId: req.params.id, userId: req.user.id } },
+  });
+  if (!participant) throw new ApiError(403, 'Not a participant');
+
+  // Cascade delete removes all messages and participants
+  await prisma.conversation.delete({ where: { id: req.params.id } });
+  res.json({ success: true, message: 'Conversation deleted' });
+}));
+
 export default router;

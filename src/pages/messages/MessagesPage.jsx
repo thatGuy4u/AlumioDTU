@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { selectCurrentUser } from '../../store/slices/authSlice';
 import { useSocket, useSocketEvent } from '../../hooks/useSocket';
 import api from '../../utils/apiClient';
-import { HiOutlinePaperAirplane, HiOutlineMagnifyingGlass, HiOutlinePlusCircle, HiOutlineXMark } from 'react-icons/hi2';
+import { HiOutlinePaperAirplane, HiOutlineMagnifyingGlass, HiOutlinePlusCircle, HiOutlineXMark, HiOutlineTrash, HiOutlineArrowLeft } from 'react-icons/hi2';
 
 export default function MessagesPage() {
   const currentUser = useSelector(selectCurrentUser);
@@ -27,6 +27,13 @@ export default function MessagesPage() {
   const [userSearch, setUserSearch] = useState('');
   const [userResults, setUserResults] = useState([]);
   const [userSearchLoading, setUserSearchLoading] = useState(false);
+
+  // Delete confirmation modal state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Mobile view: show chat area instead of sidebar
+  const [mobileShowChat, setMobileShowChat] = useState(false);
   const userSearchTimeoutRef = useRef(null);
 
   // Socket.io integration (shared via context)
@@ -82,6 +89,7 @@ export default function MessagesPage() {
   const loadMessages = async (convoId) => {
     setActiveConvo(convoId);
     setMsgLoading(true);
+    setMobileShowChat(true); // Switch to chat view on mobile
     try {
       const res = await api.get(`/chat/conversations/${convoId}/messages`);
       setMessages(res.data.data.messages);
@@ -96,6 +104,34 @@ export default function MessagesPage() {
     } catch (e) { console.error(e); }
     setMsgLoading(false);
     setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+  };
+
+  // Delete conversation handler
+  const deleteConversation = async () => {
+    if (!activeConvo) return;
+    setDeleteLoading(true);
+    try {
+      await api.delete(`/chat/conversations/${activeConvo}`);
+      // Leave socket room
+      if (socket) socket.emit('leave_conversation', activeConvo);
+      // Remove from local state
+      setConversations(prev => prev.filter(c => c.id !== activeConvo));
+      setActiveConvo(null);
+      setMessages([]);
+      setMobileShowChat(false);
+    } catch (e) {
+      console.error('Failed to delete conversation:', e);
+    }
+    setDeleteLoading(false);
+    setShowDeleteConfirm(false);
+  };
+
+  // Mobile back button handler
+  const handleMobileBack = () => {
+    setMobileShowChat(false);
+    if (socket && activeConvo) socket.emit('leave_conversation', activeConvo);
+    setActiveConvo(null);
+    setMessages([]);
   };
 
   // Leave previous room when switching conversations
@@ -241,7 +277,7 @@ export default function MessagesPage() {
   });
 
   return (
-    <div className="messages-page">
+    <div className={`messages-page${mobileShowChat ? ' mobile-chat-active' : ''}`}>
       {/* Sidebar */}
       <div className="messages-sidebar">
         <div className="messages-sidebar-header">
@@ -299,6 +335,9 @@ export default function MessagesPage() {
         ) : (
           <>
             <div className="messages-chat-header">
+              <button className="mobile-back-btn" onClick={handleMobileBack} title="Back to conversations">
+                <HiOutlineArrowLeft size={20} />
+              </button>
               <div className="message-convo-avatar">{otherUser?.avatar ? <img src={otherUser.avatar} alt="" /> : <span>{otherUser?.name?.[0]}</span>}</div>
               <div className="messages-chat-header-info">
                 <div className="messages-chat-header-name-row">
@@ -311,6 +350,9 @@ export default function MessagesPage() {
                 </div>
                 {isTyping && <span className="typing-indicator">typing...</span>}
               </div>
+              <button className="delete-chat-btn" onClick={() => setShowDeleteConfirm(true)} title="Delete conversation">
+                <HiOutlineTrash size={18} />
+              </button>
             </div>
 
             <div className="messages-body">
@@ -414,6 +456,40 @@ export default function MessagesPage() {
                     </button>
                   ))
                 )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            className="new-chat-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => !deleteLoading && setShowDeleteConfirm(false)}
+          >
+            <motion.div
+              className="delete-confirm-modal"
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.2 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="delete-confirm-icon">🗑️</div>
+              <h3>Delete Conversation</h3>
+              <p>Are you sure you want to delete this entire conversation with <strong>{otherUser?.name}</strong>? This action cannot be undone.</p>
+              <div className="delete-confirm-actions">
+                <button className="delete-confirm-cancel" onClick={() => setShowDeleteConfirm(false)} disabled={deleteLoading}>
+                  Cancel
+                </button>
+                <button className="delete-confirm-delete" onClick={deleteConversation} disabled={deleteLoading}>
+                  {deleteLoading ? <span className="auth-spinner-large" /> : 'Delete'}
+                </button>
               </div>
             </motion.div>
           </motion.div>
