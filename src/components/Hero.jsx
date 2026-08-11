@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import MovingBorderButton from './MovingBorderButton';
 import ShineButton from './ShineButton';
+import dtuCampusImg from '../assets/dtu-campus.jpg';
 
 export default function Hero({ onOpenModal }) {
   const statsRef = useRef(null);
@@ -44,6 +45,8 @@ export default function Hero({ onOpenModal }) {
 
   return (
     <section id="hero">
+      {/* Blended campus background */}
+      <div className="hero-campus-bg" style={{ backgroundImage: `url(${dtuCampusImg})` }} />
       <div className="hero-content">
         <motion.div className="hero-dtu-badge" {...fadeUp(0)}>
           <span className="dtu-dot" />
