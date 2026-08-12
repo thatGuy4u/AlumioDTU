@@ -268,6 +268,35 @@
   margin-bottom: 8px;
 }
 
+.auth-alumni-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(220, 38, 38, 0.10);
+  border: 1px solid rgba(220, 38, 38, 0.30);
+  overflow: hidden;
+}
+
+.auth-alumni-warning svg {
+  flex-shrink: 0;
+  color: #ef4444;
+  margin-top: 1px;
+}
+
+.auth-alumni-warning p {
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: #fca5a5;
+  margin: 0;
+}
+
+.auth-alumni-warning p strong {
+  color: #f87171;
+}
+
+
 .auth-extras {
   display: flex;
   justify-content: flex-end;
@@ -2533,6 +2562,13 @@
 [data-theme="light"] .auth-role-pill.active { color: #1a1a2e; }
 [data-theme="light"] .auth-role-slider { background: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 [data-theme="light"] .auth-role-desc { color: #555570; }
+
+[data-theme="light"] .auth-alumni-warning {
+  background: rgba(220, 38, 38, 0.06);
+  border-color: rgba(220, 38, 38, 0.20);
+}
+[data-theme="light"] .auth-alumni-warning p { color: #991b1b; }
+[data-theme="light"] .auth-alumni-warning p strong { color: #dc2626; }
 
 [data-theme="light"] .auth-footer { color: #8888a0; }
 [data-theme="light"] .auth-footer a { color: var(--gold); }

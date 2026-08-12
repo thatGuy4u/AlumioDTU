@@ -5,6 +5,7 @@ import { useRegisterMutation } from '../../store/api/authApi';
 import {
   HiOutlineEnvelope, HiOutlineLockClosed, HiOutlineUser,
   HiOutlineEye, HiOutlineEyeSlash, HiOutlineAcademicCap, HiOutlineBriefcase,
+  HiOutlineExclamationTriangle,
 } from 'react-icons/hi2';
 
 export default function SignupPage() {
@@ -195,6 +196,23 @@ export default function SignupPage() {
           <Link to="/auth/login">Sign in</Link>
         </p>
       </div>
+
+      <AnimatePresence>
+        {role === 'alumni' && (
+          <motion.div
+            className="auth-alumni-warning"
+            initial={{ opacity: 0, height: 0, marginTop: 0 }}
+            animate={{ opacity: 1, height: 'auto', marginTop: 12 }}
+            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <HiOutlineExclamationTriangle size={20} />
+            <p>
+              <strong>Warning:</strong> If you are a student and you sign up as alumni, your account will be <strong>banned permanently</strong> without warning.
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
