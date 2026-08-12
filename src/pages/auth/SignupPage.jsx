@@ -208,7 +208,7 @@ export default function SignupPage() {
           >
             <HiOutlineExclamationTriangle size={20} />
             <p>
-              <strong>Warning:</strong> If you are a student and you sign up as alumni, your account will be <strong>banned permanently</strong> without warning.
+              <strong>Warning:</strong> If you are a student and you sign up as alumni, your account will be <strong>banned permanently</strong> without prior notification.
             </p>
           </motion.div>
         )}
