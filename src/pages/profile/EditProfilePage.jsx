@@ -275,12 +275,15 @@ export default function EditProfilePage() {
         <motion.section className="edit-section" variants={item}>
           <h3><HiOutlineGlobeAlt size={18} /> Social Links</h3>
           <div className="edit-fields-row">
-            {['linkedin', 'github', 'twitter', 'portfolio'].map(key => (
+            {['linkedin', 'github', 'twitter', 'portfolio'].map(key => {
+              const labels = { linkedin: 'LinkedIn', github: 'GitHub', twitter: 'X (Twitter)', portfolio: 'Portfolio' };
+              return (
               <div className="edit-field" key={key}>
-                <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
-                <input className="onboarding-input" value={userData.socialLinks?.[key] || ''} onChange={e => setUserData(p => ({ ...p, socialLinks: { ...p.socialLinks, [key]: e.target.value } }))} placeholder={`https://${key}.com/...`} />
+                <label>{labels[key]}</label>
+                <input className="onboarding-input" value={userData.socialLinks?.[key] || ''} onChange={e => setUserData(p => ({ ...p, socialLinks: { ...p.socialLinks, [key]: e.target.value } }))} placeholder={key === 'twitter' ? 'https://x.com/...' : `https://${key}.com/...`} />
               </div>
-            ))}
+              );
+            })}
           </div>
         </motion.section>
       </motion.div>

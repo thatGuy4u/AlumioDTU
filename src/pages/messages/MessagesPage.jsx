@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { selectCurrentUser } from '../../store/slices/authSlice';
 import { useSocket, useSocketEvent } from '../../hooks/useSocket';
 import api from '../../utils/apiClient';
-import { HiOutlinePaperAirplane, HiOutlineMagnifyingGlass, HiOutlinePlusCircle, HiOutlineXMark, HiOutlineTrash, HiOutlineArrowLeft } from 'react-icons/hi2';
+import { HiOutlinePaperAirplane, HiOutlineMagnifyingGlass, HiOutlinePlusCircle, HiOutlineXMark, HiOutlineTrash, HiOutlineArrowLeft, HiOutlineEnvelope } from 'react-icons/hi2';
 
 export default function MessagesPage() {
   const currentUser = useSelector(selectCurrentUser);
@@ -260,7 +260,7 @@ export default function MessagesPage() {
 
   const getOtherUser = (convo) => {
     const other = convo.participants?.find(p => p.user?.id !== currentUser?.id);
-    const user = other?.user || { name: 'Unknown', avatar: '' };
+    const user = other?.user || { name: 'Unknown', avatar: '', role: '' };
     // Extract profile info (works for both students and alumni)
     const profile = user.studentProfile || user.alumniProfile || {};
     return { ...user, rollNumber: user.studentProfile?.rollNumber, graduationYear: profile.graduationYear, company: user.alumniProfile?.company };
@@ -269,6 +269,11 @@ export default function MessagesPage() {
   const activeConvoData = conversations.find(c => c.id === activeConvo);
   const otherUser = activeConvoData ? getOtherUser(activeConvoData) : null;
   const isTyping = Object.keys(typingUsers).length > 0;
+
+  // Re-derive read-only flag after otherUser is defined
+  const isAdminConvo = otherUser?.role === 'admin';
+  const isStudent = currentUser?.role === 'student';
+  const isReadOnly = isStudent && isAdminConvo;
 
   const filteredConvos = conversations.filter(c => {
     if (!search) return true;
@@ -304,6 +309,7 @@ export default function MessagesPage() {
                     <div className="message-convo-info">
                       <div className="message-convo-name-row">
                         <strong>{other.name}</strong>
+                        {other.role && <span className={`message-role-badge role-${other.role}`}>{other.role}</span>}
                         {(other.rollNumber || other.graduationYear) && (
                           <span className="message-convo-meta">
                             {other.rollNumber}{other.rollNumber && other.graduationYear ? ' · ' : ''}{other.graduationYear && `Class of ${other.graduationYear}`}
@@ -342,6 +348,7 @@ export default function MessagesPage() {
               <div className="messages-chat-header-info">
                 <div className="messages-chat-header-name-row">
                   <strong>{otherUser?.name}</strong>
+                  {otherUser?.role && <span className={`message-role-badge role-${otherUser.role}`}>{otherUser.role}</span>}
                   {(otherUser?.rollNumber || otherUser?.graduationYear) && (
                     <span className="messages-chat-header-meta">
                       {otherUser?.rollNumber}{otherUser?.rollNumber && otherUser?.graduationYear ? ' · ' : ''}{otherUser?.graduationYear && `${otherUser.graduationYear}`}
@@ -365,10 +372,11 @@ export default function MessagesPage() {
                   )}
                   {messages.map((msg, i) => {
                     const isMine = msg.senderId === currentUser?.id || msg.sender?.id === currentUser?.id;
+                    const senderIsAdmin = msg.sender?.role === 'admin' || (isAdminConvo && !isMine);
                     return (
                       <motion.div
                         key={msg.id || i}
-                        className={`message-bubble ${isMine ? 'mine' : 'theirs'}${msg._optimistic ? ' optimistic' : ''}`}
+                        className={`message-bubble ${isMine ? 'mine' : 'theirs'}${msg._optimistic ? ' optimistic' : ''}${senderIsAdmin ? ' admin-msg' : ''}`}
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.02 }}
@@ -383,15 +391,31 @@ export default function MessagesPage() {
               )}
             </div>
 
-            <form className="messages-input" onSubmit={sendMessage}>
-              <input
-                placeholder="Type a message..."
-                value={newMsg}
-                onChange={e => { setNewMsg(e.target.value); handleTyping(); }}
-                autoFocus
-              />
-              <button type="submit" disabled={!newMsg.trim()}><HiOutlinePaperAirplane size={20} /></button>
-            </form>
+            {isReadOnly ? (
+              <div className="messages-readonly-banner">
+                <div className="messages-readonly-icon">
+                  <HiOutlineEnvelope size={20} />
+                </div>
+                <div className="messages-readonly-content">
+                  <p className="messages-readonly-title">This is a one-way channel</p>
+                  <p className="messages-readonly-desc">
+                    You cannot reply to admin messages. For any queries, please{' '}
+                    <Link to="/app/contact" className="messages-readonly-link">Contact Us</Link>{' '}
+                    or mail us at <a href="mailto:alumiodtu@gmail.com" className="messages-readonly-link">alumiodtu@gmail.com</a>
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <form className="messages-input" onSubmit={sendMessage}>
+                <input
+                  placeholder="Type a message..."
+                  value={newMsg}
+                  onChange={e => { setNewMsg(e.target.value); handleTyping(); }}
+                  autoFocus
+                />
+                <button type="submit" disabled={!newMsg.trim()}><HiOutlinePaperAirplane size={20} /></button>
+              </form>
+            )}
           </>
         )}
       </div>

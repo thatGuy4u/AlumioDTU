@@ -5,8 +5,12 @@ import { Provider } from 'react-redux';
 import { Toaster } from 'react-hot-toast';
 import { store } from './store';
 import { SocketProvider } from './contexts/SocketProvider';
+import { setStore } from './utils/apiClient';
 import './index.css';
 import App from './App.jsx';
+
+// Wire store to API client for auto-refresh token handling
+setStore(store);
 
 const savedTheme = localStorage.getItem('alumiodtu_theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);

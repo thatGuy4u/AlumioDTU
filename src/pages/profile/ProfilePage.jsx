@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { selectCurrentUser, selectToken, selectProfile } from '../../store/slices/authSlice';
 import { API_URL } from '../../utils/constants';
-import { HiOutlineEnvelope, HiOutlineMapPin, HiOutlineBriefcase, HiOutlineAcademicCap, HiOutlineChatBubbleLeftRight, HiOutlinePencilSquare, HiOutlineTrophy, HiOutlineLink, HiOutlineFlag } from 'react-icons/hi2';
+import { HiOutlineEnvelope, HiOutlineMapPin, HiOutlineBriefcase, HiOutlineAcademicCap, HiOutlineChatBubbleLeftRight, HiOutlinePencilSquare, HiOutlineTrophy, HiOutlineLink, HiOutlineFlag, HiOutlineGlobeAlt } from 'react-icons/hi2';
 import ReportModal from '../../components/ReportModal';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
@@ -123,6 +123,31 @@ export default function ProfilePage() {
             {p?.location && <div className="profile-info-row"><HiOutlineMapPin size={16} /><span>{p.location}</span></div>}
             {p?.linkedinProfile && <div className="profile-info-row"><HiOutlineLink size={16} /><a href={p.linkedinProfile} target="_blank" rel="noreferrer">LinkedIn</a></div>}
           </div>
+
+          {/* Social Links */}
+          {(() => {
+            const socials = typeof u.socialLinks === 'object' && u.socialLinks ? u.socialLinks : {};
+            const links = [
+              { key: 'linkedin', label: 'LinkedIn', icon: '🔗' },
+              { key: 'github', label: 'GitHub', icon: '💻' },
+              { key: 'twitter', label: 'X (Twitter)', icon: '𝕏' },
+              { key: 'portfolio', label: 'Portfolio', icon: '🌐' },
+            ].filter(l => socials[l.key]);
+            if (links.length === 0) return null;
+            return (
+              <>
+                <div className="dash-widget-header" style={{ marginTop: 12 }}><h3><HiOutlineGlobeAlt size={16} /> Socials</h3></div>
+                <div className="profile-social-links">
+                  {links.map(l => (
+                    <a key={l.key} href={socials[l.key]} target="_blank" rel="noreferrer" className="profile-social-link">
+                      <span className="profile-social-icon">{l.icon}</span>
+                      <span>{l.label}</span>
+                    </a>
+                  ))}
+                </div>
+              </>
+            );
+          })()}
         </motion.div>
 
         {/* Skills */}

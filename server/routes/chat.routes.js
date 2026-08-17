@@ -34,10 +34,12 @@ router.post('/conversations', asyncHandler(async (req, res) => {
   const { recipientId } = req.body;
   if (!recipientId) throw new ApiError(400, 'Recipient ID is required');
 
-  // Block messaging admin users
+  // Block students from messaging admin users; alumni & admin can message anyone
   const recipient = await prisma.user.findUnique({ where: { id: recipientId }, select: { role: true } });
   if (!recipient) throw new ApiError(404, 'User not found');
-  if (recipient.role === 'admin') throw new ApiError(403, 'You cannot send messages to administrators');
+  if (recipient.role === 'admin' && req.user.role === 'student') {
+    throw new ApiError(403, 'Students cannot send messages to administrators. Please use the Contact Us page.');
+  }
 
   // Check if conversation already exists
   const existingParticipants = await prisma.conversationParticipant.findMany({
@@ -112,6 +114,16 @@ router.post('/conversations/:id/messages', asyncHandler(async (req, res) => {
     where: { conversationId_userId: { conversationId: req.params.id, userId: req.user.id } },
   });
   if (!participant) throw new ApiError(403, 'Not a participant');
+
+  // Students cannot send messages in conversations with admin (one-way only)
+  if (req.user.role === 'student') {
+    const adminParticipant = await prisma.conversationParticipant.findFirst({
+      where: { conversationId: req.params.id, user: { role: 'admin' } },
+    });
+    if (adminParticipant) {
+      throw new ApiError(403, 'This is a one-way channel. Students cannot reply to admin messages.');
+    }
+  }
 
   const message = await prisma.message.create({
     data: {

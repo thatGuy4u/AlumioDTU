@@ -156,7 +156,7 @@ export default function Footer() {
         <div className="footer-bottom">
           <p>© 2026 AlumioDTU. Built with <HiOutlineHeart style={{ verticalAlign: 'middle', color: '#f43f5e', width: 14, height: 14 }} /> by Aman.</p>
           <div className="footer-socials">
-            <a href="#" aria-label="Twitter">𝕏</a>
+            <a href="#" aria-label="X">𝕏</a>
             <a href="#" aria-label="LinkedIn">in</a>
             <a href="#" aria-label="GitHub">GH</a>
           </div>

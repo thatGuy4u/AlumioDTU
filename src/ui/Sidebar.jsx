@@ -50,6 +50,7 @@ const adminLinks = [
   { to: '/app/admin/reports', icon: HiOutlineChartBarSquare, label: 'Analytics' },
   { to: '/app/admin/moderation', icon: HiOutlineCog6Tooth, label: 'Moderation' },
   { to: '/app/admin/broadcast', icon: HiOutlineMegaphone, label: 'Broadcast' },
+  { to: '/app/messages', icon: HiOutlineChatBubbleLeftRight, label: 'Messages' },
   { to: '/app/community', icon: HiOutlineChatBubbleOvalLeft, label: 'Community' },
   { to: '/app/events', icon: HiOutlineCalendarDays, label: 'Events' },
   { to: '/app/notifications', icon: HiOutlineBell, label: 'Notifications' },

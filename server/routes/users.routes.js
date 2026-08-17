@@ -207,7 +207,11 @@ router.get('/directory', asyncHandler(async (req, res) => {
 router.get('/search', asyncHandler(async (req, res) => {
   const { q, role, page = 1, limit = 10 } = req.query;
   if (!q) throw new ApiError(400, 'Search query is required');
-  const where = { name: { contains: q, mode: 'insensitive' }, isBanned: false, role: { not: 'admin' } };
+  const where = { name: { contains: q, mode: 'insensitive' }, isBanned: false };
+  // Students cannot see admin users in search; alumni and admin can
+  if (req.user.role === 'student') {
+    where.role = { not: 'admin' };
+  }
   if (role) where.role = role;
   const skip = (parseInt(page) - 1) * parseInt(limit);
   const [users, total] = await prisma.$transaction([
