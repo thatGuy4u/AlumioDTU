@@ -15,6 +15,11 @@ export const register = asyncHandler(async (req, res) => {
   // Guard: never allow admin self-registration
   const safeRole = role === 'alumni' ? 'alumni' : 'student';
 
+  // Students must use @dtu.ac.in email
+  if (safeRole === 'student' && !email.endsWith('@dtu.ac.in')) {
+    throw new ApiError(400, 'Students must use a valid @dtu.ac.in email address');
+  }
+
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) throw new ApiError(400, 'An account with this email already exists');
 
@@ -99,10 +104,18 @@ export const verifyEmail = asyncHandler(async (req, res) => {
 });
 
 export const resendVerificationEmail = asyncHandler(async (req, res) => {
-  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
-  if (!user) throw new ApiError(404, 'User not found');
-  if (user.isEmailVerified) {
-    return res.json({ success: true, message: 'Email is already verified.' });
+  // Support both authenticated (req.user) and unauthenticated (req.body.email) requests.
+  // This handles the case where a user's JWT has expired but they still need to resend.
+  let user;
+  if (req.user) {
+    user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  } else if (req.body.email) {
+    user = await prisma.user.findUnique({ where: { email: req.body.email.toLowerCase().trim() } });
+  }
+
+  // Intentionally vague response to avoid leaking whether an email is registered
+  if (!user || user.isEmailVerified) {
+    return res.json({ success: true, message: 'If the account exists and is unverified, a verification email has been sent.' });
   }
 
   const verificationToken = generateRandomToken();

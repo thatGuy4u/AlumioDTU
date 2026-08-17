@@ -171,4 +171,47 @@ router.put('/reports/:id', asyncHandler(async (req, res) => {
   res.json({ success: true, data: updated });
 }));
 
+// POST /broadcast — send a notification to all students, all alumni, or all users
+router.post('/broadcast', asyncHandler(async (req, res) => {
+  const { title, message, audience, link } = req.body;
+
+  if (!title || !message || !audience) {
+    throw new ApiError(400, 'Title, message, and audience are required');
+  }
+  if (!['all', 'students', 'alumni'].includes(audience)) {
+    throw new ApiError(400, 'Audience must be one of: all, students, alumni');
+  }
+
+  // Build the user filter based on audience
+  const where = { isBanned: false };
+  if (audience === 'students') where.role = 'student';
+  else if (audience === 'alumni') where.role = 'alumni';
+
+  const users = await prisma.user.findMany({
+    where,
+    select: { id: true },
+  });
+
+  if (users.length === 0) {
+    return res.json({ success: true, message: 'No users found for the selected audience.', data: { count: 0 } });
+  }
+
+  // Create notifications in bulk
+  await prisma.notification.createMany({
+    data: users.map(u => ({
+      recipientId: u.id,
+      type: 'system_notification',
+      title,
+      message,
+      link: link || null,
+    })),
+  });
+
+  res.status(201).json({
+    success: true,
+    message: `Broadcast sent to ${users.length} ${audience === 'all' ? 'users' : audience}`,
+    data: { count: users.length },
+  });
+}));
+
 export default router;

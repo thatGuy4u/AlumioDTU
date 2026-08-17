@@ -5,9 +5,14 @@ export const registerSchema = Joi.object({
     'string.min': 'Name must be at least 2 characters',
     'any.required': 'Name is required',
   }),
-  email: Joi.string().email().lowercase().trim().pattern(/@dtu\.ac\.in$/)
-    .required().messages({
-      'string.pattern.base': 'Must be a valid @dtu.ac.in email address',
+  email: Joi.string().email().lowercase().trim().required()
+    .when('role', {
+      is: 'student',
+      then: Joi.string().pattern(/@dtu\.ac\.in$/).messages({
+        'string.pattern.base': 'Students must use a valid @dtu.ac.in email address',
+      }),
+    })
+    .messages({
       'any.required': 'Email is required',
     }),
   password: Joi.string().min(8).max(128).required().messages({

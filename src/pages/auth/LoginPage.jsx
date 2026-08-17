@@ -37,7 +37,9 @@ export default function LoginPage() {
       const result = await login({ email, password }).unwrap();
       if (result.success) {
         const loggedInUser = result.data.user;
-        if (!loggedInUser.isProfileComplete) {
+        if (!loggedInUser.isEmailVerified) {
+          navigate('/app/pending-verification');
+        } else if (!loggedInUser.isProfileComplete) {
           navigate('/app/onboarding');
         } else {
           navigate('/app/dashboard');

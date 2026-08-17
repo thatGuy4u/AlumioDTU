@@ -11,7 +11,7 @@ import {
   HiOutlineBell, HiOutlineCog6Tooth,
   HiOutlineShieldCheck, HiOutlineChartBarSquare,
   HiOutlineChevronLeft, HiOutlineChevronRight,
-  HiOutlineEnvelope,
+  HiOutlineEnvelope, HiOutlineMegaphone,
 } from 'react-icons/hi2';
 
 const studentLinks = [
@@ -49,6 +49,7 @@ const adminLinks = [
   { to: '/app/admin/verifications', icon: HiOutlineShieldCheck, label: 'Verifications' },
   { to: '/app/admin/reports', icon: HiOutlineChartBarSquare, label: 'Analytics' },
   { to: '/app/admin/moderation', icon: HiOutlineCog6Tooth, label: 'Moderation' },
+  { to: '/app/admin/broadcast', icon: HiOutlineMegaphone, label: 'Broadcast' },
   { to: '/app/community', icon: HiOutlineChatBubbleOvalLeft, label: 'Community' },
   { to: '/app/events', icon: HiOutlineCalendarDays, label: 'Events' },
   { to: '/app/notifications', icon: HiOutlineBell, label: 'Notifications' },

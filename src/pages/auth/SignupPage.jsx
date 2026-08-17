@@ -31,8 +31,12 @@ export default function SignupPage() {
       setError('Password must be at least 8 characters');
       return;
     }
-    if (!/^[\w.-]+@dtu\.ac\.in$/.test(email)) {
-      setError('Must use a valid @dtu.ac.in email address');
+    if (role === 'student' && !/^[\w.-]+@dtu\.ac\.in$/.test(email)) {
+      setError('Students must use a valid @dtu.ac.in email address');
+      return;
+    }
+    if (role === 'alumni' && !/^[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+      setError('Please enter a valid email address');
       return;
     }
     if (!acceptedPolicy) {
@@ -43,11 +47,7 @@ export default function SignupPage() {
     try {
       const result = await register({ name: name.trim(), email, password, role }).unwrap();
       if (result.success) {
-        if (!result.data.user?.isProfileComplete) {
-          navigate('/app/onboarding');
-        } else {
-          navigate('/app/dashboard');
-        }
+        navigate('/app/pending-verification');
       }
     } catch (err) {
       setError(err.data?.message || 'Registration failed. Please try again.');
@@ -129,19 +129,23 @@ export default function SignupPage() {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="signup-email">DTU EMAIL</label>
+          <label htmlFor="signup-email">{role === 'student' ? 'DTU EMAIL' : 'EMAIL ADDRESS'}</label>
           <div className="auth-input-wrapper">
             <HiOutlineEnvelope className="auth-input-icon" size={18} />
             <input
               id="signup-email"
               type="email"
-              placeholder="you@dtu.ac.in"
+              placeholder={role === 'student' ? 'you@dtu.ac.in' : 'you@example.com'}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
             />
           </div>
-          <span className="auth-field-hint">Only @dtu.ac.in emails accepted</span>
+          <span className="auth-field-hint">
+            {role === 'student'
+              ? 'Only @dtu.ac.in emails accepted'
+              : 'Any valid email address accepted'}
+          </span>
         </div>
 
         <div className="auth-field">

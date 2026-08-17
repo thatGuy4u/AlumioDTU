@@ -23,6 +23,7 @@ import SignupPage from './pages/auth/SignupPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import VerifyEmailPage from './pages/auth/VerifyEmailPage';
+import PendingVerificationPage from './pages/auth/PendingVerificationPage';
 
 // Dashboard
 import DashboardRouter from './pages/dashboard/DashboardRouter';
@@ -58,6 +59,7 @@ import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminVerificationsPage from './pages/admin/AdminVerificationsPage';
 import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage';
 import AdminModerationPage from './pages/admin/AdminModerationPage';
+import AdminBroadcastPage from './pages/admin/AdminBroadcastPage';
 
 // Landing Page Component
 function LandingPage() {
@@ -126,6 +128,9 @@ function App() {
       </Route>
 
       {/* Authenticated App */}
+      {/* Pending email verification — sits outside AppLayout so unverified users see it standalone */}
+      <Route path="/app/pending-verification" element={<PendingVerificationPage />} />
+
       <Route path="/app" element={<AppLayout />}>
         <Route path="dashboard" element={<DashboardRouter />} />
         <Route path="onboarding" element={<OnboardingRouter />} />
@@ -174,6 +179,7 @@ function App() {
         <Route path="admin/verifications" element={<AdminVerificationsPage />} />
         <Route path="admin/reports" element={<AdminAnalyticsPage />} />
         <Route path="admin/moderation" element={<AdminModerationPage />} />
+        <Route path="admin/broadcast" element={<AdminBroadcastPage />} />
       </Route>
 
       {/* Catch-all */}

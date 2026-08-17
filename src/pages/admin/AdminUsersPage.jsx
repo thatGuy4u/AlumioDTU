@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectToken, selectCurrentUser } from '../../store/slices/authSlice';
 import { API_URL } from '../../utils/constants';
 import { format } from 'date-fns';
 import {
   HiOutlineMagnifyingGlass, HiOutlineShieldCheck, HiOutlineNoSymbol,
-  HiOutlineTrash, HiOutlineCheckBadge, HiOutlineUser,
+  HiOutlineTrash, HiOutlineCheckBadge, HiOutlineUser, HiOutlineEye,
 } from 'react-icons/hi2';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.03 } } };
@@ -103,11 +104,11 @@ export default function AdminUsersPage() {
             {users.map(u => (
               <motion.div key={u.id} className="admin-table-row" variants={item}>
                 <div className="admin-user-cell">
-                  <div className="directory-card-avatar tiny">
+                  <Link to={`/app/profile/${u.id}`} className="directory-card-avatar tiny" style={{ textDecoration: 'none' }}>
                     {u.avatar ? <img src={u.avatar} alt="" /> : <span>{u.name?.[0]}</span>}
-                  </div>
+                  </Link>
                   <div>
-                    <span className="poster-name">{u.name}</span>
+                    <Link to={`/app/profile/${u.id}`} className="poster-name admin-user-link">{u.name}</Link>
                     <span className="poster-email">{u.email}</span>
                   </div>
                 </div>
@@ -120,6 +121,9 @@ export default function AdminUsersPage() {
                 </div>
                 <span className="admin-date">{u.createdAt ? format(new Date(u.createdAt), 'MMM d, yyyy') : '—'}</span>
                 <div className="admin-actions">
+                  <Link to={`/app/profile/${u.id}`} className="admin-action-btn view" title="View Profile">
+                    <HiOutlineEye size={16} />
+                  </Link>
                   {!u.isVerified && u.role === 'alumni' && (
                     <button className="admin-action-btn verify" onClick={() => handleVerify(u.id)} title="Verify">
                       <HiOutlineCheckBadge size={16} />

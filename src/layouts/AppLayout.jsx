@@ -54,6 +54,15 @@ export default function AppLayout() {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
+  // Block unverified users — force them to the pending-verification page
+  if (
+    !BYPASS_AUTH_FOR_TESTING
+    && user
+    && !user.isEmailVerified
+  ) {
+    return <Navigate to="/app/pending-verification" replace />;
+  }
+
   if (
     !BYPASS_AUTH_FOR_TESTING
     && user

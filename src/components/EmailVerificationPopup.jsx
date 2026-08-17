@@ -49,9 +49,9 @@ export default function EmailVerificationPopup() {
     if (resending || cooldown > 0) return;
     setResending(true);
     try {
-      await axios.post(`${API_URL}/auth/resend-verification`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const headers = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+      await axios.post(`${API_URL}/auth/resend-verification`, { email: user?.email }, { headers });
       toast.success('Verification email resent! Check your inbox.');
       setCooldown(COOLDOWN_SECONDS);
     } catch (err) {

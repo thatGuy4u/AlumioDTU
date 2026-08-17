@@ -20,6 +20,15 @@ export const authLimiter = rateLimit({
   },
 });
 
+export const resendLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: {
+    success: false,
+    message: 'Too many resend attempts, please try again after 15 minutes.',
+  },
+});
+
 export const uploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 20,

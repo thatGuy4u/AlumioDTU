@@ -32,7 +32,7 @@ export const INDUSTRIES = [
 export const POST_CATEGORIES = [
   { value: 'placements', label: 'Placements', icon: '🎯' },
   { value: 'internships', label: 'Internships', icon: '💼' },
-  { value: 'higher-studies', label: 'Higher Studies', icon: '🎓' },
+  { value: 'higher_studies', label: 'Higher Studies', icon: '🎓' },
   { value: 'startups', label: 'Startups', icon: '🚀' },
   { value: 'general', label: 'General Discussion', icon: '💬' },
 ];
