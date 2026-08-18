@@ -114,6 +114,9 @@ export default function StudentDashboard() {
                   ? 'Convert your student account to alumni NOW to keep all your data, posts, and connections.'
                   : `As a Class of ${gradYear} graduate, please convert your account to alumni before September 30, ${gradYear} to continue using AlumioDTU.`}
               </span>
+              <span style={{ fontSize: '0.78rem', opacity: 0.85, marginTop: 4, display: 'block' }}>
+                💡 You can also create a new alumni account with your personal email ID.
+              </span>
             </div>
             <Link to="/app/transition" className="graduation-warning-btn">
               Convert to Alumni →
