@@ -38,7 +38,7 @@ export default function AdminUsersPage() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchUsers(page); }, [page]);
+  useEffect(() => { fetchUsers(page); }, [page, roleFilter]);
 
   const handleVerify = async (userId) => {
     try {
@@ -83,7 +83,7 @@ export default function AdminUsersPage() {
           <input placeholder="Search by name..." value={search} onChange={e => setSearch(e.target.value)} />
           <button type="submit">Search</button>
         </form>
-        <select className="onboarding-input" style={{ width: 'auto' }} value={roleFilter} onChange={e => { setRoleFilter(e.target.value); setPage(1); setTimeout(() => fetchUsers(1), 0); }}>
+        <select className="onboarding-input" style={{ width: 'auto' }} value={roleFilter} onChange={e => { setRoleFilter(e.target.value); setPage(1); }}>
           <option value="">All Roles</option>
           <option value="student">Students</option>
           <option value="alumni">Alumni</option>

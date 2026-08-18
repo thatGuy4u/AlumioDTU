@@ -24,6 +24,24 @@ router.get('/profile', asyncHandler(async (req, res) => {
 // PUT /profile
 router.put('/profile', asyncHandler(async (req, res) => {
   const { name, socialLinks, ...profileData } = req.body;
+
+  // Validate social link URLs
+  if (socialLinks && typeof socialLinks === 'object') {
+    const socialValidators = {
+      linkedin: (v) => /^https?:\/\/(www\.)?linkedin\.com\/in\/.+/i.test(v),
+      github: (v) => /^https?:\/\/(www\.)?github\.com\/.+/i.test(v),
+      twitter: (v) => /^https?:\/\/(www\.)?(twitter\.com|x\.com)\/.+/i.test(v),
+      portfolio: (v) => /^https?:\/\/.+\..+/i.test(v),
+    };
+    const labels = { linkedin: 'LinkedIn', github: 'GitHub', twitter: 'X (Twitter)', portfolio: 'Portfolio' };
+    for (const [key, validator] of Object.entries(socialValidators)) {
+      const val = socialLinks[key]?.trim();
+      if (val && !validator(val)) {
+        throw new ApiError(400, `Invalid ${labels[key]} URL`);
+      }
+    }
+  }
+
   const userData = {};
   if (name) userData.name = name;
   if (socialLinks) userData.socialLinks = socialLinks;

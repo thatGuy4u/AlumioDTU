@@ -83,7 +83,27 @@ export default function EditProfilePage() {
     setProfileData(prev => ({ ...prev, [type]: (prev[type] || []).filter(t => t !== tag) }));
   };
 
+  // Social link URL validators — only allow valid platform URLs (or empty)
+  const socialValidators = {
+    linkedin: (v) => /^https?:\/\/(www\.)?linkedin\.com\/in\/.+/i.test(v),
+    github: (v) => /^https?:\/\/(www\.)?github\.com\/.+/i.test(v),
+    twitter: (v) => /^https?:\/\/(www\.)?(twitter\.com|x\.com)\/.+/i.test(v),
+    portfolio: (v) => /^https?:\/\/.+\..+/i.test(v),
+  };
+  const socialLabels = { linkedin: 'LinkedIn', github: 'GitHub', twitter: 'X (Twitter)', portfolio: 'Portfolio' };
+
   const handleSave = async () => {
+
+    // Validate social links
+    const socials = userData.socialLinks || {};
+    for (const [key, validator] of Object.entries(socialValidators)) {
+      const val = socials[key]?.trim();
+      if (val && !validator(val)) {
+        toast.error(`Invalid ${socialLabels[key]} URL. Please enter a valid ${socialLabels[key]} profile link.`);
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       const body = { name: userData.name, socialLinks: userData.socialLinks };
