@@ -5,16 +5,23 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { selectToken } from '../../store/slices/authSlice';
 import { API_URL, BRANCHES, INDUSTRIES } from '../../utils/constants';
-import { HiOutlineMagnifyingGlass, HiOutlineMapPin, HiOutlineBriefcase, HiOutlineAcademicCap, HiOutlineFunnel, HiOutlineXMark } from 'react-icons/hi2';
+import { HiOutlineMagnifyingGlass, HiOutlineMapPin, HiOutlineBriefcase, HiOutlineAcademicCap, HiOutlineFunnel, HiOutlineXMark, HiOutlineUserGroup } from 'react-icons/hi2';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
+
+const ROLE_TABS = [
+  { value: '', label: 'All' },
+  { value: 'alumni', label: 'Alumni' },
+  { value: 'student', label: 'Students' },
+];
 
 export default function DirectoryPage() {
   const token = useSelector(selectToken);
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
   const [filters, setFilters] = useState({ branch: '', industry: '', graduationYear: '', mentorshipAvailable: '' });
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
@@ -24,6 +31,7 @@ export default function DirectoryPage() {
     setLoading(true);
     const params = new URLSearchParams({ page: p, limit: 12 });
     if (search) params.set('search', search);
+    if (roleFilter) params.set('role', roleFilter);
     Object.entries(filters).forEach(([k, v]) => { if (v) params.set(k, v); });
     try {
       const res = await axios.get(`${API_URL}/users/directory?${params}`, { headers: { Authorization: `Bearer ${token}` } });
@@ -34,16 +42,30 @@ export default function DirectoryPage() {
   };
 
   useEffect(() => { fetchProfiles(page); }, [page]);
+  useEffect(() => { setPage(1); fetchProfiles(1); }, [roleFilter]);
   const handleSearch = (e) => { e.preventDefault(); setPage(1); fetchProfiles(1); };
-  const clearFilters = () => { setFilters({ branch: '', industry: '', graduationYear: '', mentorshipAvailable: '' }); setSearch(''); setPage(1); setTimeout(() => fetchProfiles(1), 0); };
+  const clearFilters = () => { setFilters({ branch: '', industry: '', graduationYear: '', mentorshipAvailable: '' }); setSearch(''); setRoleFilter(''); setPage(1); setTimeout(() => fetchProfiles(1), 0); };
 
   return (
     <div className="directory-page">
       <div className="directory-header">
         <div>
-          <h1>Alumni <span className="text-gold">Directory</span></h1>
-          <p>Connect with DTU alumni across the globe</p>
+          <h1>Users <span className="text-gold">Directory</span></h1>
+          <p>Discover students and alumni across the DTU network</p>
         </div>
+      </div>
+
+      {/* Role Tabs */}
+      <div className="directory-role-tabs">
+        {ROLE_TABS.map(tab => (
+          <button
+            key={tab.value}
+            className={`directory-role-tab ${roleFilter === tab.value ? 'active' : ''}`}
+            onClick={() => setRoleFilter(tab.value)}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Search & Filters */}
@@ -64,14 +86,18 @@ export default function DirectoryPage() {
             <option value="">All Branches</option>
             {BRANCHES.map(b => <option key={b.value} value={b.value}>{b.label}</option>)}
           </select>
-          <select className="onboarding-input" value={filters.industry} onChange={e => setFilters(f => ({ ...f, industry: e.target.value }))}>
-            <option value="">All Industries</option>
-            {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
-          </select>
-          <select className="onboarding-input" value={filters.mentorshipAvailable} onChange={e => setFilters(f => ({ ...f, mentorshipAvailable: e.target.value }))}>
-            <option value="">Mentorship</option>
-            <option value="true">Available</option>
-          </select>
+          {roleFilter !== 'student' && (
+            <>
+              <select className="onboarding-input" value={filters.industry} onChange={e => setFilters(f => ({ ...f, industry: e.target.value }))}>
+                <option value="">All Industries</option>
+                {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
+              </select>
+              <select className="onboarding-input" value={filters.mentorshipAvailable} onChange={e => setFilters(f => ({ ...f, mentorshipAvailable: e.target.value }))}>
+                <option value="">Mentorship</option>
+                <option value="true">Available</option>
+              </select>
+            </>
+          )}
           <button className="onboarding-back-btn" onClick={clearFilters}>Clear</button>
           <button className="auth-submit-btn" style={{ width: 'auto', padding: '8px 20px' }} onClick={() => { setPage(1); fetchProfiles(1); }}>Apply</button>
         </motion.div>
@@ -83,14 +109,16 @@ export default function DirectoryPage() {
       ) : (
         <>
           <motion.div className="directory-grid" variants={container} initial="hidden" animate="show">
-            {profiles.length === 0 && <p style={{ color: 'var(--text-muted)', gridColumn: '1/-1', textAlign: 'center', padding: 40 }}>No alumni found matching your criteria.</p>}
+            {profiles.length === 0 && <p style={{ color: 'var(--text-muted)', gridColumn: '1/-1', textAlign: 'center', padding: 40 }}>No members found matching your criteria.</p>}
             {profiles.map(p => (
-              <motion.div key={p.id} className="directory-card" variants={item}>
+              <motion.div key={p.user?.id || p.id} className="directory-card" variants={item}>
                 <div className="directory-card-avatar">{p.user?.avatar ? <img src={p.user.avatar} alt="" /> : <span>{p.user?.name?.[0]}</span>}</div>
                 <h3>{p.user?.name}</h3>
+                <span className={`topbar-role-badge role-${p.user?.role}`}>{p.user?.role}</span>
                 {p.company && <div className="directory-card-meta"><HiOutlineBriefcase size={14} /><span>{p.designation ? `${p.designation}, ` : ''}{p.company}</span></div>}
                 {p.branch && <div className="directory-card-meta"><HiOutlineAcademicCap size={14} /><span>{p.branch}{p.graduationYear ? ` '${String(p.graduationYear).slice(2)}` : ''}</span></div>}
                 {p.location && <div className="directory-card-meta"><HiOutlineMapPin size={14} /><span>{p.location}</span></div>}
+                {p.rollNumber && <div className="directory-card-meta"><HiOutlineUserGroup size={14} /><span>{p.rollNumber}</span></div>}
                 {p.skills?.length > 0 && <div className="directory-card-skills">{p.skills.slice(0, 3).map((s, i) => <span key={i} className="dash-tag">{s}</span>)}{p.skills.length > 3 && <span className="dash-tag secondary">+{p.skills.length - 3}</span>}</div>}
                 <div className="directory-card-actions">
                   <Link to={`/app/profile/${p.user?.id}`} className="profile-edit-btn">View Profile</Link>

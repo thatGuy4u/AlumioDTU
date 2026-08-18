@@ -164,6 +164,35 @@
 .directory-header h1 { font-size: 1.3rem; font-weight: 800; color: var(--text-primary); }
 .directory-header p { color: var(--text-muted); font-size: 0.85rem; }
 
+/* Role filter tabs */
+.directory-role-tabs {
+  display: flex; gap: 6px; margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.directory-role-tab {
+  padding: 6px 18px; border-radius: 20px;
+  font-size: 0.8rem; font-weight: 600;
+  background: var(--glass-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer; transition: all 0.2s;
+}
+.directory-role-tab:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.directory-role-tab.active {
+  background: linear-gradient(135deg, rgba(79,110,247,0.15), rgba(79,110,247,0.08));
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Card name row with role badge */
+.directory-card-name-row {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap;
+}
+
 /* On mobile, stack search and filters vertically */
 .directory-controls {
   display: flex; gap: 8px; margin-bottom: 16px;

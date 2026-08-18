@@ -171,34 +171,89 @@ router.post('/convert-to-alumni', asyncHandler(async (req, res) => {
   });
 }));
 
-// GET /directory — fixed search to use database-level filtering
+// GET /directory — universal user directory (alumni + students)
 router.get('/directory', asyncHandler(async (req, res) => {
-  const { search, company, industry, branch, graduationYear, location, skills, mentorshipAvailable, page = 1, limit = 12 } = req.query;
-  const where = {};
+  const { search, role, company, industry, branch, graduationYear, location, skills, mentorshipAvailable, page = 1, limit = 12 } = req.query;
 
-  if (company) where.company = { contains: company, mode: 'insensitive' };
-  if (industry) where.industry = industry;
-  if (branch) where.branch = branch;
-  if (graduationYear) where.graduationYear = parseInt(graduationYear);
-  if (location) where.location = { contains: location, mode: 'insensitive' };
-  if (skills) where.skills = { hasSome: skills.split(',').map(s => s.trim()) };
-  if (mentorshipAvailable === 'true') where.mentorshipAvailability = true;
+  const userWhere = { isBanned: false, isProfileComplete: true, role: { not: 'admin' } };
+  const alumniProfileWhere = {};
+  const studentProfileWhere = {};
 
-  // Search by user name at the database level (not client-side filtering)
+  // Role filter
+  if (role === 'alumni' || role === 'student') {
+    userWhere.role = role;
+  }
+
+  // Name search
   if (search) {
-    where.user = { name: { contains: search, mode: 'insensitive' } };
+    userWhere.name = { contains: search, mode: 'insensitive' };
+  }
+
+  // Alumni-specific filters (only applied if not filtering to students-only)
+  if (company) alumniProfileWhere.company = { contains: company, mode: 'insensitive' };
+  if (industry) alumniProfileWhere.industry = industry;
+  if (location) alumniProfileWhere.location = { contains: location, mode: 'insensitive' };
+  if (mentorshipAvailable === 'true') alumniProfileWhere.mentorshipAvailability = true;
+
+  // Shared profile filters
+  if (branch) {
+    alumniProfileWhere.branch = branch;
+    studentProfileWhere.branch = branch;
+  }
+  if (graduationYear) {
+    const yr = parseInt(graduationYear);
+    alumniProfileWhere.graduationYear = yr;
+    studentProfileWhere.graduationYear = yr;
+  }
+  if (skills) {
+    const skillArr = skills.split(',').map(s => s.trim());
+    alumniProfileWhere.skills = { hasSome: skillArr };
+    studentProfileWhere.skills = { hasSome: skillArr };
+  }
+
+  // Build the composite where — if alumni-specific filters are set and role is not 'student',
+  // require matching alumni profile; if student filters are set and role is not 'alumni', require matching student profile
+  const hasAlumniFilters = Object.keys(alumniProfileWhere).length > 0;
+  const hasStudentFilters = Object.keys(studentProfileWhere).length > 0;
+
+  if (hasAlumniFilters && role !== 'student') {
+    userWhere.alumniProfile = alumniProfileWhere;
+  }
+  if (hasStudentFilters && role !== 'alumni') {
+    userWhere.studentProfile = studentProfileWhere;
+  }
+
+  // If alumni-specific filters are active but no role is specified, only show alumni
+  if (hasAlumniFilters && !hasStudentFilters && !role) {
+    userWhere.role = 'alumni';
   }
 
   const skip = (parseInt(page) - 1) * parseInt(limit);
   const take = parseInt(limit);
 
-  const [profiles, total] = await prisma.$transaction([
-    prisma.alumniProfile.findMany({
-      where, skip, take, orderBy: { createdAt: 'desc' },
-      include: { user: { select: { id: true, name: true, email: true, avatar: true, isVerified: true, socialLinks: true } } },
+  const [users, total] = await prisma.$transaction([
+    prisma.user.findMany({
+      where: userWhere, skip, take,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true, name: true, email: true, avatar: true, role: true,
+        isVerified: true, socialLinks: true,
+        alumniProfile: true,
+        studentProfile: true,
+      },
     }),
-    prisma.alumniProfile.count({ where }),
+    prisma.user.count({ where: userWhere }),
   ]);
+
+  // Normalize into a unified shape: { user: {...}, ...profileFields }
+  const profiles = users.map(u => {
+    const profile = u.alumniProfile || u.studentProfile || {};
+    const { alumniProfile, studentProfile, ...userData } = u;
+    return {
+      ...profile,
+      user: userData,
+    };
+  });
 
   res.json({ success: true, data: { profiles, pagination: { page: parseInt(page), limit: take, total, pages: Math.ceil(total / take) } } });
 }));

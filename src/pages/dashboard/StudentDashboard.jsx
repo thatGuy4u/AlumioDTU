@@ -8,7 +8,7 @@ import {
   HiOutlineAcademicCap, HiOutlineBriefcase, HiOutlineCalendarDays,
   HiOutlineUserGroup, HiOutlineChatBubbleOvalLeft, HiOutlineArrowTrendingUp,
   HiOutlineSparkles, HiOutlineRocketLaunch, HiOutlineEnvelope,
-  HiOutlineExclamationCircle, HiOutlineCheckBadge,
+  HiOutlineCheckBadge,
   HiOutlineBoltSlash, HiOutlineClock,
 } from 'react-icons/hi2';
 
@@ -24,28 +24,6 @@ const item = {
 export default function StudentDashboard() {
   const user = useSelector(selectCurrentUser);
   const profile = useSelector(selectProfile);
-
-  // Compute profile completion dynamically from filled fields
-  const completionScore = (() => {
-    if (!profile && !user) return 0;
-    let score = 0;
-    // User-level fields (20%)
-    if (user?.name) score += 10;
-    if (user?.avatar) score += 10;
-    // Profile-level fields (80%)
-    if (profile) {
-      if (profile.branch) score += 10;
-      if (profile.year) score += 5;
-      if (profile.graduationYear) score += 5;
-      if (profile.rollNumber) score += 5;
-      if (profile.bio && profile.bio.length > 0) score += 10;
-      if (profile.skills && profile.skills.length > 0) score += 15;
-      if (profile.interests && profile.interests.length > 0) score += 10;
-      if (profile.careerGoals && profile.careerGoals.length > 0) score += 10;
-      if (profile.resume && profile.resume.length > 0) score += 10;
-    }
-    return Math.min(score, 100);
-  })();
 
   const [alumni, setAlumni] = useState([]);
   const [events, setEvents] = useState([]);
@@ -144,29 +122,18 @@ export default function StudentDashboard() {
         );
       })()}
 
-      {/* Info Banner — shows when profile incomplete or email unverified */}
-      {(completionScore < 100 || !user?.isEmailVerified) && (
+      {/* Email Verification Banner — shows only when email is unverified */}
+      {!user?.isEmailVerified && (
         <motion.div className="dash-info-banner" variants={item}>
           <div className="dash-info-banner-icon">
-            {completionScore < 100 ? <HiOutlineExclamationCircle size={22} /> : <HiOutlineCheckBadge size={22} />}
+            <HiOutlineCheckBadge size={22} />
           </div>
           <div className="dash-info-banner-text">
-            <strong>
-              {completionScore < 100
-                ? `Your profile is ${completionScore}% complete`
-                : 'Verify your email address'}
-            </strong>
-            <span>
-              {completionScore < 100
-                ? 'Complete your profile to unlock all features and improve visibility.'
-                : 'Check your inbox for a verification link to fully activate your account.'}
-            </span>
+            <strong>Verify your email address</strong>
+            <span>Check your inbox for a verification link to fully activate your account.</span>
           </div>
-          <Link
-            to={completionScore < 100 ? '/app/profile/edit' : '/app/settings'}
-            className="dash-info-banner-btn"
-          >
-            {completionScore < 100 ? 'Complete Profile' : 'Resend Email'}
+          <Link to="/app/settings" className="dash-info-banner-btn">
+            Resend Email
           </Link>
         </motion.div>
       )}
@@ -200,15 +167,15 @@ export default function StudentDashboard() {
 
       {/* Dashboard Grid */}
       <div className="dash-grid-2col">
-        {/* Recommended Alumni */}
+        {/* Recommended Users */}
         <motion.div className="dash-widget" variants={item}>
           <div className="dash-widget-header">
             <HiOutlineSparkles size={18} className="text-gold" />
-            <h3>Recommended Alumni</h3>
+            <h3>Recommended Users</h3>
           </div>
           <div className="dash-widget-body">
             {alumni.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No alumni found yet</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No users found yet</p>
             ) : alumni.map((a) => (
               <Link key={a.id} to={`/app/profile/${a.user?.id}`} className="dash-alumni-card" style={{ textDecoration: 'none' }}>
                 <div className="dash-alumni-avatar">
@@ -219,11 +186,11 @@ export default function StudentDashboard() {
                   <span>{a.company || a.designation || 'Alumni'}</span>
                   <span className="dash-alumni-branch">{a.branch} {a.graduationYear ? `'${String(a.graduationYear).slice(2)}` : ''}</span>
                 </div>
-                <button className="dash-connect-btn" onClick={(e) => e.preventDefault()}>View</button>
+                <span className="dash-connect-btn">View</span>
               </Link>
             ))}
           </div>
-          <Link to="/app/directory" className="dash-widget-link">View All Alumni →</Link>
+          <Link to="/app/directory" className="dash-widget-link">View All Users →</Link>
         </motion.div>
 
         {/* Upcoming Events */}

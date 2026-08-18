@@ -17,7 +17,7 @@ import {
 const studentLinks = [
   { to: '/app/dashboard', icon: HiOutlineHome, label: 'Dashboard' },
   { to: '/app/profile', icon: HiOutlineUser, label: 'Profile' },
-  { to: '/app/directory', icon: HiOutlineUsers, label: 'Alumni Directory' },
+  { to: '/app/directory', icon: HiOutlineUsers, label: 'Users Directory' },
   { to: '/app/mentorship', icon: HiOutlineAcademicCap, label: 'Mentorship' },
   { to: '/app/messages', icon: HiOutlineChatBubbleLeftRight, label: 'Messages' },
   { to: '/app/jobs', icon: HiOutlineBriefcase, label: 'Jobs & Internships' },
