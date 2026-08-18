@@ -78,16 +78,17 @@ AlumioDTU is a **full-stack, real-time alumni-student networking platform** purp
 - **Role-Based Registration** - Separate flows for Students, Alumni, and Admins with distinct onboarding journeys
 - **Email Verification** - Resend-powered verification with secure tokenized links
 - **Password Recovery** - Forgot password flow with time-limited reset tokens
-- **JWT Authentication** - Secure access + refresh token rotation stored in HTTP-only cookies
+- **JWT Authentication** - Secure access + refresh token rotation stored in HTTP-only cookies with automatic token refresh on 401 responses
 - **Alumni Verification** - Admin-reviewed verification system to ensure alumni authenticity
 - **Guided Onboarding** - Role-specific onboarding that walks users through profile setup step by step
 
-### 🔍 Smart Alumni Directory
+### 🔍 Users Directory
 
-- **Advanced Search & Filtering** - Search alumni by name, batch year, branch (CSE, IT, ECE, EE, ME, CE, and 8 more), company, industry, location, and skills
-- **Rich Alumni Profiles** - Full career journey, current designation, mentorship availability, skills, social links, and LinkedIn integration
+- **Universal Member Search** - Discover both alumni and students in a unified directory with role filter tabs (All / Alumni / Students)
+- **Advanced Search & Filtering** - Search by name, batch year, branch (CSE, IT, ECE, EE, ME, CE, and 8 more), company, industry, location, and skills
+- **Rich Alumni Profiles** - Full career journey, current designation, mentorship availability, skills, social links (LinkedIn, GitHub, X, Portfolio), and more
 - **Student Profiles** - Academic details, skills, career goals, projects portfolio, resume upload, and achievements
-- **Profile Completion Score** - Gamified progress tracking that encourages users to build complete profiles
+- **Social Link Validation** - Platform-specific URL validation ensures only valid LinkedIn, GitHub, X (Twitter), and portfolio links are saved
 
 ### 🎯 Mentorship Hub
 
@@ -151,7 +152,7 @@ AlumioDTU is a **full-stack, real-time alumni-student networking platform** purp
 
 ### 🛡️ Admin Panel
 
-- **User Management** - View, search, ban/unban users across all roles
+- **User Management** - View, search, filter by role (Students/Alumni/Admins), ban/unban users across all roles
 - **Alumni Verification Queue** - Review and approve/reject alumni verification requests
 - **Content Moderation** - Review reported content (spam, harassment, inappropriate, misinformation) with status tracking (pending → reviewed → resolved/dismissed)
 - **Platform Analytics** - Dashboard with user growth metrics, engagement data, and platform health indicators
@@ -310,7 +311,7 @@ The platform uses **PostgreSQL** with **Prisma ORM** and includes **14 models**:
 | GET | `/me` | Get current user profile |
 | GET | `/:id` | Get user profile by ID |
 | PUT | `/profile` | Update user profile |
-| GET | `/directory` | Browse alumni/student directory with filters |
+| GET | `/directory` | Universal user directory with role filter (all/alumni/student), search, and advanced filters |
 | PUT | `/settings` | Update account settings |
 
 ### Mentorship - `/api/mentorship`
@@ -556,7 +557,7 @@ AlumioDTU/
     ├── package.json             # Backend dependencies
     │
     ├── config/                  # Configuration
-    │   ├── db.js                # Prisma client instance
+    │   ├── db.js                # Prisma client instance with graceful shutdown
     │   └── socket.js            # Socket.io initialization
     │
     ├── prisma/                  # Database

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { HiOutlineHeart, HiOutlinePaperAirplane } from 'react-icons/hi2';
 import toast from 'react-hot-toast';
@@ -9,25 +9,10 @@ const footerLinks = {
 };
 
 export default function Footer() {
-  const [showContact, setShowContact] = useState(false);
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [sending, setSending] = useState(false);
   const contactRef = useRef(null);
   const nameInputRef = useRef(null);
-
-  // Scroll to contact form and focus name input when it opens
-  useEffect(() => {
-    if (showContact && contactRef.current) {
-      // Small delay to let DOM render the form before scrolling
-      requestAnimationFrame(() => {
-        contactRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        // Focus the name input after scroll animation settles
-        setTimeout(() => {
-          nameInputRef.current?.focus();
-        }, 400);
-      });
-    }
-  }, [showContact]);
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
@@ -80,17 +65,17 @@ export default function Footer() {
             <div className="footer-col">
               <h4>Connect</h4>
               <a href="#" onClick={(e) => { e.preventDefault(); window.open('https://en.wikipedia.org/wiki/Delhi_Technological_University', '_blank'); }}>About DTU</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setShowContact(!showContact); }}>Contact Us</a>
+              <a href="#contact-form" onClick={(e) => { e.preventDefault(); document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}>Contact Us</a>
               <Link to="/privacy-policy">Privacy Policy</Link>
             </div>
           </div>
         </div>
 
-        {/* Contact Form — Pre-login */}
-        {showContact && (
-          <div ref={contactRef} style={{ padding: '24px 0', borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: 16 }}>
-            <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 460 }}>
-              <h4 style={{ color: '#F5C842', fontSize: '1rem', marginBottom: 4 }}>📧 Send us a Message</h4>
+        {/* Contact Form — Always Visible */}
+        <div id="contact-form" ref={contactRef} style={{ padding: '24px 0', borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: 16 }}>
+          <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 460 }}>
+            <h4 style={{ color: '#F5C842', fontSize: '1rem', marginBottom: 4 }}>📧 Contact Us</h4>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', marginTop: -4, marginBottom: 4 }}>Have a question or feedback? We'd love to hear from you.</p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <input
                   ref={nameInputRef}
@@ -124,33 +109,19 @@ export default function Footer() {
                 onChange={e => setContactForm(p => ({ ...p, message: e.target.value }))}
                 required
               />
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button
-                  type="submit"
-                  disabled={sending}
-                  style={{
-                    padding: '10px 24px', borderRadius: 50, border: 'none',
-                    background: 'linear-gradient(135deg, #F5C842, #c9a227)', color: '#0a0f2e',
-                    fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6
-                  }}
-                >
-                  {sending ? 'Sending...' : <><HiOutlinePaperAirplane size={14} /> Send</>}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowContact(false)}
-                  style={{
-                    padding: '10px 20px', borderRadius: 50, border: '1px solid rgba(255,255,255,0.2)',
-                    background: 'transparent', color: 'rgba(255,255,255,0.6)',
-                    fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer'
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={sending}
+                style={{
+                  padding: '10px 24px', borderRadius: 50, border: 'none', width: 'fit-content',
+                  background: 'linear-gradient(135deg, #F5C842, #c9a227)', color: '#0a0f2e',
+                  fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6
+                }}
+              >
+                {sending ? 'Sending...' : <><HiOutlinePaperAirplane size={14} /> Send Message</>}
+              </button>
             </form>
           </div>
-        )}
 
         <div className="footer-divider" />
         <div className="footer-bottom">

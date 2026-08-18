@@ -73,7 +73,7 @@ export default function Hero({ onOpenModal }) {
             <span className="btn-arrow">→</span>
           </MovingBorderButton>
           <ShineButton onClick={() => onOpenModal('login')}>
-            Alumni? Log In
+            Log In
           </ShineButton>
         </motion.div>
 

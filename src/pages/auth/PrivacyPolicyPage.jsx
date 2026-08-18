@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
 
         <motion.div className="privacy-page" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <h1>Privacy Policy</h1>
-          <p className="privacy-date">Last updated: July 2026</p>
+          <p className="privacy-date">Last updated: August 2026</p>
 
           <p>
             At AlumioDTU, we are committed to protecting your privacy and ensuring the security of your personal information.
@@ -30,11 +30,10 @@ export default function PrivacyPolicyPage() {
           <p>We collect the following types of information:</p>
           <ul>
             <li><strong>Account Information:</strong> Name, email address, password (encrypted), and role (student/alumni) provided during registration.</li>
-            <li><strong>Profile Information:</strong> Branch, graduation year, skills, bio, career goals, resume, company, designation, and other professional details you voluntarily provide.</li>
+            <li><strong>Profile Information:</strong> Branch, graduation year, skills, bio, career goals, company, designation, and other professional details you voluntarily provide.</li>
             <li><strong>Avatar &amp; Media:</strong> Profile pictures and uploaded files stored securely via Cloudinary.</li>
             <li><strong>Usage Data:</strong> Information about how you interact with the platform — pages visited, features used, mentorship requests, job applications, event registrations, community posts, and comments.</li>
             <li><strong>Communication Data:</strong> Messages sent through our messaging system and contact form submissions.</li>
-            <li><strong>Device Information:</strong> Browser type, IP address, and device information collected automatically for security and analytics.</li>
           </ul>
 
           <h2>2. How We Use Your Information</h2>
@@ -56,21 +55,14 @@ export default function PrivacyPolicyPage() {
           </p>
           <ul>
             <li><strong>Other Users:</strong> Your profile information (name, avatar, bio, skills) is visible to other registered users of the platform to facilitate networking and mentorship.</li>
-            <li><strong>Service Providers:</strong> We use trusted third-party services for email delivery (Resend), file storage (Cloudinary), and database hosting (PostgreSQL) — all subject to their own privacy policies.</li>
+            <li><strong>Service Providers:</strong> We use trusted third-party services for email delivery, file storage, and database hosting — all subject to their own privacy policies.</li>
             <li><strong>Legal Requirements:</strong> We may disclose information if required by law or to protect the rights and safety of our users.</li>
           </ul>
 
           <h2>4. Data Security</h2>
           <p>
-            We implement industry-standard security measures to protect your data:
+            We take the security of your data seriously. Your passwords are securely encrypted and never stored in plain text. All data transmitted between your browser and our servers is encrypted. We employ multiple layers of protection to safeguard your account against unauthorized access and misuse.
           </p>
-          <ul>
-            <li>Passwords are hashed using bcrypt with a salt factor of 12</li>
-            <li>All API communications use HTTPS encryption</li>
-            <li>JWT tokens with short expiry are used for authentication</li>
-            <li>Rate limiting protects against brute-force attacks</li>
-            <li>Input validation and sanitization prevent injection attacks</li>
-          </ul>
 
           <h2>5. Data Retention</h2>
           <p>
