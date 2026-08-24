@@ -939,10 +939,6 @@
   font-size: 0.75rem; font-weight: 600; letter-spacing: 0.2px;
   color: var(--accent); white-space: nowrap;
 }
-@media (min-width: 768px) {
-  .new-chat-label { display: none; }
-  .new-chat-btn { padding: 4px; }
-}
 
 /* Empty state CTA */
 .new-chat-start-btn {
