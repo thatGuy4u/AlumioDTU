@@ -39,6 +39,28 @@ export const register = asyncHandler(async (req, res) => {
     await prisma.studentProfile.create({ data: { userId: user.id } });
   } else {
     await prisma.alumniProfile.create({ data: { userId: user.id } });
+
+    // Create default conversation with admin for alumni
+    try {
+      const admin = await prisma.user.findFirst({ where: { role: 'admin' } });
+      if (admin) {
+        await prisma.conversation.create({
+          data: {
+            lastContent: 'Welcome to AlumioDTU! Feel free to reach out if you need any help.',
+            lastSenderId: admin.id,
+            lastMsgAt: new Date(),
+            participants: { create: [{ userId: user.id }, { userId: admin.id }] },
+            messages: {
+              create: {
+                senderId: admin.id,
+                content: 'Welcome to AlumioDTU! 👋 Feel free to reach out if you need any help with verification, profile setup, or anything else.',
+                readBy: [admin.id],
+              },
+            },
+          },
+        });
+      }
+    } catch { /* non-critical — don't block registration */ }
   }
 
   sendVerificationEmail(email, name, verificationToken).catch(e => console.error('Email error:', e.message));

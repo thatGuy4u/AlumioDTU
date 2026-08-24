@@ -229,6 +229,7 @@ model AlumniProfile {
   user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   branch                  Branch?
   graduationYear          Int?
+  rollNumber              String?
   company                 String   @default("")
   designation             String   @default("")
   industry                String   @default("")

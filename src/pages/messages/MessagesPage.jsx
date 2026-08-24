@@ -291,6 +291,7 @@ export default function MessagesPage() {
             {isConnected && <span className="socket-connected-dot" title="Real-time connected" />}
             <button className="new-chat-btn" onClick={() => setShowNewChat(true)} title="New conversation">
               <HiOutlinePlusCircle size={22} />
+              <span className="new-chat-label">New Chat</span>
             </button>
           </div>
         </div>

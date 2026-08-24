@@ -144,6 +144,7 @@ router.post('/convert-to-alumni', asyncHandler(async (req, res) => {
         userId,
         branch: studentProfile.branch,
         graduationYear: studentProfile.graduationYear,
+        rollNumber: studentProfile.rollNumber || '',
         bio: studentProfile.bio || '',
         skills: studentProfile.skills || [],
         company,
@@ -180,6 +181,41 @@ router.post('/convert-to-alumni', asyncHandler(async (req, res) => {
       link: '/app/dashboard',
       io: req.app.get('io'),
     });
+  } catch { /* non-critical */ }
+
+  // Create default conversation with admin for newly converted alumni (if none exists)
+  try {
+    const admin = await prisma.user.findFirst({ where: { role: 'admin' } });
+    if (admin) {
+      // Check if conversation with admin already exists
+      const existingParticipants = await prisma.conversationParticipant.findMany({
+        where: { userId }, select: { conversationId: true },
+      });
+      const myConvoIds = existingParticipants.map(p => p.conversationId);
+      let hasAdminConvo = false;
+      if (myConvoIds.length > 0) {
+        hasAdminConvo = !!(await prisma.conversationParticipant.findFirst({
+          where: { conversationId: { in: myConvoIds }, userId: admin.id },
+        }));
+      }
+      if (!hasAdminConvo) {
+        await prisma.conversation.create({
+          data: {
+            lastContent: 'Welcome to the Alumni Network! Reach out if you need any help.',
+            lastSenderId: admin.id,
+            lastMsgAt: new Date(),
+            participants: { create: [{ userId }, { userId: admin.id }] },
+            messages: {
+              create: {
+                senderId: admin.id,
+                content: 'Welcome to the Alumni Network! 🎉 Your transition is complete. Feel free to reach out if you need any assistance.',
+                readBy: [admin.id],
+              },
+            },
+          },
+        });
+      }
+    }
   } catch { /* non-critical */ }
 
   res.json({

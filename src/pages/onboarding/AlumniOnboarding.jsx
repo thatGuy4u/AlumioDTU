@@ -6,23 +6,23 @@ import { selectCurrentUser, selectToken, setCredentials } from '../../store/slic
 import { BRANCHES, INDUSTRIES, API_URL } from '../../utils/constants';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { HiOutlineBriefcase, HiOutlineUser, HiOutlineAcademicCap, HiOutlineHeart, HiOutlineCheck, HiOutlineArrowRight, HiOutlineArrowLeft } from 'react-icons/hi2';
+import { HiOutlineBriefcase, HiOutlineUser, HiOutlineAcademicCap, HiOutlineHeart, HiOutlineCheck, HiOutlineArrowRight, HiOutlineArrowLeft, HiOutlineShieldCheck } from 'react-icons/hi2';
 import EmailVerificationPopup from '../../components/EmailVerificationPopup';
 
 const steps = ['About You', 'Work Experience', 'DTU Background', 'Mentorship'];
 
 // Required fields per step
 const requiredByStep = [
-  ['bio'],                                      // Step 0: About You
-  ['company', 'designation', 'industry', 'location', 'experience'], // Step 1: Work
-  ['branch', 'graduationYear', 'skills'],       // Step 2: DTU Background
+  [],                                           // Step 0: About You (optional)
+  [],                                           // Step 1: Work (optional)
+  ['rollNumber', 'branch', 'graduationYear'],   // Step 2: DTU Background
   [],                                           // Step 3: Mentorship (optional toggle)
 ];
 
 const fieldLabels = {
   bio: 'Bio', company: 'Company', designation: 'Designation', industry: 'Industry',
   location: 'Location', experience: 'Years of Experience', branch: 'Branch',
-  graduationYear: 'Graduation Year', skills: 'Skills',
+  graduationYear: 'Graduation Year', rollNumber: 'Roll Number', skills: 'Skills',
 };
 
 export default function AlumniOnboarding() {
@@ -34,7 +34,7 @@ export default function AlumniOnboarding() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     bio: '', company: '', designation: '', industry: '', location: '', experience: '',
-    branch: '', graduationYear: '', skills: '', linkedinProfile: '',
+    branch: '', graduationYear: '', rollNumber: '', skills: '', linkedinProfile: '',
     mentorshipAvailability: false, mentorshipCapacity: '3',
   });
 
@@ -58,13 +58,14 @@ export default function AlumniOnboarding() {
     setLoading(true);
     try {
       const payload = {
-        bio: form.bio, company: form.company, designation: form.designation,
-        industry: form.industry, location: form.location,
-        experience: form.experience ? parseInt(form.experience) : 0,
+        bio: form.bio || undefined, company: form.company || undefined, designation: form.designation || undefined,
+        industry: form.industry || undefined, location: form.location || undefined,
+        experience: form.experience ? parseInt(form.experience) : undefined,
         branch: form.branch || undefined,
         graduationYear: form.graduationYear ? parseInt(form.graduationYear) : undefined,
+        rollNumber: form.rollNumber || undefined,
         skills: form.skills ? form.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
-        linkedinProfile: form.linkedinProfile,
+        linkedinProfile: form.linkedinProfile || undefined,
         mentorshipAvailability: form.mentorshipAvailability,
         mentorshipCapacity: parseInt(form.mentorshipCapacity) || 3,
       };
@@ -92,6 +93,20 @@ export default function AlumniOnboarding() {
         <p>Set up your alumni profile and start giving back to the DTU community</p>
       </div>
 
+      {/* Motivational Banner */}
+      <div className="onboarding-motivation-banner">
+        <div className="onboarding-motivation-inner">
+          <div className="onboarding-motivation-icon alumni">🔓</div>
+          <div className="onboarding-motivation-text">
+            <strong>Complete required details to make your profile visible</strong>
+            <span>Fill in your <span className="motivation-highlight">Roll No, Branch & Graduation Year</span> — work details like company, role & experience are optional and can be added anytime if your company allows.</span>
+          </div>
+          <div className="onboarding-motivation-badge alumni">
+            <HiOutlineShieldCheck size={13} /> Required
+          </div>
+        </div>
+      </div>
+
       <div className="onboarding-steps">
         {steps.map((s, i) => {
           const Icon = stepIcons[i];
@@ -109,7 +124,7 @@ export default function AlumniOnboarding() {
           {step === 0 && (
             <div className="onboarding-fields">
               <h3>Tell us about yourself</h3>
-              <div className="auth-field"><Label text="BIO" required /><textarea className="onboarding-textarea" placeholder="Your professional summary..." value={form.bio} onChange={e => update('bio', e.target.value)} rows={3} /></div>
+              <div className="auth-field"><Label text="BIO" /><textarea className="onboarding-textarea" placeholder="Your professional summary..." value={form.bio} onChange={e => update('bio', e.target.value)} rows={3} /></div>
               <div className="auth-field"><Label text="LINKEDIN PROFILE" /><input className="onboarding-input" placeholder="https://linkedin.com/in/..." value={form.linkedinProfile} onChange={e => update('linkedinProfile', e.target.value)} /></div>
             </div>
           )}
@@ -117,24 +132,25 @@ export default function AlumniOnboarding() {
             <div className="onboarding-fields">
               <h3>Current Work</h3>
               <div className="onboarding-row">
-                <div className="auth-field"><Label text="COMPANY" required /><input className="onboarding-input" placeholder="e.g. Google" value={form.company} onChange={e => update('company', e.target.value)} /></div>
-                <div className="auth-field"><Label text="DESIGNATION" required /><input className="onboarding-input" placeholder="e.g. Senior SDE" value={form.designation} onChange={e => update('designation', e.target.value)} /></div>
+                <div className="auth-field"><Label text="COMPANY" /><input className="onboarding-input" placeholder="e.g. Google" value={form.company} onChange={e => update('company', e.target.value)} /></div>
+                <div className="auth-field"><Label text="DESIGNATION" /><input className="onboarding-input" placeholder="e.g. Senior SDE" value={form.designation} onChange={e => update('designation', e.target.value)} /></div>
               </div>
               <div className="onboarding-row">
-                <div className="auth-field"><Label text="INDUSTRY" required />
+                <div className="auth-field"><Label text="INDUSTRY" />
                   <select className="onboarding-input" value={form.industry} onChange={e => update('industry', e.target.value)}>
                     <option value="">Select Industry</option>
                     {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
                   </select>
                 </div>
-                <div className="auth-field"><Label text="LOCATION" required /><input className="onboarding-input" placeholder="e.g. Bangalore, India" value={form.location} onChange={e => update('location', e.target.value)} /></div>
+                <div className="auth-field"><Label text="LOCATION" /><input className="onboarding-input" placeholder="e.g. Bangalore, India" value={form.location} onChange={e => update('location', e.target.value)} /></div>
               </div>
-              <div className="auth-field"><Label text="YEARS OF EXPERIENCE" required /><input className="onboarding-input" type="number" min="0" max="50" placeholder="e.g. 5" value={form.experience} onChange={e => update('experience', e.target.value)} /></div>
+              <div className="auth-field"><Label text="YEARS OF EXPERIENCE" /><input className="onboarding-input" type="number" min="0" max="50" placeholder="e.g. 5" value={form.experience} onChange={e => update('experience', e.target.value)} /></div>
             </div>
           )}
           {step === 2 && (
             <div className="onboarding-fields">
               <h3>DTU Background</h3>
+              <div className="auth-field"><Label text="ROLL NUMBER" required /><input className="onboarding-input" placeholder="e.g. 2K19/CO/123" value={form.rollNumber} onChange={e => update('rollNumber', e.target.value)} /></div>
               <div className="onboarding-row">
                 <div className="auth-field"><Label text="BRANCH" required />
                   <select className="onboarding-input" value={form.branch} onChange={e => update('branch', e.target.value)}>
@@ -144,7 +160,7 @@ export default function AlumniOnboarding() {
                 </div>
                 <div className="auth-field"><Label text="GRADUATION YEAR" required /><input className="onboarding-input" type="number" min="1960" max="2025" placeholder="e.g. 2019" value={form.graduationYear} onChange={e => update('graduationYear', e.target.value)} /></div>
               </div>
-              <div className="auth-field"><Label text="SKILLS (comma-separated)" required /><input className="onboarding-input" placeholder="React, Cloud, System Design..." value={form.skills} onChange={e => update('skills', e.target.value)} /></div>
+              <div className="auth-field"><Label text="SKILLS (comma-separated)" /><input className="onboarding-input" placeholder="React, Cloud, System Design..." value={form.skills} onChange={e => update('skills', e.target.value)} /></div>
             </div>
           )}
           {step === 3 && (

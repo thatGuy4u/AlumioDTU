@@ -186,7 +186,7 @@ export default function StudentDashboard() {
                 </div>
                 <div className="dash-alumni-info">
                   <strong>{a.user?.name}</strong>
-                  <span>{a.company || a.designation || 'Alumni'}</span>
+                  <span>{a.company || a.designation || (a.user?.role ? a.user.role.charAt(0).toUpperCase() + a.user.role.slice(1) : 'User')}</span>
                   <span className="dash-alumni-branch">{a.branch} {a.graduationYear ? `'${String(a.graduationYear).slice(2)}` : ''}</span>
                 </div>
                 <span className="dash-connect-btn">View</span>

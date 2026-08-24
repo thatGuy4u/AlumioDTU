@@ -8,7 +8,7 @@ import axios from 'axios';
 import { API_URL } from '../../utils/constants';
 import { selectToken } from '../../store/slices/authSlice';
 import toast from 'react-hot-toast';
-import { HiOutlineAcademicCap, HiOutlineUser, HiOutlineCodeBracket, HiOutlineRocketLaunch, HiOutlineCheck, HiOutlineArrowRight, HiOutlineArrowLeft } from 'react-icons/hi2';
+import { HiOutlineAcademicCap, HiOutlineUser, HiOutlineCodeBracket, HiOutlineRocketLaunch, HiOutlineCheck, HiOutlineArrowRight, HiOutlineArrowLeft, HiOutlineClock } from 'react-icons/hi2';
 import EmailVerificationPopup from '../../components/EmailVerificationPopup';
 
 const steps = ['Basic Info', 'Academics', 'Skills & Interests', 'Career Goals'];
@@ -90,6 +90,20 @@ export default function StudentOnboarding() {
       <div className="onboarding-header">
         <h1>Welcome, <span className="text-gold">{user?.name?.split(' ')[0]}</span> 🎓</h1>
         <p>Let's set up your student profile to get the most out of AlumioDTU</p>
+      </div>
+
+      {/* Motivational Banner */}
+      <div className="onboarding-motivation-banner">
+        <div className="onboarding-motivation-inner">
+          <div className="onboarding-motivation-icon student">⚡</div>
+          <div className="onboarding-motivation-text">
+            <strong>Just ~2 minutes to complete your profile!</strong>
+            <span>Set up now to <span className="motivation-highlight">connect with alumni, find mentors, and discover opportunities</span> — your DTU network is waiting for you.</span>
+          </div>
+          <div className="onboarding-motivation-badge student">
+            <HiOutlineClock size={13} /> ~2 min
+          </div>
+        </div>
       </div>
 
       {/* Step Indicator */}
