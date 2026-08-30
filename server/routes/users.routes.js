@@ -229,7 +229,7 @@ router.post('/convert-to-alumni', asyncHandler(async (req, res) => {
 router.get('/directory', asyncHandler(async (req, res) => {
   const { search, role, company, industry, branch, graduationYear, location, skills, mentorshipAvailable, page = 1, limit = 12 } = req.query;
 
-  const userWhere = { isBanned: false, isProfileComplete: true, role: { not: 'admin' } };
+  const userWhere = { isBanned: false, isVerified: true, role: { not: 'admin' } };
   const alumniProfileWhere = {};
   const studentProfileWhere = {};
 
