@@ -2,6 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { selectCurrentUser } from '../store/slices/authSlice';
+import { useGetUnreadCountQuery } from '../store/api/chatApi';
 import LeftDrawer from './LeftDrawer';
 import {
   HiOutlineHome, HiOutlineUser, HiOutlineUsers,
@@ -59,12 +60,16 @@ const adminLinks = [
 ];
 
 function SidebarLinks({ links, collapsed, isMobile, location, onNavigate }) {
+  const { data: unreadData } = useGetUnreadCountQuery();
+  const unreadCount = unreadData?.data?.count || 0;
+
   return (
     <div className="sidebar-nav" role="navigation" aria-label="App navigation">
       {links.map((link) => {
         const Icon = link.icon;
         const isActive = location.pathname === link.to
           || (link.to !== '/app/dashboard' && location.pathname.startsWith(link.to));
+        const isMessages = link.to === '/app/messages';
 
         return (
           <NavLink
@@ -76,9 +81,17 @@ function SidebarLinks({ links, collapsed, isMobile, location, onNavigate }) {
           >
             <span className="sidebar-link-icon">
               <Icon size={20} />
+              {isMessages && unreadCount > 0 && collapsed && !isMobile && (
+                <span className="sidebar-badge sidebar-badge--dot" />
+              )}
             </span>
             {(!collapsed || isMobile) && (
               <span className="sidebar-link-label">{link.label}</span>
+            )}
+            {isMessages && unreadCount > 0 && (!collapsed || isMobile) && (
+              <span className="sidebar-badge">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
             )}
           </NavLink>
         );

@@ -152,7 +152,7 @@ export default function MentorshipPage() {
                     ) : (
                       <button
                         className="auth-submit-btn"
-                        style={{ width: '100%', marginTop: 12, padding: '8px', fontSize: '0.82rem' }}
+                        style={{ width: '100%', marginTop: 'auto', padding: '8px', fontSize: '0.82rem' }}
                         onClick={() => handleRequestMentorship(mentorUserId)}
                         disabled={requestingId === mentorUserId}
                       >

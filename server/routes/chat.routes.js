@@ -157,6 +157,15 @@ router.put('/conversations/:id/read', asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Marked as read' });
 }));
 
+// GET /unread-count  — total unread messages across all conversations
+router.get('/unread-count', asyncHandler(async (req, res) => {
+  const result = await prisma.conversationParticipant.aggregate({
+    where: { userId: req.user.id },
+    _sum: { unreadCount: true },
+  });
+  res.json({ success: true, data: { count: result._sum.unreadCount || 0 } });
+}));
+
 // DELETE /conversations/:id
 router.delete('/conversations/:id', asyncHandler(async (req, res) => {
   const participant = await prisma.conversationParticipant.findUnique({

@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { selectCurrentUser } from '../../store/slices/authSlice';
+import { chatApi } from '../../store/api/chatApi';
 import { useSocket, useSocketEvent } from '../../hooks/useSocket';
 import api from '../../utils/apiClient';
 import { HiOutlinePaperAirplane, HiOutlineMagnifyingGlass, HiOutlinePlusCircle, HiOutlineXMark, HiOutlineTrash, HiOutlineArrowLeft, HiOutlineEnvelope } from 'react-icons/hi2';
 
 export default function MessagesPage() {
   const currentUser = useSelector(selectCurrentUser);
+  const dispatch = useDispatch();
   const { conversationId: urlConvoId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState([]);
@@ -95,6 +97,8 @@ export default function MessagesPage() {
       setMessages(res.data.data.messages);
       await api.put(`/chat/conversations/${convoId}/read`);
       setConversations(prev => prev.map(c => c.id === convoId ? { ...c, myUnreadCount: 0 } : c));
+      // Refresh sidebar unread badge
+      dispatch(chatApi.util.invalidateTags(['UnreadCount']));
 
       // Join socket room for real-time
       if (socket) {
@@ -224,8 +228,10 @@ export default function MessagesPage() {
           ? { ...c, lastContent: message.content, lastMsgAt: message.createdAt, myUnreadCount: (c.myUnreadCount || 0) + 1 }
           : c
       ));
+      // Refresh sidebar unread badge
+      dispatch(chatApi.util.invalidateTags(['UnreadCount']));
     }
-  }, [activeConvo]));
+  }, [activeConvo, dispatch]));
 
   // ── New Chat: search users ──
   const handleUserSearch = (query) => {
