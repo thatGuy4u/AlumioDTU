@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import api from '../../utils/apiClient';
-import { HiOutlineBell, HiOutlineCheckCircle, HiOutlineTrash } from 'react-icons/hi2';
+import { HiOutlineBell, HiOutlineCheckCircle, HiOutlineTrash, HiOutlineLink } from 'react-icons/hi2';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.03 } } };
 const item = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } };
@@ -83,9 +83,41 @@ export default function NotificationsPage() {
           {notifications.map(n => (
             <motion.div key={n.id} className={`notification-card ${!n.isRead ? 'unread' : ''}`} variants={item}>
               <div className="notification-icon">{typeIcons[n.type] || '🔔'}</div>
-              <div className="notification-content" onClick={() => { if (!n.isRead) markRead(n.id); navigate(n.link || '/app/notifications'); }} style={{ cursor: 'pointer' }}>
+              <div className="notification-content" onClick={() => {
+                if (!n.isRead) markRead(n.id);
+                navigate('/app/notifications');
+              }} style={{ cursor: 'pointer' }}>
                 <strong>{n.title}</strong>
-                <p>{n.message}</p>
+                <p className="notification-message-full">{n.message}</p>
+                {n.link && (
+                  n.link.startsWith('http') ? (
+                    <a
+                      href={n.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="notification-link-badge"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!n.isRead) markRead(n.id);
+                      }}
+                    >
+                      <HiOutlineLink size={13} />
+                      {n.link}
+                    </a>
+                  ) : (
+                    <span
+                      className="notification-link-badge"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!n.isRead) markRead(n.id);
+                        navigate(n.link);
+                      }}
+                    >
+                      <HiOutlineLink size={13} />
+                      Open: {n.link}
+                    </span>
+                  )
+                )}
                 <span className="notification-time">{timeAgo(n.createdAt)}</span>
               </div>
               <button className="notification-delete" onClick={() => deleteNotif(n.id)} title="Delete">

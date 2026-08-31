@@ -204,13 +204,42 @@ export default function Topbar({ onMenuToggle, isMobileNav = false, mobileOpen =
                       onClick={() => {
                         if (!n.isRead) markRead(n.id);
                         setNotifOpen(false);
-                        navigate(n.link || '/app/notifications');
+                        navigate('/app/notifications');
                       }}
                     >
                       <span className="topbar-notif-icon">{typeIcons[n.type] || '🔔'}</span>
                       <span className="topbar-notif-text">
                         <span className="topbar-notif-title">{n.title}</span>
                         <span className="topbar-notif-msg">{n.message}</span>
+                        {n.link && (
+                          n.link.startsWith('http') ? (
+                            <a
+                              href={n.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="topbar-notif-link-hint"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!n.isRead) markRead(n.id);
+                                setNotifOpen(false);
+                              }}
+                            >
+                              🔗 {n.link}
+                            </a>
+                          ) : (
+                            <span
+                              className="topbar-notif-link-hint"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!n.isRead) markRead(n.id);
+                                setNotifOpen(false);
+                                navigate(n.link);
+                              }}
+                            >
+                              🔗 {n.link}
+                            </span>
+                          )
+                        )}
                       </span>
                       {!n.isRead && <span className="topbar-notif-dot" />}
                     </button>

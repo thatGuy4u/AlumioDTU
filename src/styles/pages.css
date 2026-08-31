@@ -1279,7 +1279,7 @@
 /* ===== Notifications ===== */
 .notifications-list { display: flex; flex-direction: column; gap: 6px; }
 .notification-card {
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: flex-start; gap: 10px;
   padding: 12px 14px; border-radius: 10px;
   background: var(--card-bg); border: 1px solid var(--card-border);
   transition: all 0.2s;
@@ -1342,10 +1342,48 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
-.notification-icon { font-size: 1.1rem; flex-shrink: 0; }
+.notification-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
 .notification-content { flex: 1; min-width: 0; }
 .notification-content strong { display: block; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 2px; }
 .notification-content p { font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 2px; }
+.notification-message-full {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
+.notification-link-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  margin-bottom: 2px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(79, 110, 247, 0.1);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 500;
+  word-break: break-all;
+  transition: background 0.2s;
+}
+.notification-link-badge:hover {
+  background: rgba(79, 110, 247, 0.18);
+  text-decoration: underline;
+}
+a.notification-link-badge {
+  text-decoration: none;
+  cursor: pointer;
+}
+a.notification-link-badge:hover {
+  text-decoration: underline;
+}
+[data-theme="light"] .notification-link-badge {
+  background: rgba(66, 133, 244, 0.1);
+  color: #4285f4;
+}
+[data-theme="light"] .notification-link-badge:hover {
+  background: rgba(66, 133, 244, 0.18);
+}
 .notification-time { font-size: 0.7rem; color: var(--text-muted); }
 .notification-delete {
   width: 30px; height: 30px; border-radius: 8px; border: none;

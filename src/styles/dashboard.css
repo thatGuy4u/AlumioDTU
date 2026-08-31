@@ -1048,6 +1048,20 @@
   overflow: hidden;
 }
 
+.topbar-notif-link-hint {
+  font-size: 0.7rem;
+  color: var(--accent);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+  display: block;
+}
+a.topbar-notif-link-hint:hover {
+  text-decoration: underline;
+}
+
 .topbar-notif-dot {
   width: 8px;
   height: 8px;
