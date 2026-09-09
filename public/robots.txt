@@ -1,0 +1,18 @@
+# robots.txt for AlumioDTU
+# https://alumiodtu.tech
+
+# Allow all search engines to crawl public pages
+User-agent: *
+Allow: /
+Allow: /privacy-policy
+Allow: /auth/login
+Allow: /auth/signup
+
+# Block authenticated/private app pages
+Disallow: /app/
+Disallow: /auth/forgot-password
+Disallow: /auth/reset-password
+Disallow: /auth/verify-email
+
+# Sitemap location
+Sitemap: https://alumiodtu.tech/sitemap.xml

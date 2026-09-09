@@ -3,12 +3,96 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AlumioDTU</title>
-  <meta name="description" content="AlumioDTU bridges the gap between graduating students and the powerful DTU alumni community. Connect, mentor, grow — together." />
-  <link rel="icon" href="/favicon.svg" />
+
+  <!-- Primary SEO Meta Tags -->
+  <title>AlumioDTU — DTU Alumni Network | Connect, Mentor & Grow Together</title>
+  <meta name="description" content="AlumioDTU is the official alumni platform for Delhi Technological University (DTU). Connect with alumni, find mentors, discover job opportunities, and grow your professional network. Join the DTU community today." />
+  <meta name="keywords" content="AlumioDTU, DTU alumni, Delhi Technological University alumni, DTU alumni network, DTU mentorship, DTU jobs, DTU community, DTU student alumni connect, DCE alumni, alumni platform India" />
+  <meta name="author" content="AlumioDTU" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://alumiodtu.tech/" />
+
+  <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://alumiodtu.tech/" />
+  <meta property="og:title" content="AlumioDTU — DTU Alumni Network | Connect, Mentor & Grow" />
+  <meta property="og:description" content="The official alumni platform for Delhi Technological University. Connect with 10,000+ alumni, find mentors, discover jobs, and grow your career — all in one place." />
+  <meta property="og:image" content="https://alumiodtu.tech/og-image.png" />
+  <meta property="og:image:width" content="500" />
+  <meta property="og:image:height" content="500" />
+  <meta property="og:image:alt" content="AlumioDTU - DTU Alumni Network Logo" />
+  <meta property="og:site_name" content="AlumioDTU" />
+  <meta property="og:locale" content="en_IN" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://alumiodtu.tech/" />
+  <meta name="twitter:title" content="AlumioDTU — DTU Alumni Network | Connect, Mentor & Grow" />
+  <meta name="twitter:description" content="The official alumni platform for Delhi Technological University. Connect with alumni, find mentors, discover jobs, and build your professional network." />
+  <meta name="twitter:image" content="https://alumiodtu.tech/og-image.png" />
+  <meta name="twitter:image:alt" content="AlumioDTU - DTU Alumni Network" />
+
+  <!-- Theme & Mobile -->
+  <meta name="theme-color" content="#0C1248" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="AlumioDTU" />
+
+  <!-- Favicons -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/og-image.png" />
+
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist+Pixel&display=swap" rel="stylesheet">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "AlumioDTU",
+    "url": "https://alumiodtu.tech",
+    "logo": "https://alumiodtu.tech/og-image.png",
+    "description": "AlumioDTU is the official alumni platform for Delhi Technological University (DTU). Connect with alumni, find mentors, discover job opportunities, and grow your professional network.",
+    "foundingDate": "2025",
+    "sameAs": [],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "url": "https://alumiodtu.tech/app/contact"
+    },
+    "areaServed": {
+      "@type": "Country",
+      "name": "India"
+    },
+    "memberOf": {
+      "@type": "EducationalOrganization",
+      "name": "Delhi Technological University",
+      "alternateName": "DTU",
+      "url": "https://dtu.ac.in"
+    }
+  }
+  </script>
+
+  <!-- Google Analytics — Replace G-XXXXXXXXXX with your actual Measurement ID -->
+  <!-- To get your Measurement ID:
+       1. Go to https://analytics.google.com
+       2. Create an account & property for alumiodtu.tech
+       3. Go to Admin > Data Streams > Web > Create Stream
+       4. Copy the Measurement ID (starts with G-)
+       5. Replace G-XXXXXXXXXX below -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FJ9B31LDYB"></script>
+  <script> 
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FJ9B31LDYB');
+  </script>
 </head>
 <body>
   <div id="root"></div>

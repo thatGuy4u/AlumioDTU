@@ -229,7 +229,16 @@ router.post('/convert-to-alumni', asyncHandler(async (req, res) => {
 router.get('/directory', asyncHandler(async (req, res) => {
   const { search, role, company, industry, branch, graduationYear, location, skills, mentorshipAvailable, page = 1, limit = 12 } = req.query;
 
-  const userWhere = { isBanned: false, isVerified: true, role: { not: 'admin' } };
+  // Students are verified via @dtu.ac.in email domain, not admin verification.
+  // Alumni require admin verification (isVerified). Show both in directory.
+  const userWhere = {
+    isBanned: false,
+    role: { not: 'admin' },
+    OR: [
+      { isVerified: true },                              // admin-verified users (alumni)
+      { role: 'student', isEmailVerified: true },         // students with verified email
+    ],
+  };
   const alumniProfileWhere = {};
   const studentProfileWhere = {};
 
@@ -270,10 +279,16 @@ router.get('/directory', asyncHandler(async (req, res) => {
   const hasAlumniFilters = Object.keys(alumniProfileWhere).length > 0;
   const hasStudentFilters = Object.keys(studentProfileWhere).length > 0;
 
-  if (hasAlumniFilters && role !== 'student') {
+  if (hasAlumniFilters && hasStudentFilters && !role) {
+    // Shared filters (branch, graduationYear, skills) apply to both profile types.
+    // Use OR so a user with either a matching alumni OR student profile is included.
+    userWhere.OR = [
+      { alumniProfile: alumniProfileWhere, isVerified: true },
+      { studentProfile: studentProfileWhere, role: 'student', isEmailVerified: true },
+    ];
+  } else if (hasAlumniFilters && role !== 'student') {
     userWhere.alumniProfile = alumniProfileWhere;
-  }
-  if (hasStudentFilters && role !== 'alumni') {
+  } else if (hasStudentFilters && role !== 'alumni') {
     userWhere.studentProfile = studentProfileWhere;
   }
 
