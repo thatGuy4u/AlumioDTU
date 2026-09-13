@@ -22,6 +22,55 @@ body {
   transition: background 0.3s ease, color 0.3s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ===== Custom Scrollbar — thin, accent-tinted ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(79, 110, 247, 0.18);
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(79, 110, 247, 0.35); }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.12); }
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.22); }
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(79, 110, 247, 0.18) transparent;
+}
+[data-theme="light"] * {
+  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+}
+
+/* ===== Selection Highlight ===== */
+::selection {
+  background: rgba(44, 135, 246, 0.3);
+  color: #ffffff;
+}
+[data-theme="light"] ::selection {
+  background: rgba(44, 135, 246, 0.2);
+  color: #1e293b;
+}
+
+/* ===== Focus-visible — accessible accent ring ===== */
+:focus-visible {
+  outline: 2px solid var(--accent, #2c87f6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent, #2c87f6);
+  outline-offset: 2px;
+}
+
+/* ===== Reusable shimmer animation ===== */
+@keyframes globalShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 /* Geist Pixel only on landing page headings; app headings inherit Inter from body */
