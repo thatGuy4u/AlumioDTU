@@ -48,19 +48,20 @@ export default function Hero({ onOpenModal }) {
       {/* Blended campus background */}
       <div className="hero-campus-bg" style={{ backgroundImage: `url(${dtuCampusImg})` }} />
       <div className="hero-content">
-        <motion.div className="hero-dtu-badge" {...fadeUp(0)}>
-          <span className="dtu-dot" />
-          <span>Delhi Technological University</span>
-        </motion.div>
-
         <motion.h1
           className="hero-title"
           initial={{ opacity: 0.5, y: 100 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.8, ease: 'easeInOut' }}
         >
-          Connect Today.<br />
-          Lead Tomorrow.
+          <div className="hero-title-line">
+            <span className="hero-title-accent">Connect</span>
+            <span className="hero-title-main">Today.</span>
+          </div>
+          <div className="hero-title-line">
+            <span className="hero-title-main-green">Lead</span>
+            <span className="hero-title-accent-white">Tomorrow.</span>
+          </div>
         </motion.h1>
 
         <motion.p className="hero-sub" {...fadeUp(0.2)}>
