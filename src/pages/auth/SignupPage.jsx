@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRegisterMutation } from '../../store/api/authApi';
@@ -7,6 +7,7 @@ import {
   HiOutlineEye, HiOutlineEyeSlash, HiOutlineAcademicCap, HiOutlineBriefcase,
   HiOutlineExclamationTriangle,
 } from 'react-icons/hi2';
+import RocketTransition from '../../components/RocketTransition';
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -18,6 +19,12 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
+  const [showRocket, setShowRocket] = useState(false);
+  const [rocketUserName, setRocketUserName] = useState('');
+
+  const handleRocketComplete = useCallback(() => {
+    navigate('/app/pending-verification');
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,7 +54,8 @@ export default function SignupPage() {
     try {
       const result = await register({ name: name.trim(), email, password, role }).unwrap();
       if (result.success) {
-        navigate('/app/pending-verification');
+        setRocketUserName(name.trim().split(' ')[0]);
+        setShowRocket(true);
       }
     } catch (err) {
       setError(err.data?.message || 'Registration failed. Please try again.');
@@ -55,6 +63,7 @@ export default function SignupPage() {
   };
 
   return (
+    <>
     <div className="auth-card">
       <div className="auth-card-header">
         <h1>Join AlumioDTU</h1>
@@ -218,5 +227,13 @@ export default function SignupPage() {
         )}
       </AnimatePresence>
     </div>
+
+    <RocketTransition
+      isActive={showRocket}
+      onComplete={handleRocketComplete}
+      userName={rocketUserName}
+    />
+    </>
   );
 }
+

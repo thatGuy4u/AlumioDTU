@@ -1,0 +1,310 @@
+/* ================================================================
+   Rocket Transition — Seamless curtain-sweep launch animation
+   ================================================================ */
+
+/* ===== Fixed overlay — sits above everything ===== */
+.rocket-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  overflow: hidden;
+  pointer-events: all;
+}
+
+/* ===== Reveal layer — subtle dark glass behind the curtain ===== */
+.rocket-reveal-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(10, 14, 39, 0.6) 0%,
+    rgba(4, 6, 20, 0.75) 50%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ===== Dark curtain — slides upward to reveal ===== */
+.rocket-curtain {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: radial-gradient(
+    ellipse at 50% 80%,
+    #0a0e27 0%,
+    #020412 50%,
+    #000000 100%
+  );
+  will-change: transform;
+}
+
+/* Curtain bottom edge — soft glow at the sweep boundary */
+.rocket-curtain-edge {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  z-index: 20;
+  background: linear-gradient(
+    to top,
+    transparent 0%,
+    rgba(79, 172, 254, 0.04) 30%,
+    rgba(79, 172, 254, 0.1) 60%,
+    rgba(255, 180, 80, 0.06) 80%,
+    rgba(255, 120, 50, 0.12) 100%
+  );
+  filter: blur(6px);
+  pointer-events: none;
+}
+
+.rocket-curtain-edge::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 15%;
+  right: 15%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(79, 172, 254, 0.3) 20%,
+    rgba(200, 220, 255, 0.5) 50%,
+    rgba(79, 172, 254, 0.3) 80%,
+    transparent 100%
+  );
+  border-radius: 2px;
+  box-shadow:
+    0 0 12px 3px rgba(79, 172, 254, 0.2),
+    0 0 30px 8px rgba(79, 172, 254, 0.08);
+}
+
+/* ===== Star Field ===== */
+.rocket-starfield {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.rocket-star {
+  position: absolute;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.35);
+}
+
+/* ===== Launch Text ===== */
+.rocket-launch-text {
+  position: absolute;
+  top: 16%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.rocket-welcome-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow:
+    0 0 30px rgba(79, 172, 254, 0.5),
+    0 0 60px rgba(79, 172, 254, 0.2);
+  letter-spacing: -0.5px;
+}
+
+.rocket-subtext {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ===== Rocket Container ===== */
+.rocket-container {
+  position: absolute;
+  bottom: -220px;        /* start just below the viewport */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  will-change: transform;
+}
+
+.rocket-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rocket-svg {
+  filter: drop-shadow(0 0 18px rgba(79, 172, 254, 0.3));
+  z-index: 2;
+}
+
+/* Rocket ambient glow */
+.rocket-glow {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(79, 172, 254, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  animation: rocketGlowPulse 0.8s ease-in-out infinite;
+}
+
+@keyframes rocketGlowPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+  50% { transform: translate(-50%, -50%) scale(1.25); opacity: 1; }
+}
+
+/* ===== Exhaust Flames ===== */
+.rocket-exhaust {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  margin-top: -12px;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.rocket-exhaust--active {
+  height: 100px;
+  animation: exhaustGrow 0.6s ease-out forwards;
+}
+
+@keyframes exhaustGrow {
+  from { height: 50px; }
+  to { height: 100px; }
+}
+
+.rocket-flame {
+  position: absolute;
+  top: 0;
+  border-radius: 0 0 50% 50%;
+}
+
+.rocket-flame--outer {
+  width: 46px;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(255, 100, 50, 0.9), rgba(255, 50, 0, 0) 90%);
+  animation: flameFlicker 0.08s alternate infinite;
+  filter: blur(3px);
+}
+
+.rocket-flame--mid {
+  width: 34px;
+  height: 82%;
+  background: linear-gradient(to bottom, rgba(255, 160, 50, 0.95), rgba(255, 100, 0, 0) 85%);
+  animation: flameFlicker 0.06s alternate infinite;
+  filter: blur(2px);
+}
+
+.rocket-flame--inner {
+  width: 22px;
+  height: 65%;
+  background: linear-gradient(to bottom, rgba(255, 230, 100, 1), rgba(255, 160, 50, 0) 80%);
+  animation: flameFlicker 0.05s alternate infinite;
+  filter: blur(1px);
+}
+
+.rocket-flame--core {
+  width: 10px;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 200, 0) 70%);
+  animation: flameFlicker 0.04s alternate infinite;
+}
+
+@keyframes flameFlicker {
+  0%   { transform: scaleX(1)    scaleY(1); }
+  25%  { transform: scaleX(0.88) scaleY(1.06); }
+  50%  { transform: scaleX(1.12) scaleY(0.94); }
+  75%  { transform: scaleX(0.94) scaleY(1.08); }
+  100% { transform: scaleX(1.06) scaleY(0.97); }
+}
+
+/* ===== Spark Particles ===== */
+.rocket-sparks-container {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  z-index: 5;
+}
+
+.rocket-spark {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #ffd700;
+  box-shadow:
+    0 0 5px 2px rgba(255, 215, 0, 0.7),
+    0 0 10px 4px rgba(255, 165, 0, 0.35);
+}
+
+/* ===== Smoke — trails beneath the rocket exhaust ===== */
+.rocket-smoke-container {
+  position: absolute;
+  bottom: -30px;          /* just below exhaust */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.rocket-smoke-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(210, 210, 220, 0.3) 0%,
+    rgba(160, 165, 180, 0.15) 40%,
+    rgba(110, 115, 130, 0.04) 70%,
+    transparent 100%
+  );
+  filter: blur(10px);
+  will-change: transform, opacity;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .rocket-welcome-text {
+    font-size: 1.35rem;
+  }
+  .rocket-subtext {
+    font-size: 0.75rem;
+  }
+  .rocket-svg {
+    width: 80px;
+    height: 135px;
+  }
+  .rocket-exhaust { width: 35px; }
+  .rocket-exhaust--active { height: 70px; }
+  .rocket-flame--outer { width: 32px; }
+  .rocket-flame--mid { width: 24px; }
+  .rocket-flame--inner { width: 16px; }
+  .rocket-flame--core { width: 8px; }
+  .rocket-glow { width: 140px; height: 140px; }
+  .rocket-curtain-edge { height: 50px; }
+}

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useLoginMutation } from '../../store/api/authApi';
 import { BYPASS_AUTH_FOR_TESTING } from '../../utils/constants';
 import { HiOutlineEnvelope, HiOutlineLockClosed, HiOutlineEye, HiOutlineEyeSlash } from 'react-icons/hi2';
+import RocketTransition from '../../components/RocketTransition';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -13,13 +14,22 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
+  const [showRocket, setShowRocket] = useState(false);
+  const [rocketTarget, setRocketTarget] = useState('/app/dashboard');
+  const [rocketUserName, setRocketUserName] = useState('');
+
+  const handleRocketComplete = useCallback(() => {
+    navigate(rocketTarget);
+  }, [navigate, rocketTarget]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     if (BYPASS_AUTH_FOR_TESTING) {
-      navigate('/app/dashboard');
+      setRocketUserName('Tester');
+      setRocketTarget('/app/dashboard');
+      setShowRocket(true);
       return;
     }
 
@@ -37,13 +47,17 @@ export default function LoginPage() {
       const result = await login({ email, password }).unwrap();
       if (result.success) {
         const loggedInUser = result.data.user;
+        const userName = loggedInUser.name?.split(' ')[0] || '';
+        setRocketUserName(userName);
+
         if (!loggedInUser.isEmailVerified) {
-          navigate('/app/pending-verification');
+          setRocketTarget('/app/pending-verification');
         } else if (!loggedInUser.isProfileComplete) {
-          navigate('/app/onboarding');
+          setRocketTarget('/app/onboarding');
         } else {
-          navigate('/app/dashboard');
+          setRocketTarget('/app/dashboard');
         }
+        setShowRocket(true);
       }
     } catch (err) {
       setError(err.data?.message || 'Login failed. Please try again.');
@@ -51,6 +65,7 @@ export default function LoginPage() {
   };
 
   return (
+    <>
     <div className="auth-card">
       <div className="auth-card-header">
         <h1>Welcome Back</h1>
@@ -147,5 +162,12 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+
+    <RocketTransition
+      isActive={showRocket}
+      onComplete={handleRocketComplete}
+      userName={rocketUserName}
+    />
+    </>
   );
 }

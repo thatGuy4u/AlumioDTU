@@ -1,5 +1,6 @@
 @import "./styles/dashboard.css";
 @import "./styles/pages.css";
+@import "./styles/rocket-transition.css";
 
 :root {
   --gold: #F5C842;
