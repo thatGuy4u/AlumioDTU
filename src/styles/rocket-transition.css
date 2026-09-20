@@ -36,42 +36,7 @@
   will-change: transform;
 }
 
-/* Curtain bottom edge — soft glow at the sweep boundary */
-.rocket-curtain-edge {
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 60px;
-  z-index: 20;
-  background: linear-gradient(to top,
-      transparent 0%,
-      rgba(79, 172, 254, 0.04) 30%,
-      rgba(79, 172, 254, 0.1) 60%,
-      rgba(255, 180, 80, 0.06) 80%,
-      rgba(255, 120, 50, 0.12) 100%);
-  filter: blur(6px);
-  pointer-events: none;
-}
 
-.rocket-curtain-edge::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 15%;
-  right: 15%;
-  height: 2px;
-  background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(79, 172, 254, 0.3) 20%,
-      rgba(200, 220, 255, 0.5) 50%,
-      rgba(79, 172, 254, 0.3) 80%,
-      transparent 100%);
-  border-radius: 2px;
-  box-shadow:
-    0 0 12px 3px rgba(79, 172, 254, 0.2),
-    0 0 30px 8px rgba(79, 172, 254, 0.08);
-}
 
 /* ===== Star Field ===== */
 .rocket-starfield {
@@ -126,10 +91,10 @@
 .rocket-container {
   position: absolute;
   bottom: -220px;
-  /* start just below the viewport */
-  left: 50%;
-  margin-left: -60px;
-  /* half of rocket SVG width (120/2) — avoids transform for centering since framer-motion controls transform */
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
   z-index: 20;
   will-change: transform;
 }
@@ -287,9 +252,8 @@
 .rocket-smoke-container {
   position: absolute;
   bottom: -30px;
-  /* just below exhaust */
   left: 50%;
-  transform: translateX(-50%);
+  margin-left: 0;
   width: 0;
   height: 0;
   z-index: 0;
@@ -325,11 +289,6 @@
     letter-spacing: 1.5px;
   }
 
-  .rocket-container {
-    margin-left: -40px;
-    /* half of 80px mobile rocket width */
-  }
-
   .rocket-svg {
     width: 80px;
     height: 135px;
@@ -362,10 +321,6 @@
   .rocket-glow {
     width: 120px;
     height: 120px;
-  }
-
-  .rocket-curtain-edge {
-    height: 40px;
   }
 
   .rocket-smoke-particle {
