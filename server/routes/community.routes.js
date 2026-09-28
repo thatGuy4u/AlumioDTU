@@ -112,6 +112,24 @@ router.delete('/comments/:id', asyncHandler(async (req, res) => {
   }
 }));
 
+// GET /unread-count — count posts created after a given timestamp
+router.get('/unread-count', asyncHandler(async (req, res) => {
+  const { since } = req.query;
+
+  // Build the where clause — if no `since` provided, count ALL non-moderated posts
+  const where = { isModerated: false };
+
+  if (since) {
+    const sinceDate = new Date(since);
+    if (!isNaN(sinceDate.getTime())) {
+      where.createdAt = { gt: sinceDate };
+    }
+  }
+
+  const count = await prisma.post.count({ where });
+  res.json({ success: true, data: { count } });
+}));
+
 // GET /trending
 router.get('/trending', asyncHandler(async (req, res) => {
   const posts = await prisma.post.findMany({ where: { isModerated: false }, orderBy: [{ upvoteCount: 'desc' }, { commentCount: 'desc' }], take: 10, include: { author: { select: { id: true, name: true, avatar: true, role: true } } } });

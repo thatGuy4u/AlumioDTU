@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { selectCurrentUser } from '../store/slices/authSlice';
 import { useGetUnreadCountQuery } from '../store/api/chatApi';
+import { useGetCommunityUnreadCountQuery } from '../store/api/communityApi';
 import LeftDrawer from './LeftDrawer';
 import {
   HiOutlineHome, HiOutlineUser, HiOutlineUsers,
@@ -62,6 +63,8 @@ const adminLinks = [
 function SidebarLinks({ links, collapsed, isMobile, location, onNavigate }) {
   const { data: unreadData } = useGetUnreadCountQuery();
   const unreadCount = unreadData?.data?.count || 0;
+  const { data: communityUnreadData } = useGetCommunityUnreadCountQuery();
+  const communityUnread = communityUnreadData?.data?.count || 0;
 
   return (
     <div className="sidebar-nav" role="navigation" aria-label="App navigation">
@@ -70,6 +73,7 @@ function SidebarLinks({ links, collapsed, isMobile, location, onNavigate }) {
         const isActive = location.pathname === link.to
           || (link.to !== '/app/dashboard' && location.pathname.startsWith(link.to));
         const isMessages = link.to === '/app/messages';
+        const isCommunity = link.to === '/app/community';
 
         return (
           <NavLink
@@ -92,6 +96,12 @@ function SidebarLinks({ links, collapsed, isMobile, location, onNavigate }) {
               <span className="sidebar-badge">
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
+            )}
+            {isCommunity && communityUnread > 0 && collapsed && !isMobile && (
+              <span className="sidebar-badge sidebar-badge--dot sidebar-badge--community" />
+            )}
+            {isCommunity && communityUnread > 0 && (!collapsed || isMobile) && (
+              <span className="sidebar-badge sidebar-badge--community">NEW</span>
             )}
           </NavLink>
         );

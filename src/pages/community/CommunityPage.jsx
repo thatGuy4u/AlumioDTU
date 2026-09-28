@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { selectToken, selectCurrentUser } from '../../store/slices/authSlice';
 import { API_URL, POST_CATEGORIES } from '../../utils/constants';
+import { setCommunityLastVisit, communityApi } from '../../store/api/communityApi';
 import { HiOutlineArrowTrendingUp, HiOutlineChatBubbleOvalLeft, HiOutlinePlusCircle, HiOutlineHandThumbUp, HiHandThumbUp } from 'react-icons/hi2';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 export default function CommunityPage() {
+  const dispatch = useDispatch();
   const token = useSelector(selectToken);
   const user = useSelector(selectCurrentUser);
   const [posts, setPosts] = useState([]);
@@ -22,6 +24,12 @@ export default function CommunityPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newPost, setNewPost] = useState({ title: '', content: '', category: 'general', tags: '' });
   const [upvotedIds, setUpvotedIds] = useState(new Set());
+
+  // Mark community as visited — clears the "NEW" badge in sidebar
+  useEffect(() => {
+    setCommunityLastVisit();
+    dispatch(communityApi.util.invalidateTags(['CommunityUnread']));
+  }, [dispatch]);
 
   const fetchPosts = async (p = 1) => {
     setLoading(true);

@@ -716,6 +716,38 @@
   box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
 }
 
+/* Community "NEW" badge — teal variant */
+.sidebar-badge--community {
+  background: linear-gradient(135deg, #00d4c8, #0ea5e9);
+  box-shadow: 0 0 10px rgba(0, 212, 200, 0.45);
+  font-size: 0.6rem;
+  letter-spacing: 0.5px;
+  padding: 0 7px;
+  animation: community-badge-pulse 2s ease-in-out infinite;
+}
+
+.sidebar-badge--community.sidebar-badge--dot {
+  background: #00d4c8;
+  animation: community-badge-pulse 2s ease-in-out infinite;
+}
+
+.sidebar-link.active .sidebar-badge--community {
+  background: rgba(0, 212, 200, 0.35);
+  color: #fff;
+  box-shadow: none;
+  animation: none;
+}
+
+.sidebar-link.active .sidebar-badge--community.sidebar-badge--dot {
+  background: #00d4c8;
+  box-shadow: 0 0 6px rgba(0, 212, 200, 0.5);
+}
+
+@keyframes community-badge-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
 .sidebar-active-indicator {
   position: absolute;
   left: 0;
