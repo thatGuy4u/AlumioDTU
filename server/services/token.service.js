@@ -27,6 +27,15 @@ export const generateRandomToken = () => {
 };
 
 /**
+ * Hash a token with SHA-256 for secure storage.
+ * Used for refresh tokens — SHA-256 is appropriate because the tokens
+ * are already high-entropy, so a fast hash suffices (no need for bcrypt).
+ */
+export const hashToken = (token) => {
+  return crypto.createHash('sha256').update(token).digest('hex');
+};
+
+/**
  * Set refresh token as httpOnly cookie.
  * Uses 'none' sameSite in production for cross-origin deployments (e.g. Vercel frontend + Render backend).
  */

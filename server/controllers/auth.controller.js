@@ -4,7 +4,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { sanitizeUser } from '../utils/sanitize.js';
 import {
-  generateAccessToken, generateRefreshToken, generateRandomToken, setRefreshTokenCookie,
+  generateAccessToken, generateRefreshToken, generateRandomToken, setRefreshTokenCookie, hashToken,
 } from '../services/token.service.js';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service.js';
 import jwt from 'jsonwebtoken';
@@ -67,7 +67,7 @@ export const register = asyncHandler(async (req, res) => {
 
   const accessToken = generateAccessToken(user.id);
   const refreshTk = generateRefreshToken(user.id);
-  await prisma.user.update({ where: { id: user.id }, data: { refreshToken: refreshTk } });
+  await prisma.user.update({ where: { id: user.id }, data: { refreshToken: hashToken(refreshTk) } });
   setRefreshTokenCookie(res, refreshTk);
 
   res.status(201).json({ success: true, message: 'Account created! Check your email to verify.', data: { user: sanitizeUser(user), accessToken } });
@@ -85,7 +85,7 @@ export const login = asyncHandler(async (req, res) => {
 
   const accessToken = generateAccessToken(user.id);
   const refreshTk = generateRefreshToken(user.id);
-  await prisma.user.update({ where: { id: user.id }, data: { refreshToken: refreshTk, lastLogin: new Date() } });
+  await prisma.user.update({ where: { id: user.id }, data: { refreshToken: hashToken(refreshTk), lastLogin: new Date() } });
   setRefreshTokenCookie(res, refreshTk);
 
   res.json({ success: true, message: 'Login successful', data: { user: sanitizeUser(user), accessToken } });
@@ -103,11 +103,11 @@ export const refreshToken = asyncHandler(async (req, res) => {
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   const user = await prisma.user.findUnique({ where: { id: decoded.id } });
-  if (!user || user.refreshToken !== token) throw new ApiError(401, 'Invalid refresh token');
+  if (!user || user.refreshToken !== hashToken(token)) throw new ApiError(401, 'Invalid refresh token');
 
   const newAccess = generateAccessToken(user.id);
   const newRefresh = generateRefreshToken(user.id);
-  await prisma.user.update({ where: { id: user.id }, data: { refreshToken: newRefresh } });
+  await prisma.user.update({ where: { id: user.id }, data: { refreshToken: hashToken(newRefresh) } });
   setRefreshTokenCookie(res, newRefresh);
   res.json({ success: true, data: { accessToken: newAccess } });
 });
