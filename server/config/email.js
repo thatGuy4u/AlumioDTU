@@ -34,14 +34,15 @@ export async function sendMail(options) {
     return null;
   }
 
+  const replyAddress = options.replyTo || options.reply_to || undefined;
+
   const { data, error } = await resend.emails.send({
     from: options.from || process.env.EMAIL_FROM,
     to: options.to,
     subject: options.subject,
     html: options.html,
-    ...(options.replyTo || options.reply_to
-      ? { reply_to: options.replyTo || options.reply_to }
-      : {}),
+    ...(replyAddress ? { replyTo: replyAddress, reply_to: replyAddress } : {}),
+    ...(replyAddress ? { headers: { ...(options.headers || {}), 'Reply-To': replyAddress } } : {}),
   });
 
   if (error) {
