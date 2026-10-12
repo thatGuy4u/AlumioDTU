@@ -30,14 +30,19 @@ export default function ContactUsPage() {
     }
     setSending(true);
     try {
-      await api.post('/users/contact', { name, email, subject, message });
-      toast.success('Message sent successfully! We\'ll get back to you soon.');
-      setSubject('');
-      setMessage('');
+      const res = await api.post('/users/contact', { name, email, subject, message });
+      if (res.data?.success !== false) {
+        toast.success('Message sent successfully! We\'ll get back to you soon.');
+        setSubject('');
+        setMessage('');
+      } else {
+        toast.error(res.data?.message || 'Failed to send message');
+      }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to send message');
+      toast.error(err.response?.data?.message || err.message || 'Failed to send message');
+    } finally {
+      setSending(false);
     }
-    setSending(false);
   };
 
   return (

@@ -32,7 +32,6 @@ export default function Footer() {
       if (data.success) {
         toast.success('Message sent! We\'ll get back to you soon.');
         setContactForm({ name: '', email: '', subject: '', message: '' });
-        setShowContact(false);
       } else {
         toast.error(data.message || 'Failed to send');
       }
