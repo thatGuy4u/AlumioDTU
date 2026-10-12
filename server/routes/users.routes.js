@@ -439,10 +439,12 @@ router.post('/contact', asyncHandler(async (req, res) => {
   const { name, email, subject, message } = req.body;
   if (!subject || !message) throw new ApiError(400, 'Subject and message are required');
 
+  const replyToEmail = email || req.user.email;
   const { sendMail } = await import('../config/email.js');
   await sendMail({
     from: process.env.EMAIL_FROM,
-    to: 'alumiodtu@gmail.com',
+    to: process.env.CONTACT_EMAIL || 'alumiodtu@gmail.com',
+    replyTo: replyToEmail,
     subject: `[AlumioDTU Contact] ${subject}`,
     html: `
       <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0f2e; color: #e8eaf6; padding: 40px; border-radius: 16px;">

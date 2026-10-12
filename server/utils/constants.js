@@ -5,7 +5,7 @@ export const ROLES = {
 };
 
 export const BRANCHES = [
-  'CSE', 'IT', 'ECE', 'EE', 'ME', 'CE', 'BT', 'EP',
+  'CSE', 'IT', 'ECE', 'EE', 'ME', 'CE', 'CHE', 'BT', 'EP',
   'COE', 'SE', 'MCE', 'PIE', 'ENE', 'Other',
 ];
 

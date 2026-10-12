@@ -83,7 +83,8 @@ app.post('/api/contact', async (req, res, next) => {
     const { sendMail } = await import('./config/email.js');
     await sendMail({
       from: process.env.EMAIL_FROM,
-      to: 'alumiodtu@gmail.com',
+      to: process.env.CONTACT_EMAIL || 'alumiodtu@gmail.com',
+      replyTo: email,
       subject: `[AlumioDTU Contact] ${subject}`,
       html: `
         <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0f2e; color: #e8eaf6; padding: 40px; border-radius: 16px;">

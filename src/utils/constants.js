@@ -11,6 +11,7 @@ export const BRANCHES = [
   { value: 'EE', label: 'Electrical Engineering' },
   { value: 'ME', label: 'Mechanical Engineering' },
   { value: 'CE', label: 'Civil Engineering' },
+  { value: 'CHE', label: 'Chemical Engineering' },
   { value: 'BT', label: 'Biotechnology' },
   { value: 'EP', label: 'Engineering Physics' },
   { value: 'COE', label: 'Computer Engineering' },

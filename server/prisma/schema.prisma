@@ -28,6 +28,7 @@ enum Branch {
   EE
   ME
   CE
+  CHE
   BT
   EP
   COE

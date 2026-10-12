@@ -39,6 +39,9 @@ export async function sendMail(options) {
     to: options.to,
     subject: options.subject,
     html: options.html,
+    ...(options.replyTo || options.reply_to
+      ? { reply_to: options.replyTo || options.reply_to }
+      : {}),
   });
 
   if (error) {
