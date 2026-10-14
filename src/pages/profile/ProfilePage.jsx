@@ -2,9 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import axios from 'axios';
-import { selectCurrentUser, selectToken, selectProfile } from '../../store/slices/authSlice';
-import { API_URL } from '../../utils/constants';
+import { selectCurrentUser, selectProfile } from '../../store/slices/authSlice';
+import api from '../../utils/apiClient';
 import { HiOutlineEnvelope, HiOutlineMapPin, HiOutlineBriefcase, HiOutlineAcademicCap, HiOutlineChatBubbleLeftRight, HiOutlinePencilSquare, HiOutlineTrophy, HiOutlineLink, HiOutlineFlag, HiOutlineGlobeAlt } from 'react-icons/hi2';
 import ReportModal from '../../components/ReportModal';
 
@@ -14,7 +13,6 @@ const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 export default function ProfilePage() {
   const { userId } = useParams();
   const currentUser = useSelector(selectCurrentUser);
-  const token = useSelector(selectToken);
   const myProfile = useSelector(selectProfile);
 
   // Only declare "own profile" when we have a currentUser to compare against.
@@ -55,7 +53,7 @@ export default function ProfilePage() {
     } else {
       // Fetch the other user's profile
       setLoading(true);
-      axios.get(`${API_URL}/users/profile/${userId}`, { headers: { Authorization: `Bearer ${token}` } })
+      api.get(`/users/profile/${userId}`)
         .then(r => {
           // Only apply if we're still looking at the same user
           if (lastFetchedId.current === userId) {
@@ -76,7 +74,7 @@ export default function ProfilePage() {
           }
         });
     }
-  }, [userId, isOwn, currentUser, myProfile, token]);
+  }, [userId, isOwn, currentUser, myProfile]);
 
   const u = userData;
   const p = profileData;

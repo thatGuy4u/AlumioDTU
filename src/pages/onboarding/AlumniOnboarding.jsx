@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { motion, AnimatePresence } from 'framer-motion';
 import { selectCurrentUser, selectToken, setCredentials } from '../../store/slices/authSlice';
-import { BRANCHES, INDUSTRIES, API_URL } from '../../utils/constants';
-import axios from 'axios';
+import { BRANCHES, INDUSTRIES } from '../../utils/constants';
+import api from '../../utils/apiClient';
 import toast from 'react-hot-toast';
 import { HiOutlineBriefcase, HiOutlineUser, HiOutlineAcademicCap, HiOutlineHeart, HiOutlineCheck, HiOutlineArrowRight, HiOutlineArrowLeft, HiOutlineShieldCheck } from 'react-icons/hi2';
 import EmailVerificationPopup from '../../components/EmailVerificationPopup';
@@ -24,6 +23,10 @@ const fieldLabels = {
   location: 'Location', experience: 'Years of Experience', branch: 'Branch',
   graduationYear: 'Graduation Year', rollNumber: 'Roll Number', skills: 'Skills',
 };
+
+function Label({ text, required }) {
+  return <label>{text}{required && <span className="required-mark"> *</span>}</label>;
+}
 
 export default function AlumniOnboarding() {
   const navigate = useNavigate();
@@ -69,7 +72,7 @@ export default function AlumniOnboarding() {
         mentorshipAvailability: form.mentorshipAvailability,
         mentorshipCapacity: parseInt(form.mentorshipCapacity) || 3,
       };
-      const res = await axios.put(`${API_URL}/users/onboarding`, payload, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await api.put('/users/onboarding', payload);
       if (res.data.success) {
         dispatch(setCredentials({ user: res.data.data.user, accessToken: token, profile: res.data.data.profile }));
         navigate('/app/dashboard');
@@ -79,11 +82,6 @@ export default function AlumniOnboarding() {
   };
 
   const stepIcons = [HiOutlineUser, HiOutlineBriefcase, HiOutlineAcademicCap, HiOutlineHeart];
-
-  // Helper to render label with required asterisk
-  const Label = ({ text, required }) => (
-    <label>{text}{required && <span className="required-mark"> *</span>}</label>
-  );
 
   return (
     <div className="onboarding-page">

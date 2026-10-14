@@ -21,6 +21,104 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
 
+// ─── Skeleton Components ───
+function SkeletonPulse({ width, height = 16, borderRadius = 6, style }) {
+  return (
+    <div
+      className="skeleton-pulse"
+      style={{ width, height, borderRadius, ...style }}
+    />
+  );
+}
+
+function StatCardSkeleton() {
+  return (
+    <div className="dash-stat-card">
+      <SkeletonPulse width={40} height={40} borderRadius={10} />
+      <div className="dash-stat-info" style={{ gap: 6 }}>
+        <SkeletonPulse width={48} height={28} />
+        <SkeletonPulse width={80} height={12} />
+      </div>
+    </div>
+  );
+}
+
+function UserCardSkeleton() {
+  return [0, 1, 2].map(i => (
+    <div key={i} className="dash-alumni-card" style={{ opacity: 0.5 }}>
+      <SkeletonPulse width={40} height={40} borderRadius={10} />
+      <div className="dash-alumni-info" style={{ gap: 6, flex: 1 }}>
+        <SkeletonPulse width="55%" height={14} />
+        <SkeletonPulse width="70%" height={11} />
+        <SkeletonPulse width="35%" height={10} />
+      </div>
+      <SkeletonPulse width={50} height={28} borderRadius={8} />
+    </div>
+  ));
+}
+
+function EventCardSkeleton() {
+  return [0, 1, 2].map(i => (
+    <div key={i} className="dash-event-card" style={{ opacity: 0.5 }}>
+      <div className="dash-event-date">
+        <SkeletonPulse width={28} height={20} />
+        <SkeletonPulse width={28} height={12} />
+      </div>
+      <div className="dash-event-info" style={{ gap: 6, flex: 1 }}>
+        <SkeletonPulse width="65%" height={14} />
+        <SkeletonPulse width="40%" height={10} />
+      </div>
+    </div>
+  ));
+}
+
+function JobCardSkeleton() {
+  return [0, 1, 2].map(i => (
+    <div key={i} className="dash-job-card" style={{ opacity: 0.5 }}>
+      <div className="dash-job-info" style={{ gap: 6, flex: 1 }}>
+        <SkeletonPulse width="60%" height={14} />
+        <SkeletonPulse width="40%" height={11} />
+      </div>
+      <div className="dash-job-tags" style={{ gap: 6 }}>
+        <SkeletonPulse width={60} height={22} borderRadius={12} />
+        <SkeletonPulse width={50} height={22} borderRadius={12} />
+      </div>
+    </div>
+  ));
+}
+
+function PostCardSkeleton() {
+  return [0, 1, 2].map(i => (
+    <div key={i} className="dash-post-card" style={{ opacity: 0.5 }}>
+      <div className="dash-post-votes">
+        <SkeletonPulse width={14} height={14} borderRadius={3} />
+        <SkeletonPulse width={18} height={12} />
+      </div>
+      <div className="dash-post-info" style={{ gap: 6, flex: 1 }}>
+        <SkeletonPulse width="70%" height={14} />
+        <SkeletonPulse width="35%" height={10} />
+      </div>
+    </div>
+  ));
+}
+
+function ActivitySkeleton() {
+  return (
+    <div className="dash-activity-feed">
+      {[0, 1, 2, 3].map(i => (
+        <div key={i} className="dash-activity-item" style={{ opacity: 0.5 }}>
+          <SkeletonPulse width={8} height={8} borderRadius={4} style={{ flexShrink: 0 }} />
+          <div className="dash-activity-content" style={{ gap: 6, flex: 1 }}>
+            <SkeletonPulse width="50%" height={13} />
+            <SkeletonPulse width="80%" height={11} />
+            <SkeletonPulse width="25%" height={10} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function StudentDashboard() {
   const user = useSelector(selectCurrentUser);
   const profile = useSelector(selectProfile);
@@ -31,6 +129,7 @@ export default function StudentDashboard() {
   const [posts, setPosts] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [stats, setStats] = useState({ connections: 0, mentors: 0, applications: 0, events: 0 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch real data from APIs — gracefully fall back to empty arrays
@@ -48,6 +147,7 @@ export default function StudentDashboard() {
       if (jobsRes.status === 'fulfilled') setJobs(jobsRes.value.data.data?.jobs || []);
       if (postsRes.status === 'fulfilled') setPosts((postsRes.value.data.data || []).slice(0, 3));
       if (activityRes.status === 'fulfilled') setRecentActivity(activityRes.value.data.data?.notifications || []);
+      setLoading(false);
     });
   }, []);
 
@@ -143,17 +243,21 @@ export default function StudentDashboard() {
 
       {/* Stats Row */}
       <motion.div className="dash-stats-row" variants={item}>
-        {statCards.map((stat, i) => (
-          <div key={i} className="dash-stat-card">
-            <div className="dash-stat-icon" style={{ background: `${stat.color}15`, color: stat.color }}>
-              <stat.icon size={22} />
+        {loading ? (
+          <>{[0, 1, 2, 3].map(i => <StatCardSkeleton key={i} />)}</>
+        ) : (
+          statCards.map((stat, i) => (
+            <div key={i} className="dash-stat-card">
+              <div className="dash-stat-icon" style={{ background: `${stat.color}15`, color: stat.color }}>
+                <stat.icon size={22} />
+              </div>
+              <div className="dash-stat-info">
+                <span className="dash-stat-value">{stat.value}</span>
+                <span className="dash-stat-label">{stat.label}</span>
+              </div>
             </div>
-            <div className="dash-stat-info">
-              <span className="dash-stat-value">{stat.value}</span>
-              <span className="dash-stat-label">{stat.label}</span>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </motion.div>
 
       {/* Quick Actions */}
@@ -177,7 +281,9 @@ export default function StudentDashboard() {
             <h3>Recommended Users</h3>
           </div>
           <div className="dash-widget-body">
-            {alumni.length === 0 ? (
+            {loading ? (
+              <UserCardSkeleton />
+            ) : alumni.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No users found yet</p>
             ) : alumni.map((a) => (
               <Link key={a.id} to={`/app/profile/${a.user?.id}`} className="dash-alumni-card" style={{ textDecoration: 'none' }}>
@@ -203,7 +309,9 @@ export default function StudentDashboard() {
             <h3>Upcoming Events</h3>
           </div>
           <div className="dash-widget-body">
-            {events.length === 0 ? (
+            {loading ? (
+              <EventCardSkeleton />
+            ) : events.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No upcoming events</p>
             ) : events.map((event) => {
               const d = new Date(event.date);
@@ -231,7 +339,9 @@ export default function StudentDashboard() {
             <h3>Latest Opportunities</h3>
           </div>
           <div className="dash-widget-body">
-            {jobs.length === 0 ? (
+            {loading ? (
+              <JobCardSkeleton />
+            ) : jobs.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No jobs posted yet</p>
             ) : jobs.map((job) => (
               <Link key={job.id} to={`/app/jobs/${job.id}`} className="dash-job-card" style={{ textDecoration: 'none' }}>
@@ -256,7 +366,9 @@ export default function StudentDashboard() {
             <h3>Trending Discussions</h3>
           </div>
           <div className="dash-widget-body">
-            {posts.length === 0 ? (
+            {loading ? (
+              <PostCardSkeleton />
+            ) : posts.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No discussions yet</p>
             ) : posts.map((post) => (
               <Link key={post.id} to={`/app/community/${post.id}`} className="dash-post-card" style={{ textDecoration: 'none' }}>
@@ -281,7 +393,9 @@ export default function StudentDashboard() {
             <h3>Recent Activity</h3>
           </div>
           <div className="dash-widget-body">
-            {recentActivity.length === 0 ? (
+            {loading ? (
+              <ActivitySkeleton />
+            ) : recentActivity.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No recent activity yet. Start engaging!</p>
             ) : (
               <div className="dash-activity-feed">

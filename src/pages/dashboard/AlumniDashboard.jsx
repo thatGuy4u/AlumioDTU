@@ -14,12 +14,84 @@ import {
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } };
 
+// ─── Skeleton Components ───
+function SkeletonPulse({ width, height = 16, borderRadius = 6, style }) {
+  return (
+    <div
+      className="skeleton-pulse"
+      style={{ width, height, borderRadius, ...style }}
+    />
+  );
+}
+
+function StatCardSkeleton() {
+  return (
+    <div className="dash-stat-card">
+      <SkeletonPulse width={40} height={40} borderRadius={10} />
+      <div className="dash-stat-info" style={{ gap: 6 }}>
+        <SkeletonPulse width={48} height={28} />
+        <SkeletonPulse width={80} height={12} />
+      </div>
+    </div>
+  );
+}
+
+function RequestCardSkeleton() {
+  return [0, 1, 2].map(i => (
+    <div key={i} className="dash-request-card" style={{ opacity: 0.5 }}>
+      <SkeletonPulse width={40} height={40} borderRadius={10} />
+      <div className="dash-request-info" style={{ gap: 6, flex: 1 }}>
+        <SkeletonPulse width="55%" height={14} />
+        <SkeletonPulse width="75%" height={11} />
+        <SkeletonPulse width="90%" height={10} />
+      </div>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <SkeletonPulse width={32} height={32} borderRadius={8} />
+        <SkeletonPulse width={32} height={32} borderRadius={8} />
+      </div>
+    </div>
+  ));
+}
+
+function JobAnalyticsSkeleton() {
+  return [0, 1, 2].map(i => (
+    <div key={i} className="dash-analytics-card" style={{ opacity: 0.5 }}>
+      <div className="dash-analytics-info" style={{ gap: 6, flex: 1 }}>
+        <SkeletonPulse width="60%" height={14} />
+        <SkeletonPulse width={55} height={20} borderRadius={12} />
+      </div>
+      <div className="dash-analytics-stats" style={{ gap: 6 }}>
+        <SkeletonPulse width={80} height={11} />
+        <SkeletonPulse width={60} height={11} />
+      </div>
+    </div>
+  ));
+}
+
+function ActivitySkeleton() {
+  return (
+    <div className="dash-activity-feed">
+      {[0, 1, 2, 3].map(i => (
+        <div key={i} className="dash-activity-item" style={{ opacity: 0.5 }}>
+          <SkeletonPulse width={8} height={8} borderRadius={4} style={{ flexShrink: 0 }} />
+          <div className="dash-activity-content" style={{ gap: 6, flex: 1 }}>
+            <SkeletonPulse width="50%" height={13} />
+            <SkeletonPulse width="80%" height={11} />
+            <SkeletonPulse width="25%" height={10} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function AlumniDashboard() {
   const user = useSelector(selectCurrentUser);
   const [stats, setStats] = useState({ activeMentees: 0, jobsPosted: 0, eventsOrganized: 0, studentsHelped: 0 });
   const [requests, setRequests] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.allSettled([
@@ -32,6 +104,7 @@ export default function AlumniDashboard() {
       if (reqRes.status === 'fulfilled') setRequests(reqRes.value.data.data?.requests || []);
       if (jobsRes.status === 'fulfilled') setJobs((jobsRes.value.data.data || []).slice(0, 3));
       if (activityRes.status === 'fulfilled') setRecentActivity(activityRes.value.data.data?.notifications || []);
+      setLoading(false);
     });
   }, []);
 
@@ -72,22 +145,26 @@ export default function AlumniDashboard() {
 
       {/* Quick Stats */}
       <motion.div className="dash-stats-row" variants={item}>
-        {[
-          { label: 'Active Mentees', value: stats.activeMentees, icon: HiOutlineAcademicCap, color: '#00d4c8' },
-          { label: 'Jobs Posted', value: stats.jobsPosted, icon: HiOutlineBriefcase, color: '#2c87f6' },
-          { label: 'Events Organized', value: stats.eventsOrganized, icon: HiOutlineCalendarDays, color: '#7c4dff' },
-          { label: 'Students Helped', value: stats.studentsHelped, icon: HiOutlineChartBar, color: '#ff6b6b' },
-        ].map((stat, i) => (
-          <div key={i} className="dash-stat-card">
-            <div className="dash-stat-icon" style={{ background: `${stat.color}15`, color: stat.color }}>
-              <stat.icon size={22} />
+        {loading ? (
+          <>{[0, 1, 2, 3].map(i => <StatCardSkeleton key={i} />)}</>
+        ) : (
+          [
+            { label: 'Active Mentees', value: stats.activeMentees, icon: HiOutlineAcademicCap, color: '#00d4c8' },
+            { label: 'Jobs Posted', value: stats.jobsPosted, icon: HiOutlineBriefcase, color: '#2c87f6' },
+            { label: 'Events Organized', value: stats.eventsOrganized, icon: HiOutlineCalendarDays, color: '#7c4dff' },
+            { label: 'Students Helped', value: stats.studentsHelped, icon: HiOutlineChartBar, color: '#ff6b6b' },
+          ].map((stat, i) => (
+            <div key={i} className="dash-stat-card">
+              <div className="dash-stat-icon" style={{ background: `${stat.color}15`, color: stat.color }}>
+                <stat.icon size={22} />
+              </div>
+              <div className="dash-stat-info">
+                <span className="dash-stat-value">{stat.value}</span>
+                <span className="dash-stat-label">{stat.label}</span>
+              </div>
             </div>
-            <div className="dash-stat-info">
-              <span className="dash-stat-value">{stat.value}</span>
-              <span className="dash-stat-label">{stat.label}</span>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </motion.div>
 
       {/* Quick Actions */}
@@ -118,7 +195,9 @@ export default function AlumniDashboard() {
             <h3>Pending Mentorship Requests</h3>
           </div>
           <div className="dash-widget-body">
-            {requests.length === 0 ? (
+            {loading ? (
+              <RequestCardSkeleton />
+            ) : requests.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No pending requests 🎉</p>
             ) : requests.map((req) => (
               <div key={req.id} className="dash-request-card">
@@ -151,7 +230,9 @@ export default function AlumniDashboard() {
             <h3>Your Job Postings</h3>
           </div>
           <div className="dash-widget-body">
-            {jobs.length === 0 ? (
+            {loading ? (
+              <JobAnalyticsSkeleton />
+            ) : jobs.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No jobs posted yet</p>
             ) : jobs.map((job) => (
               <Link key={job.id} to={`/app/jobs/${job.id}`} className="dash-analytics-card" style={{ textDecoration: 'none' }}>
@@ -176,7 +257,9 @@ export default function AlumniDashboard() {
             <h3>Recent Activity</h3>
           </div>
           <div className="dash-widget-body">
-            {recentActivity.length === 0 ? (
+            {loading ? (
+              <ActivitySkeleton />
+            ) : recentActivity.length === 0 ? (
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No recent activity yet.</p>
             ) : (
               <div className="dash-activity-feed">

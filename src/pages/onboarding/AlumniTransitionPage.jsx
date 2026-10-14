@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { motion, AnimatePresence } from 'framer-motion';
 import { selectCurrentUser, selectToken, selectProfile, setCredentials } from '../../store/slices/authSlice';
 import { BRANCHES, INDUSTRIES } from '../../utils/constants';
 import api from '../../utils/apiClient';
@@ -24,6 +23,10 @@ const fieldLabels = {
   company: 'Company', designation: 'Designation', industry: 'Industry',
   location: 'Location', experience: 'Years of Experience',
 };
+
+function Label({ text, required }) {
+  return <label>{text}{required && <span className="required-mark"> *</span>}</label>;
+}
 
 export default function AlumniTransitionPage() {
   const navigate = useNavigate();
@@ -107,10 +110,6 @@ export default function AlumniTransitionPage() {
   const graduationYear = profile?.graduationYear || new Date().getFullYear();
   const deadline = `September 30, ${graduationYear}`;
   const stepIcons = [HiOutlineUser, HiOutlineBriefcase, HiOutlineHeart];
-
-  const Label = ({ text, required }) => (
-    <label>{text}{required && <span className="required-mark"> *</span>}</label>
-  );
 
   return (
     <div className="onboarding-page">

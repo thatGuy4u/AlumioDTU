@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectToken, selectCurrentUser, selectProfile, updateUser, setProfile } from '../../store/slices/authSlice';
-import { API_URL, BRANCHES, INDUSTRIES } from '../../utils/constants';
+import { selectCurrentUser, updateUser, setProfile } from '../../store/slices/authSlice';
+import api from '../../utils/apiClient';
+import { BRANCHES, INDUSTRIES } from '../../utils/constants';
 import {
   HiOutlineUser, HiOutlineCamera, HiOutlineAcademicCap,
   HiOutlineBriefcase, HiOutlineGlobeAlt, HiOutlineXMark,
@@ -16,9 +16,7 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } 
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 export default function EditProfilePage() {
-  const token = useSelector(selectToken);
   const user = useSelector(selectCurrentUser);
-  const profile = useSelector(selectProfile);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -31,24 +29,22 @@ export default function EditProfilePage() {
   const [interestInput, setInterestInput] = useState('');
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    (async () => {
       try {
-        const res = await axios.get(`${API_URL}/users/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get('/users/profile');
         const { user: u, profile: p } = res.data.data;
         setUserData({
           name: u.name || '',
           socialLinks: typeof u.socialLinks === 'object' ? u.socialLinks : {},
         });
         setProfileData(p || {});
-      } catch (e) {
+      } catch {
         toast.error('Failed to load profile');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    };
-    fetchProfile();
-  }, [token]);
+    })();
+  }, []);
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -58,15 +54,16 @@ export default function EditProfilePage() {
     const fd = new FormData();
     fd.append('avatar', file);
     try {
-      const res = await axios.post(`${API_URL}/users/profile/avatar`, fd, {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
+      const res = await api.post('/users/profile/avatar', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       dispatch(updateUser({ avatar: res.data.data.avatar }));
       toast.success('Avatar updated!');
     } catch {
       toast.error('Upload failed');
+    } finally {
+      setAvatarUploading(false);
     }
-    setAvatarUploading(false);
   };
 
   const addTag = (type) => {
@@ -93,8 +90,6 @@ export default function EditProfilePage() {
   const socialLabels = { linkedin: 'LinkedIn', github: 'GitHub', twitter: 'X (Twitter)', portfolio: 'Portfolio' };
 
   const handleSave = async () => {
-
-    // Validate social links
     const socials = userData.socialLinks || {};
     for (const [key, validator] of Object.entries(socialValidators)) {
       const val = socials[key]?.trim();
@@ -106,28 +101,18 @@ export default function EditProfilePage() {
 
     setSaving(true);
     try {
-      const body = { name: userData.name, socialLinks: userData.socialLinks };
-      // Pick profile-specific fields
-      const profileFields = { ...profileData };
-      delete profileFields.id;
-      delete profileFields.userId;
-      delete profileFields.createdAt;
-      delete profileFields.updatedAt;
-      delete profileFields.user;
-      delete profileFields.profileCompletionScore;
-
-      Object.assign(body, profileFields);
-      const res = await axios.put(`${API_URL}/users/profile`, body, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { id, userId, createdAt, updatedAt, user: _u, profileCompletionScore, ...profileFields } = profileData;
+      const body = { name: userData.name, socialLinks: userData.socialLinks, ...profileFields };
+      const res = await api.put('/users/profile', body);
       dispatch(updateUser(res.data.data.user));
       dispatch(setProfile(res.data.data.profile));
       toast.success('Profile saved!');
       navigate('/app/profile');
     } catch (e) {
       toast.error(e.response?.data?.message || 'Save failed');
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   if (loading) return <div className="page-loader"><span className="auth-spinner-large" /></div>;

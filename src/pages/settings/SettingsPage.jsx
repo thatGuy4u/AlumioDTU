@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { selectCurrentUser, clearCredentials } from '../../store/slices/authSlice';
+import { selectCurrentUser } from '../../store/slices/authSlice';
 import { selectTheme, toggleTheme } from '../../store/slices/uiSlice';
 import api from '../../utils/apiClient';
 import {

@@ -1,12 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { motion, AnimatePresence } from 'framer-motion';
-import { selectCurrentUser, setCredentials } from '../../store/slices/authSlice';
+import { selectCurrentUser, setCredentials, selectToken } from '../../store/slices/authSlice';
 import { BRANCHES } from '../../utils/constants';
-import axios from 'axios';
-import { API_URL } from '../../utils/constants';
-import { selectToken } from '../../store/slices/authSlice';
+import api from '../../utils/apiClient';
 import toast from 'react-hot-toast';
 import { HiOutlineAcademicCap, HiOutlineUser, HiOutlineCodeBracket, HiOutlineRocketLaunch, HiOutlineCheck, HiOutlineArrowRight, HiOutlineArrowLeft, HiOutlineClock } from 'react-icons/hi2';
 import EmailVerificationPopup from '../../components/EmailVerificationPopup';
@@ -25,6 +22,10 @@ const fieldLabels = {
   bio: 'Bio', branch: 'Branch', year: 'Current Year', graduationYear: 'Graduation Year',
   rollNumber: 'Roll Number', skills: 'Skills', careerGoals: 'Career Goals',
 };
+
+function Label({ text, required }) {
+  return <label>{text}{required && <span className="required-mark"> *</span>}</label>;
+}
 
 export default function StudentOnboarding() {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ export default function StudentOnboarding() {
         careerGoals: form.careerGoals,
         socialLinks: { linkedin: form.linkedinUrl, github: form.githubUrl },
       };
-      const res = await axios.put(`${API_URL}/users/onboarding`, payload, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await api.put('/users/onboarding', payload);
       if (res.data.success) {
         dispatch(setCredentials({ user: res.data.data.user, accessToken: token, profile: res.data.data.profile }));
         navigate('/app/dashboard');
@@ -78,11 +79,6 @@ export default function StudentOnboarding() {
   };
 
   const stepIcons = [HiOutlineUser, HiOutlineAcademicCap, HiOutlineCodeBracket, HiOutlineRocketLaunch];
-
-  // Helper to render label with required asterisk
-  const Label = ({ text, required }) => (
-    <label>{text}{required && <span className="required-mark"> *</span>}</label>
-  );
 
   return (
     <div className="onboarding-page">

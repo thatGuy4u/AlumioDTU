@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import { verifyAccessToken } from '../services/token.service.js';
 import { chatHandler } from '../socket/chatHandler.js';
 import { notificationHandler } from '../socket/notificationHandler.js';
 import { presenceHandler } from '../socket/presenceHandler.js';
@@ -14,7 +14,7 @@ export function initializeSocket(io) {
       return next(new Error('Authentication required'));
     }
     try {
-      const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET);
+      const decoded = verifyAccessToken(token);
       socket.userId = decoded.id;
       next();
     } catch {

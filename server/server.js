@@ -15,6 +15,7 @@ import { initializeSocket } from './config/socket.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { apiLimiter, contactLimiter } from './middleware/rateLimiter.js';
 import { scheduleGraduationCheck } from './services/graduationCron.js';
+import { buildContactEmailHtml } from './utils/contactEmail.js';
 
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/users.routes.js';
@@ -95,8 +96,6 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Public contact form (no auth required) — for pre-login landing page
-import { buildContactEmailHtml } from './utils/contactEmail.js';
-
 app.post('/api/contact', contactLimiter, async (req, res, next) => {
   try {
     const { name, email, subject, message } = req.body;

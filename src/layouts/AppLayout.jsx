@@ -10,6 +10,27 @@ import { useMobileNav } from '../hooks/useMediaQuery';
 import Sidebar from '../ui/Sidebar';
 import Topbar from '../ui/Topbar';
 
+function GraduationWarningStrip({ user, profile, pathname }) {
+  if (user?.role !== 'student' || !profile?.graduationYear) return null;
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+  const isGraduating = profile.graduationYear <= currentYear && currentMonth >= 6;
+  if (!isGraduating || pathname.includes('/transition')) return null;
+  const isUrgent = currentMonth >= 9;
+  return (
+    <div className={`graduation-warning-strip ${isUrgent ? 'urgent' : ''}`}>
+      <span>
+        {isUrgent ? '⚠️' : '🎓'}{' '}
+        {isUrgent
+          ? 'Your student account will be deleted on September 30! '
+          : `Class of ${profile.graduationYear} — Convert to alumni before Sept 30 to keep your account. `}
+      </span>
+      <Link to="/app/transition">Convert Now →</Link>
+    </div>
+  );
+}
+
 export default function AppLayout() {
   const sidebarCollapsed = useSelector(selectSidebarCollapsed);
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -79,27 +100,7 @@ export default function AppLayout() {
         isMobileNav={isMobileNav}
       />
       <div className="app-main">
-        {/* Persistent graduation warning strip for graduating students */}
-        {(() => {
-          if (user?.role !== 'student' || !profile?.graduationYear) return null;
-          const now = new Date();
-          const currentYear = now.getFullYear();
-          const currentMonth = now.getMonth() + 1;
-          const isGraduating = profile.graduationYear <= currentYear && currentMonth >= 6;
-          if (!isGraduating || location.pathname.includes('/transition')) return null;
-          const isUrgent = currentMonth >= 9;
-          return (
-            <div className={`graduation-warning-strip ${isUrgent ? 'urgent' : ''}`}>
-              <span>
-                {isUrgent ? '⚠️' : '🎓'}{' '}
-                {isUrgent
-                  ? 'Your student account will be deleted on September 30! '
-                  : `Class of ${profile.graduationYear} — Convert to alumni before Sept 30 to keep your account. `}
-              </span>
-              <Link to="/app/transition">Convert Now →</Link>
-            </div>
-          );
-        })()}
+        <GraduationWarningStrip user={user} profile={profile} pathname={location.pathname} />
         <Topbar
           isMobileNav={isMobileNav}
           mobileOpen={mobileOpen}
