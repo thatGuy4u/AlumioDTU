@@ -4,7 +4,6 @@ import { Navigate, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { selectCurrentUser, selectToken, selectIsAuthenticated, updateUser } from '../../store/slices/authSlice';
 import { useGetMeQuery } from '../../store/api/authApi';
-import { BYPASS_AUTH_FOR_TESTING } from '../../utils/constants';
 import axios from 'axios';
 import { API_URL } from '../../utils/constants';
 import toast from 'react-hot-toast';
@@ -30,7 +29,7 @@ export default function PendingVerificationPage() {
 
   // Poll for email verification status (only if we have a valid session)
   const { data: meData, error: meError } = useGetMeQuery(undefined, {
-    skip: !isAuthenticated || BYPASS_AUTH_FOR_TESTING || sessionExpired,
+    skip: !isAuthenticated || sessionExpired,
     pollingInterval: POLL_INTERVAL,
   });
 
@@ -62,7 +61,7 @@ export default function PendingVerificationPage() {
   }, [cooldown]);
 
   // If not authenticated at all, redirect to login
-  if (!BYPASS_AUTH_FOR_TESTING && !isAuthenticated) {
+  if (!isAuthenticated) {
     return <Navigate to="/auth/login" replace />;
   }
 

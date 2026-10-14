@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { selectSidebarCollapsed, toggleSidebarCollapse } from '../store/slices/uiSlice';
 import { selectIsAuthenticated, selectCurrentUser, selectToken, selectProfile } from '../store/slices/authSlice';
 import { useGetMeQuery } from '../store/api/authApi';
-import { BYPASS_AUTH_FOR_TESTING } from '../utils/constants';
 import { setAuthToken } from '../utils/apiClient';
 import { useMobileNav } from '../hooks/useMediaQuery';
 import Sidebar from '../ui/Sidebar';
@@ -23,7 +22,7 @@ export default function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Fetch fresh user + profile data on mount (populates authSlice.profile)
-  useGetMeQuery(undefined, { skip: BYPASS_AUTH_FOR_TESTING || !isAuthenticated });
+  useGetMeQuery(undefined, { skip: !isAuthenticated });
 
   // Keep the centralized API client in sync with the current auth token
   useEffect(() => {
@@ -50,22 +49,20 @@ export default function AppLayout() {
     return () => window.removeEventListener('keydown', onKey);
   }, [isMobileNav, mobileOpen]);
 
-  if (!BYPASS_AUTH_FOR_TESTING && !isAuthenticated) {
+  if (!isAuthenticated) {
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
   // Block unverified users — force them to the pending-verification page
   if (
-    !BYPASS_AUTH_FOR_TESTING
-    && user
+    user
     && !user.isEmailVerified
   ) {
     return <Navigate to="/app/pending-verification" replace />;
   }
 
   if (
-    !BYPASS_AUTH_FOR_TESTING
-    && user
+    user
     && !user.isProfileComplete
     && !location.pathname.includes('/onboarding')
   ) {

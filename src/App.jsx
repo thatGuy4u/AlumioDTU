@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser, selectIsAuthenticated } from './store/slices/authSlice';
-import { BYPASS_AUTH_FOR_TESTING } from './utils/constants';
 import './App.css';
 
 // Existing landing page components
@@ -66,15 +65,11 @@ function LandingPage() {
   const navigate = useNavigate();
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
-  if (!BYPASS_AUTH_FOR_TESTING && isAuthenticated) {
+  if (isAuthenticated) {
     return <Navigate to="/app/dashboard" replace />;
   }
 
   const handleOpenModal = (tab) => {
-    if (BYPASS_AUTH_FOR_TESTING) {
-      navigate('/app/dashboard');
-      return;
-    }
     window.location.href = tab === 'login' ? '/auth/login' : '/auth/signup';
   };
   

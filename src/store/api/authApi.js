@@ -1,68 +1,64 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithReauth } from './baseQuery';
 
 export const authApi = createApi({
   reducerPath: 'authApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${API_URL}/auth`,
-    credentials: 'include',
-    prepareHeaders: (headers, { getState }) => {
-      const token = getState().auth.token;
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     register: builder.mutation({
       query: (body) => ({
-        url: '/register',
+        url: '/auth/register',
         method: 'POST',
         body,
       }),
     }),
     login: builder.mutation({
       query: (body) => ({
-        url: '/login',
+        url: '/auth/login',
         method: 'POST',
         body,
       }),
     }),
     logout: builder.mutation({
       query: () => ({
-        url: '/logout',
+        url: '/auth/logout',
         method: 'POST',
       }),
     }),
     getMe: builder.query({
-      query: () => '/me',
+      query: () => '/auth/me',
     }),
     verifyEmail: builder.mutation({
       query: (token) => ({
-        url: `/verify-email/${token}`,
+        url: `/auth/verify-email/${token}`,
         method: 'GET',
       }),
     }),
     forgotPassword: builder.mutation({
       query: (body) => ({
-        url: '/forgot-password',
+        url: '/auth/forgot-password',
         method: 'POST',
         body,
       }),
     }),
     resetPassword: builder.mutation({
       query: ({ token, password }) => ({
-        url: `/reset-password/${token}`,
+        url: `/auth/reset-password/${token}`,
         method: 'POST',
         body: { password },
       }),
     }),
     refreshToken: builder.mutation({
       query: () => ({
-        url: '/refresh-token',
+        url: '/auth/refresh-token',
         method: 'POST',
+      }),
+    }),
+    resendVerification: builder.mutation({
+      query: (body) => ({
+        url: '/auth/resend-verification',
+        method: 'POST',
+        body,
       }),
     }),
   }),
@@ -77,4 +73,5 @@ export const {
   useForgotPasswordMutation,
   useResetPasswordMutation,
   useRefreshTokenMutation,
+  useResendVerificationMutation,
 } = authApi;

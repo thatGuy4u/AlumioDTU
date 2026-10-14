@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useLoginMutation } from '../../store/api/authApi';
-import { BYPASS_AUTH_FOR_TESTING } from '../../utils/constants';
 import { HiOutlineEnvelope, HiOutlineLockClosed, HiOutlineEye, HiOutlineEyeSlash } from 'react-icons/hi2';
 
 export default function LoginPage() {
@@ -18,10 +17,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
 
-    if (BYPASS_AUTH_FOR_TESTING) {
-      navigate('/app/dashboard');
-      return;
-    }
+
 
     if (!email || !password) {
       setError('Please fill in all fields');
@@ -56,11 +52,6 @@ export default function LoginPage() {
       <div className="auth-card-header">
         <h1>Welcome Back</h1>
         <p>Sign in to your AlumioDTU account</p>
-        {BYPASS_AUTH_FOR_TESTING && (
-          <p style={{ marginTop: 8, fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)' }}>
-            Auth bypass active — click Sign In to enter the app
-          </p>
-        )}
       </div>
 
       <form onSubmit={handleSubmit} className="auth-form">

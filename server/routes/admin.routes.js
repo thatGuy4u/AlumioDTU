@@ -3,6 +3,8 @@ import { protect } from '../middleware/auth.js';
 import { roleGuard } from '../middleware/roleGuard.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
+import { validate } from '../middleware/validate.js';
+import { broadcastSchema } from '../validators/common.validator.js';
 import prisma from '../config/db.js';
 
 const router = Router();
@@ -171,8 +173,8 @@ router.put('/reports/:id', asyncHandler(async (req, res) => {
   res.json({ success: true, data: updated });
 }));
 
-// POST /broadcast — send a notification to all students, all alumni, or all users
-router.post('/broadcast', asyncHandler(async (req, res) => {
+// POST /broadcast — send a notification to all students, all alumni, or all users (validated)
+router.post('/broadcast', validate(broadcastSchema), asyncHandler(async (req, res) => {
   const { title, message, audience, link } = req.body;
 
   if (!title || !message || !audience) {

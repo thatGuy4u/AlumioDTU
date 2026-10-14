@@ -1,6 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithReauth } from './baseQuery';
 
 const LAST_VISIT_KEY = 'alumio_community_last_visit';
 
@@ -14,23 +13,13 @@ export function setCommunityLastVisit() {
 
 export const communityApi = createApi({
   reducerPath: 'communityApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${API_URL}/community`,
-    credentials: 'include',
-    prepareHeaders: (headers, { getState }) => {
-      const token = getState().auth.token;
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ['CommunityUnread'],
   endpoints: (builder) => ({
     getCommunityUnreadCount: builder.query({
       query: () => {
         const since = getCommunityLastVisit();
-        return `/unread-count${since ? `?since=${encodeURIComponent(since)}` : ''}`;
+        return `/community/unread-count${since ? `?since=${encodeURIComponent(since)}` : ''}`;
       },
       providesTags: ['CommunityUnread'],
       // Re-fetch every 60 seconds while the component is mounted

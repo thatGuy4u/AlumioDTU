@@ -2,6 +2,9 @@ import { Router } from 'express';
 import { protect } from '../middleware/auth.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
+import { validate } from '../middleware/validate.js';
+import { postCreateLimiter, reportLimiter } from '../middleware/rateLimiter.js';
+import { createPostSchema, updatePostSchema, createCommentSchema, reportSchema } from '../validators/common.validator.js';
 import prisma from '../config/db.js';
 
 const router = Router();
@@ -33,14 +36,18 @@ router.get('/posts/:id', asyncHandler(async (req, res) => {
   res.json({ success: true, data: { post, comments, hasUpvoted } });
 }));
 
-// POST /posts
-router.post('/posts', asyncHandler(async (req, res) => {
-  const post = await prisma.post.create({ data: { ...req.body, authorId: req.user.id }, include: { author: { select: { id: true, name: true, avatar: true, role: true } } } });
+// POST /posts — whitelisted fields only, validated
+router.post('/posts', postCreateLimiter, validate(createPostSchema), asyncHandler(async (req, res) => {
+  const { title, content, category, tags } = req.body;
+  const post = await prisma.post.create({
+    data: { title, content, category, tags, authorId: req.user.id },
+    include: { author: { select: { id: true, name: true, avatar: true, role: true } } },
+  });
   res.status(201).json({ success: true, data: post });
 }));
 
-// PUT /posts/:id
-router.put('/posts/:id', asyncHandler(async (req, res) => {
+// PUT /posts/:id — whitelisted fields only, validated
+router.put('/posts/:id', validate(updatePostSchema), asyncHandler(async (req, res) => {
   const post = await prisma.post.findUnique({ where: { id: req.params.id } });
   if (!post) throw new ApiError(404, 'Post not found');
   if (post.authorId !== req.user.id) throw new ApiError(403, 'Not your post');
@@ -58,24 +65,32 @@ router.delete('/posts/:id', asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Post deleted' });
 }));
 
-// POST /posts/:id/upvote (toggle)
+// POST /posts/:id/upvote (toggle) — wrapped in transaction
 router.post('/posts/:id/upvote', asyncHandler(async (req, res) => {
-  const post = await prisma.post.findUnique({ where: { id: req.params.id } });
-  if (!post) throw new ApiError(404, 'Post not found');
-  const existing = await prisma.postUpvote.findUnique({ where: { postId_userId: { postId: post.id, userId: req.user.id } } });
-  if (existing) {
-    await prisma.postUpvote.delete({ where: { id: existing.id } });
-    await prisma.post.update({ where: { id: post.id }, data: { upvoteCount: { decrement: 1 } } });
-    res.json({ success: true, data: { upvoteCount: post.upvoteCount - 1, upvoted: false } });
-  } else {
-    await prisma.postUpvote.create({ data: { postId: post.id, userId: req.user.id } });
-    await prisma.post.update({ where: { id: post.id }, data: { upvoteCount: { increment: 1 } } });
-    res.json({ success: true, data: { upvoteCount: post.upvoteCount + 1, upvoted: true } });
-  }
+  const postId = req.params.id;
+  const userId = req.user.id;
+
+  const result = await prisma.$transaction(async (tx) => {
+    const post = await tx.post.findUnique({ where: { id: postId } });
+    if (!post) throw new ApiError(404, 'Post not found');
+
+    const existing = await tx.postUpvote.findUnique({ where: { postId_userId: { postId, userId } } });
+    if (existing) {
+      await tx.postUpvote.delete({ where: { id: existing.id } });
+      const updated = await tx.post.update({ where: { id: postId }, data: { upvoteCount: { decrement: 1 } } });
+      return { upvoteCount: updated.upvoteCount, upvoted: false };
+    } else {
+      await tx.postUpvote.create({ data: { postId, userId } });
+      const updated = await tx.post.update({ where: { id: postId }, data: { upvoteCount: { increment: 1 } } });
+      return { upvoteCount: updated.upvoteCount, upvoted: true };
+    }
+  });
+
+  res.json({ success: true, data: result });
 }));
 
-// POST /posts/:id/comments
-router.post('/posts/:id/comments', asyncHandler(async (req, res) => {
+// POST /posts/:id/comments — whitelisted fields, validated
+router.post('/posts/:id/comments', validate(createCommentSchema), asyncHandler(async (req, res) => {
   const { content, parentCommentId } = req.body;
   const post = await prisma.post.findUnique({ where: { id: req.params.id } });
   if (!post) throw new ApiError(404, 'Post not found');
@@ -145,12 +160,9 @@ router.get('/tags', asyncHandler(async (req, res) => {
   res.json({ success: true, data: tags });
 }));
 
-// POST /reports — submit a report and notify admins
-router.post('/reports', asyncHandler(async (req, res) => {
+// POST /reports — submit a report and notify admins, validated
+router.post('/reports', reportLimiter, validate(reportSchema), asyncHandler(async (req, res) => {
   const { reason, description, contentType, contentId } = req.body;
-  if (!reason || !contentType || !contentId) {
-    throw new ApiError(400, 'Reason, contentType, and contentId are required');
-  }
 
   // Look up the owner of the reported content to set reportedUserId
   let reportedUserId = null;

@@ -3,11 +3,12 @@ import prisma from '../config/db.js';
 import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { sanitizeUser } from '../utils/sanitize.js';
+import { getProfileByRole } from '../utils/profileHelper.js';
 import {
-  generateAccessToken, generateRefreshToken, generateRandomToken, setRefreshTokenCookie, hashToken,
+  generateAccessToken, generateRefreshToken, generateRandomToken,
+  setRefreshTokenCookie, hashToken, verifyRefreshToken,
 } from '../services/token.service.js';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service.js';
-import jwt from 'jsonwebtoken';
 
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -29,7 +30,7 @@ export const register = asyncHandler(async (req, res) => {
   const user = await prisma.user.create({
     data: {
       name, email, password: hashedPassword, role: safeRole,
-      emailVerificationToken: verificationToken,
+      emailVerificationToken: hashToken(verificationToken),
       emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
     },
   });
@@ -63,6 +64,7 @@ export const register = asyncHandler(async (req, res) => {
     } catch { /* non-critical — don't block registration */ }
   }
 
+  // Send verification email with the UNHASHED token (user clicks this link)
   sendVerificationEmail(email, name, verificationToken).catch(e => console.error('Email error:', e.message));
 
   const accessToken = generateAccessToken(user.id);
@@ -101,7 +103,7 @@ export const refreshToken = asyncHandler(async (req, res) => {
   const token = req.cookies?.refreshToken;
   if (!token) throw new ApiError(401, 'No refresh token');
 
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const decoded = verifyRefreshToken(token);
   const user = await prisma.user.findUnique({ where: { id: decoded.id } });
   if (!user || user.refreshToken !== hashToken(token)) throw new ApiError(401, 'Invalid refresh token');
 
@@ -113,8 +115,10 @@ export const refreshToken = asyncHandler(async (req, res) => {
 });
 
 export const verifyEmail = asyncHandler(async (req, res) => {
+  // Hash the incoming token and compare against the stored hash
+  const hashedToken = hashToken(req.params.token);
   const user = await prisma.user.findFirst({
-    where: { emailVerificationToken: req.params.token, emailVerificationExpires: { gt: new Date() } },
+    where: { emailVerificationToken: hashedToken, emailVerificationExpires: { gt: new Date() } },
   });
   if (!user) throw new ApiError(400, 'Invalid or expired verification link');
 
@@ -144,11 +148,12 @@ export const resendVerificationEmail = asyncHandler(async (req, res) => {
   await prisma.user.update({
     where: { id: user.id },
     data: {
-      emailVerificationToken: verificationToken,
+      emailVerificationToken: hashToken(verificationToken),
       emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
     },
   });
 
+  // Send the UNHASHED token in the email link
   sendVerificationEmail(user.email, user.name, verificationToken).catch(e => console.error('Email error:', e.message));
   res.json({ success: true, message: 'Verification email resent! Check your inbox.' });
 });
@@ -159,16 +164,19 @@ export const forgotPassword = asyncHandler(async (req, res) => {
     const resetToken = generateRandomToken();
     await prisma.user.update({
       where: { id: user.id },
-      data: { passwordResetToken: resetToken, passwordResetExpires: new Date(Date.now() + 3600000) },
+      data: { passwordResetToken: hashToken(resetToken), passwordResetExpires: new Date(Date.now() + 3600000) },
     });
+    // Send the UNHASHED token in the email link
     sendPasswordResetEmail(user.email, user.name, resetToken).catch(e => console.error('Email error:', e.message));
   }
   res.json({ success: true, message: 'If an account with that email exists, a reset link has been sent.' });
 });
 
 export const resetPassword = asyncHandler(async (req, res) => {
+  // Hash the incoming token and compare against the stored hash
+  const hashedToken = hashToken(req.params.token);
   const user = await prisma.user.findFirst({
-    where: { passwordResetToken: req.params.token, passwordResetExpires: { gt: new Date() } },
+    where: { passwordResetToken: hashedToken, passwordResetExpires: { gt: new Date() } },
   });
   if (!user) throw new ApiError(400, 'Invalid or expired reset link');
 
@@ -181,9 +189,6 @@ export const resetPassword = asyncHandler(async (req, res) => {
 });
 
 export const getMe = asyncHandler(async (req, res) => {
-  let profile = null;
-  if (req.user.role === 'student') profile = await prisma.studentProfile.findUnique({ where: { userId: req.user.id } });
-  else if (req.user.role === 'alumni') profile = await prisma.alumniProfile.findUnique({ where: { userId: req.user.id } });
-
+  const profile = await getProfileByRole(req.user.id, req.user.role);
   res.json({ success: true, data: { user: sanitizeUser(req.user), profile } });
 });

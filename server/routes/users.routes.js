@@ -5,6 +5,11 @@ import { uploadAvatar, uploadResume, uploadToCloudinary } from '../middleware/up
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { sanitizeUser } from '../utils/sanitize.js';
+import { getProfileByRole } from '../utils/profileHelper.js';
+import { buildContactEmailHtml } from '../utils/contactEmail.js';
+import { validate } from '../middleware/validate.js';
+import { changePasswordSchema, contactFormSchema } from '../validators/common.validator.js';
+import { changePasswordLimiter, contactLimiter } from '../middleware/rateLimiter.js';
 import prisma from '../config/db.js';
 import bcrypt from 'bcryptjs';
 import { sendNotificationEmail } from '../services/email.service.js';
@@ -14,9 +19,7 @@ router.use(protect);
 
 // GET /profile
 router.get('/profile', asyncHandler(async (req, res) => {
-  let profile = null;
-  if (req.user.role === 'student') profile = await prisma.studentProfile.findUnique({ where: { userId: req.user.id } });
-  else if (req.user.role === 'alumni') profile = await prisma.alumniProfile.findUnique({ where: { userId: req.user.id } });
+  const profile = await getProfileByRole(req.user.id, req.user.role);
   const achievements = await prisma.achievement.findMany({ where: { userId: req.user.id }, orderBy: { earnedAt: 'desc' } });
   res.json({ success: true, data: { user: sanitizeUser(req.user), profile, achievements } });
 }));
@@ -77,9 +80,7 @@ router.post('/profile/resume', roleGuard('student'), uploadResume.single('resume
 router.get('/profile/:userId', asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.params.userId } });
   if (!user) throw new ApiError(404, 'User not found');
-  let profile = null;
-  if (user.role === 'student') profile = await prisma.studentProfile.findUnique({ where: { userId: user.id } });
-  else if (user.role === 'alumni') profile = await prisma.alumniProfile.findUnique({ where: { userId: user.id } });
+  const profile = await getProfileByRole(user.id, user.role);
   const achievements = await prisma.achievement.findMany({ where: { userId: user.id }, orderBy: { earnedAt: 'desc' } });
   res.json({ success: true, data: { user: sanitizeUser(user), profile, achievements } });
 }));
@@ -361,11 +362,9 @@ router.get('/leaderboard', asyncHandler(async (req, res) => {
   res.json({ success: true, data: { leaderboard } });
 }));
 
-// PUT /change-password
-router.put('/change-password', asyncHandler(async (req, res) => {
+// PUT /change-password — validated + rate limited
+router.put('/change-password', changePasswordLimiter, validate(changePasswordSchema), asyncHandler(async (req, res) => {
   const { currentPassword, newPassword } = req.body;
-  if (!currentPassword || !newPassword) throw new ApiError(400, 'Both current and new password are required');
-  if (newPassword.length < 8) throw new ApiError(400, 'New password must be at least 8 characters');
 
   const user = await prisma.user.findUnique({ where: { id: req.user.id } });
   const isMatch = await bcrypt.compare(currentPassword, user.password);
@@ -434,32 +433,19 @@ router.get('/dashboard-stats', asyncHandler(async (req, res) => {
   }
 }));
 
-// POST /contact — authenticated user contact form
-router.post('/contact', asyncHandler(async (req, res) => {
+// POST /contact — authenticated user contact form (uses shared builder + validation + rate limiter)
+router.post('/contact', contactLimiter, validate(contactFormSchema), asyncHandler(async (req, res) => {
   const { name, email, subject, message } = req.body;
-  if (!subject || !message) throw new ApiError(400, 'Subject and message are required');
 
-  const replyToEmail = email || req.user.email;
+  const senderName = name || req.user.name;
+  const senderEmail = email || req.user.email;
   const { sendMail } = await import('../config/email.js');
   await sendMail({
     from: process.env.EMAIL_FROM,
     to: process.env.CONTACT_EMAIL || 'alumiodtu@gmail.com',
-    replyTo: replyToEmail,
+    replyTo: senderEmail,
     subject: `[AlumioDTU Contact] ${subject}`,
-    html: `
-      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0f2e; color: #e8eaf6; padding: 40px; border-radius: 16px;">
-        <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="color: #F5C842; font-size: 28px; margin: 0;">Alumio<span style="color: #00d4c8;">DTU</span></h1>
-        </div>
-        <h2 style="color: #fff; margin-bottom: 8px;">New Contact Message</h2>
-        <p style="color: rgba(232,234,246,0.7);"><strong>From:</strong> ${name || req.user.name} (${email || req.user.email})</p>
-        <p style="color: rgba(232,234,246,0.7);"><strong>Subject:</strong> ${subject}</p>
-        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;" />
-        <div style="color: rgba(232,234,246,0.7); line-height: 1.7;">${message.replace(/\n/g, '<br>')}</div>
-        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 24px 0;" />
-        <p style="color: rgba(232,234,246,0.3); font-size: 12px; text-align: center;">AlumioDTU — Contact Form Submission</p>
-      </div>
-    `,
+    html: buildContactEmailHtml({ name: senderName, email: senderEmail, subject, message }),
   });
 
   res.json({ success: true, message: 'Message sent successfully' });

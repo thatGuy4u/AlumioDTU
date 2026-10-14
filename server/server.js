@@ -13,8 +13,8 @@ import dotenv from 'dotenv';
 import prisma from './config/db.js';
 import { initializeSocket } from './config/socket.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
-import { apiLimiter } from './middleware/rateLimiter.js';
-import { runGraduationCheck } from './services/graduationCron.js';
+import { apiLimiter, contactLimiter } from './middleware/rateLimiter.js';
+import { scheduleGraduationCheck } from './services/graduationCron.js';
 
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/users.routes.js';
@@ -48,15 +48,36 @@ initializeSocket(io);
 app.set('io', io);
 app.set('prisma', prisma);
 
-// TODO [PRODUCTION]: Tighten helmet settings, enable HSTS, configure CSP
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+// ─── Helmet — production-ready security headers ───
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://www.googletagmanager.com'],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com', 'blob:'],
+      connectSrc: ["'self'", ...allowedOrigins, 'https://www.google-analytics.com'],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true,
+  },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  xPermittedCrossDomainPolicies: false,
+}));
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 // TODO [PRODUCTION]: Use a structured logger (e.g., pino, winston) instead of morgan
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-// TODO [PRODUCTION]: Consider stricter rate limits and per-route limits for auth endpoints
 app.use('/api/', apiLimiter);
 
 app.get('/api/health', (req, res) => {
@@ -74,7 +95,9 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Public contact form (no auth required) — for pre-login landing page
-app.post('/api/contact', async (req, res, next) => {
+import { buildContactEmailHtml } from './utils/contactEmail.js';
+
+app.post('/api/contact', contactLimiter, async (req, res, next) => {
   try {
     const { name, email, subject, message } = req.body;
     if (!name || !email || !subject || !message) {
@@ -86,20 +109,7 @@ app.post('/api/contact', async (req, res, next) => {
       to: process.env.CONTACT_EMAIL || 'alumiodtu@gmail.com',
       replyTo: email,
       subject: `[AlumioDTU Contact] ${subject}`,
-      html: `
-        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0f2e; color: #e8eaf6; padding: 40px; border-radius: 16px;">
-          <div style="text-align: center; margin-bottom: 32px;">
-            <h1 style="color: #F5C842; font-size: 28px; margin: 0;">Alumio<span style="color: #00d4c8;">DTU</span></h1>
-          </div>
-          <h2 style="color: #fff; margin-bottom: 8px;">New Contact Message (Public)</h2>
-          <p style="color: rgba(232,234,246,0.7);"><strong>From:</strong> ${name} (${email})</p>
-          <p style="color: rgba(232,234,246,0.7);"><strong>Subject:</strong> ${subject}</p>
-          <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0;" />
-          <div style="color: rgba(232,234,246,0.7); line-height: 1.7;">${message.replace(/\n/g, '<br>')}</div>
-          <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 24px 0;" />
-          <p style="color: rgba(232,234,246,0.3); font-size: 12px; text-align: center;">AlumioDTU — Public Contact Form</p>
-        </div>
-      `,
+      html: buildContactEmailHtml({ name, email, subject, message, isPublic: true }),
     });
     res.json({ success: true, message: 'Message sent successfully' });
   } catch (err) {
@@ -123,9 +133,8 @@ async function startServer() {
       console.log(`🗄️  Database: PostgreSQL (Prisma ORM)`);
       console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}\n`);
 
-      // Run graduation check on startup (delayed 10s) + every 24 hours
-      setTimeout(() => runGraduationCheck(io), 10_000);
-      setInterval(() => runGraduationCheck(io), 24 * 60 * 60 * 1000);
+      // Schedule graduation check as a proper cron job
+      scheduleGraduationCheck(io);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
@@ -136,7 +145,6 @@ async function startServer() {
 startServer();
 
 // Graceful shutdown
-// TODO [PRODUCTION]: Add SIGTERM handler for container orchestration (Docker, Kubernetes)
 process.on('SIGINT', async () => {
   await prisma.$disconnect();
   process.exit(0);

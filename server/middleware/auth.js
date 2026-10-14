@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import { verifyAccessToken } from '../services/token.service.js';
 import prisma from '../config/db.js';
 import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
@@ -14,7 +14,7 @@ export const protect = asyncHandler(async (req, res, next) => {
   if (!token) throw new ApiError(401, 'Not authorized — no token provided');
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = verifyAccessToken(token);
     const user = await prisma.user.findUnique({ where: { id: decoded.id } });
     if (!user) throw new ApiError(401, 'User no longer exists');
     if (user.isBanned) throw new ApiError(403, 'Your account has been suspended');
@@ -34,7 +34,7 @@ export const optionalAuth = asyncHandler(async (req, res, next) => {
 
   if (token) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = verifyAccessToken(token);
       req.user = await prisma.user.findUnique({ where: { id: decoded.id } });
     } catch { /* silent */ }
   }

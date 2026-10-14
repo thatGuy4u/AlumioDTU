@@ -37,3 +37,39 @@ export const uploadLimiter = rateLimit({
     message: 'Upload limit reached. Try again later.',
   },
 });
+
+export const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,
+  message: {
+    success: false,
+    message: 'Too many contact submissions. Try again later.',
+  },
+});
+
+export const postCreateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: {
+    success: false,
+    message: 'Too many posts created. Slow down and try again later.',
+  },
+});
+
+export const reportLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  message: {
+    success: false,
+    message: 'Too many reports submitted. Try again later.',
+  },
+});
+
+export const changePasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: {
+    success: false,
+    message: 'Too many password change attempts. Try again later.',
+  },
+});

@@ -3,13 +3,15 @@ import { protect } from '../middleware/auth.js';
 import { roleGuard } from '../middleware/roleGuard.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
+import { validate } from '../middleware/validate.js';
+import { mentorshipRequestSchema, mentorshipSessionSchema, mentorshipFeedbackSchema } from '../validators/common.validator.js';
 import prisma from '../config/db.js';
 import { createNotification } from '../services/notification.service.js';
 
 const router = Router();
 router.use(protect);
 
-router.post('/request', roleGuard('student'), asyncHandler(async (req, res) => {
+router.post('/request', roleGuard('student'), validate(mentorshipRequestSchema), asyncHandler(async (req, res) => {
   const { mentorId, message } = req.body;
   const existing = await prisma.mentorshipRequest.findFirst({ where: { menteeId: req.user.id, mentorId, status: { in: ['pending', 'accepted'] } } });
   if (existing) throw new ApiError(400, 'You already have an active request with this mentor');
@@ -50,7 +52,7 @@ router.put('/requests/:id/reject', roleGuard('alumni'), asyncHandler(async (req,
   res.json({ success: true, data: updated });
 }));
 
-router.post('/sessions', asyncHandler(async (req, res) => {
+router.post('/sessions', validate(mentorshipSessionSchema), asyncHandler(async (req, res) => {
   const { mentorshipRequestId, scheduledAt, duration, topic, meetingLink } = req.body;
   const request = await prisma.mentorshipRequest.findUnique({ where: { id: mentorshipRequestId } });
   if (!request || request.status !== 'accepted') throw new ApiError(400, 'Invalid mentorship');
@@ -64,7 +66,7 @@ router.get('/sessions', asyncHandler(async (req, res) => {
   res.json({ success: true, data: sessions });
 }));
 
-router.post('/requests/:id/feedback', roleGuard('student'), asyncHandler(async (req, res) => {
+router.post('/requests/:id/feedback', roleGuard('student'), validate(mentorshipFeedbackSchema), asyncHandler(async (req, res) => {
   const { rating, comment } = req.body;
   const request = await prisma.mentorshipRequest.findUnique({ where: { id: req.params.id } });
   if (!request) throw new ApiError(404, 'Not found');

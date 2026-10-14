@@ -39,6 +39,34 @@ export async function runGraduationCheck(io) {
 }
 
 /**
+ * Schedule the graduation check to run daily using setInterval,
+ * with an initial delayed run on startup.
+ *
+ * This replaces the old inline setInterval in server.js and provides
+ * a single place to manage scheduling. For multi-instance deployments,
+ * replace with a proper job scheduler (e.g., Render Cron Jobs, BullMQ,
+ * or node-cron with Redis-based distributed locking).
+ */
+let _cronInterval = null;
+
+export function scheduleGraduationCheck(io) {
+  // Run once on startup (delayed 10s to let server settle)
+  setTimeout(() => runGraduationCheck(io), 10_000);
+
+  // Run every 24 hours
+  _cronInterval = setInterval(() => runGraduationCheck(io), 24 * 60 * 60 * 1000);
+
+  console.log('🎓 Graduation check scheduled (runs every 24h)');
+}
+
+export function stopGraduationCheck() {
+  if (_cronInterval) {
+    clearInterval(_cronInterval);
+    _cronInterval = null;
+  }
+}
+
+/**
  * Send graduation transition notifications to eligible students.
  */
 async function sendGraduationNotifications(graduationYear, currentMonth, io) {
@@ -85,7 +113,7 @@ async function sendGraduationNotifications(graduationYear, currentMonth, io) {
         <h3 style="color: #F5C842;">What happens next?</h3>
         <ul style="color: rgba(232,234,246,0.7); line-height: 2;">
           <li>✅ All your data (posts, messages, achievements) will be preserved</li>
-          <li>✅ You'll get access to alumni-exclusive features like mentoring & job posting</li>
+          <li>✅ You'll get access to alumni-exclusive features like mentoring &amp; job posting</li>
           <li>✅ Your connections and conversations stay intact</li>
         </ul>
         <p style="color: #ff6b6b; font-weight: 600;">⚠️ If you don't convert by September 30, ${graduationYear}, your account will be permanently deleted.</p>

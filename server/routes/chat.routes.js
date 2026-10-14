@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { protect } from '../middleware/auth.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
+import { validate } from '../middleware/validate.js';
+import { createMessageSchema } from '../validators/common.validator.js';
 import prisma from '../config/db.js';
 
 const router = Router();
@@ -108,7 +110,7 @@ router.get('/conversations/:id/messages', asyncHandler(async (req, res) => {
 }));
 
 // POST /conversations/:id/messages
-router.post('/conversations/:id/messages', asyncHandler(async (req, res) => {
+router.post('/conversations/:id/messages', validate(createMessageSchema), asyncHandler(async (req, res) => {
   const { content, attachments } = req.body;
   const participant = await prisma.conversationParticipant.findUnique({
     where: { conversationId_userId: { conversationId: req.params.id, userId: req.user.id } },

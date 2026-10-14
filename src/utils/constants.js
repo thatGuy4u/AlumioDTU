@@ -48,15 +48,3 @@ export const EVENT_TYPES = [
 
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 export const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
-
-// ─── TESTING ONLY: set to false before production ───
-export const BYPASS_AUTH_FOR_TESTING = false;
-
-export const MOCK_TEST_USER = {
-  id: 'test-user-1',
-  name: 'Test Student',
-  email: 'test@dtu.ac.in',
-  role: 'student',
-  isProfileComplete: true,
-  avatar: null,
-};

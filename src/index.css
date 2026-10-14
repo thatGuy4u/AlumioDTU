@@ -74,6 +74,22 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   100% { background-position: 200% 0; }
 }
 
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-pulse {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+[data-theme="light"] .skeleton-pulse {
+  background: linear-gradient(90deg, rgba(0,0,0,0.04) 25%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.04) 75%);
+  background-size: 200% 100%;
+}
+
 /* Geist Pixel only on landing page headings; app headings inherit Inter from body */
 .landing-page h1, .landing-page h2, .landing-page h3, .landing-page h4, .landing-page h5,
 .hero-section h1, .features-section h2, .how-section h2, .testi-section h2,

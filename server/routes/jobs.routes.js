@@ -3,6 +3,8 @@ import { protect } from '../middleware/auth.js';
 import { roleGuard } from '../middleware/roleGuard.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
+import { validate } from '../middleware/validate.js';
+import { createJobSchema, updateJobSchema, applicationStatusSchema } from '../validators/common.validator.js';
 import prisma from '../config/db.js';
 
 const router = Router();
@@ -60,18 +62,48 @@ router.get('/:id', asyncHandler(async (req, res) => {
   res.json({ success: true, data: { job, hasApplied, isSaved } });
 }));
 
-// POST /
-router.post('/', roleGuard('alumni'), asyncHandler(async (req, res) => {
-  const job = await prisma.job.create({ data: { ...req.body, postedById: req.user.id, applicationDeadline: req.body.applicationDeadline ? new Date(req.body.applicationDeadline) : null } });
+// POST / — whitelisted fields only, validated
+router.post('/', roleGuard('alumni'), validate(createJobSchema), asyncHandler(async (req, res) => {
+  const {
+    title, company, type, workMode, location, description,
+    requirements, skills, stipendMin, stipendMax, salaryMin, salaryMax,
+    currency, experienceMin, experienceMax, applicationDeadline,
+  } = req.body;
+
+  const job = await prisma.job.create({
+    data: {
+      title, company, type, workMode, location, description,
+      requirements, skills, stipendMin, stipendMax, salaryMin, salaryMax,
+      currency, experienceMin, experienceMax,
+      applicationDeadline: applicationDeadline ? new Date(applicationDeadline) : null,
+      postedById: req.user.id,
+    },
+  });
   res.status(201).json({ success: true, data: job });
 }));
 
-// PUT /:id
-router.put('/:id', roleGuard('alumni'), asyncHandler(async (req, res) => {
+// PUT /:id — whitelisted fields only, validated
+router.put('/:id', roleGuard('alumni'), validate(updateJobSchema), asyncHandler(async (req, res) => {
   const job = await prisma.job.findUnique({ where: { id: req.params.id } });
   if (!job) throw new ApiError(404, 'Job not found');
   if (job.postedById !== req.user.id) throw new ApiError(403, 'Not your job posting');
-  const updated = await prisma.job.update({ where: { id: req.params.id }, data: req.body });
+
+  const {
+    title, company, type, workMode, location, description,
+    requirements, skills, stipendMin, stipendMax, salaryMin, salaryMax,
+    currency, experienceMin, experienceMax, applicationDeadline, isActive,
+  } = req.body;
+
+  const updated = await prisma.job.update({
+    where: { id: req.params.id },
+    data: {
+      title, company, type, workMode, location, description,
+      requirements, skills, stipendMin, stipendMax, salaryMin, salaryMax,
+      currency, experienceMin, experienceMax,
+      applicationDeadline: applicationDeadline ? new Date(applicationDeadline) : undefined,
+      isActive,
+    },
+  });
   res.json({ success: true, data: updated });
 }));
 
@@ -114,8 +146,8 @@ router.get('/:id/applications', roleGuard('alumni'), asyncHandler(async (req, re
   res.json({ success: true, data: applications });
 }));
 
-// PUT /applications/:id/status
-router.put('/applications/:id/status', roleGuard('alumni'), asyncHandler(async (req, res) => {
+// PUT /applications/:id/status — validated
+router.put('/applications/:id/status', roleGuard('alumni'), validate(applicationStatusSchema), asyncHandler(async (req, res) => {
   const app = await prisma.jobApplication.update({ where: { id: req.params.id }, data: { status: req.body.status } });
   res.json({ success: true, data: app });
 }));

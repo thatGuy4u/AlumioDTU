@@ -3,6 +3,8 @@ import { protect } from '../middleware/auth.js';
 import { roleGuard } from '../middleware/roleGuard.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
+import { validate } from '../middleware/validate.js';
+import { createEventSchema, updateEventSchema } from '../validators/common.validator.js';
 import prisma from '../config/db.js';
 
 const router = Router();
@@ -40,18 +42,37 @@ router.get('/:id', asyncHandler(async (req, res) => {
   res.json({ success: true, data: { event, isRegistered: !!registration, registration } });
 }));
 
-// POST /
-router.post('/', roleGuard('alumni', 'admin'), asyncHandler(async (req, res) => {
-  const event = await prisma.event.create({ data: { ...req.body, organizerId: req.user.id, date: new Date(req.body.date), endDate: req.body.endDate ? new Date(req.body.endDate) : null } });
+// POST / — whitelisted fields only, validated
+router.post('/', roleGuard('alumni', 'admin'), validate(createEventSchema), asyncHandler(async (req, res) => {
+  const { title, description, type, date, endDate, location, meetingLink, coverImage, maxAttendees, tags } = req.body;
+  const event = await prisma.event.create({
+    data: {
+      title, description, type,
+      date: new Date(date),
+      endDate: endDate ? new Date(endDate) : null,
+      location, meetingLink, coverImage, maxAttendees, tags,
+      organizerId: req.user.id,
+    },
+  });
   res.status(201).json({ success: true, data: event });
 }));
 
-// PUT /:id
-router.put('/:id', roleGuard('alumni', 'admin'), asyncHandler(async (req, res) => {
+// PUT /:id — whitelisted fields only, validated
+router.put('/:id', roleGuard('alumni', 'admin'), validate(updateEventSchema), asyncHandler(async (req, res) => {
   const event = await prisma.event.findUnique({ where: { id: req.params.id } });
   if (!event) throw new ApiError(404, 'Event not found');
   if (event.organizerId !== req.user.id && req.user.role !== 'admin') throw new ApiError(403, 'Not authorized');
-  const updated = await prisma.event.update({ where: { id: req.params.id }, data: { ...req.body, date: req.body.date ? new Date(req.body.date) : undefined } });
+
+  const { title, description, type, date, endDate, location, meetingLink, coverImage, maxAttendees, tags, isActive } = req.body;
+  const updated = await prisma.event.update({
+    where: { id: req.params.id },
+    data: {
+      title, description, type,
+      date: date ? new Date(date) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+      location, meetingLink, coverImage, maxAttendees, tags, isActive,
+    },
+  });
   res.json({ success: true, data: updated });
 }));
 
