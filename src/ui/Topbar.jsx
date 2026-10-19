@@ -13,7 +13,9 @@ import {
   HiOutlineArrowRightOnRectangle, HiOutlineUser,
   HiOutlineCog6Tooth, HiOutlineChevronDown,
   HiOutlineBars3, HiOutlineXMark, HiOutlineCheckCircle,
+  HiOutlineRocketLaunch,
 } from 'react-icons/hi2';
+import { restartTour } from '../utils/tour';
 
 const typeIcons = {
   mentorship_request: '🎓', mentorship_accepted: '🎉', mentorship_rejected: '📋',
@@ -138,7 +140,7 @@ export default function Topbar({ onMenuToggle, isMobileNav = false, mobileOpen =
         </button>
       )}
 
-      <form className="topbar-search" onSubmit={handleSearch}>
+      <form className="topbar-search" onSubmit={handleSearch} data-tour="search">
         <HiOutlineMagnifyingGlass className="topbar-search-icon" size={18} />
         <input
           type="text"
@@ -155,6 +157,7 @@ export default function Topbar({ onMenuToggle, isMobileNav = false, mobileOpen =
           className="topbar-icon-btn"
           onClick={() => dispatch(toggleTheme())}
           title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          data-tour="theme-toggle"
         >
           {theme === 'dark' ? <HiOutlineSun size={20} /> : <HiOutlineMoon size={20} />}
         </button>
@@ -166,6 +169,7 @@ export default function Topbar({ onMenuToggle, isMobileNav = false, mobileOpen =
             onClick={() => setNotifOpen((open) => !open)}
             title="Notifications"
             aria-expanded={notifOpen}
+            data-tour="notifications"
           >
             <HiOutlineBell size={20} />
             {unreadCount > 0 && (
@@ -296,6 +300,9 @@ export default function Topbar({ onMenuToggle, isMobileNav = false, mobileOpen =
                 </button>
                 <button type="button" onClick={() => { navigate('/app/settings'); setDropdownOpen(false); }}>
                   <HiOutlineCog6Tooth size={16} /> Settings
+                </button>
+                <button type="button" onClick={() => { restartTour(); setDropdownOpen(false); }}>
+                  <HiOutlineRocketLaunch size={16} /> Platform Tour
                 </button>
                 <div className="topbar-dropdown-divider" />
                 <button type="button" onClick={handleLogout} className="topbar-logout-btn">

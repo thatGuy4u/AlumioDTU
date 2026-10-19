@@ -1,0 +1,488 @@
+/* ==============================================================
+   OnboardingTour.css — Compact monochrome onboarding tour
+   Black & white theme, smaller cards
+   ============================================================== */
+
+/* ─── Overlay ───────────────────────────────────────────── */
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  pointer-events: auto;
+}
+
+.tour-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* ─── SVG Spotlight ─────────────────────────────────────── */
+.tour-spotlight-svg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.tour-spotlight-ring {
+  animation: tourRingPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes tourRingPulse {
+  0%, 100% { opacity: 0.4; stroke-width: 1.5; }
+  50%      { opacity: 0.9; stroke-width: 2.5; }
+}
+
+/* ─── Tour Card (shared) ────────────────────────────────── */
+.tour-card {
+  position: relative;
+  z-index: 2;
+  width: 300px;
+  max-width: calc(100vw - 24px);
+  padding: 16px 16px 14px;
+  border-radius: 14px;
+  background: rgba(10, 10, 10, 0.94);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.5),
+    0 16px 48px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+[data-theme="light"] .tour-card {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.06),
+    0 16px 48px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* ─── Modal vs Tooltip positioning ──────────────────────── */
+.tour-card--modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 340px;
+  padding: 26px 20px 18px;
+  text-align: center;
+}
+
+.tour-card--tooltip {
+  position: fixed;
+}
+
+/* ─── Top accent strip ──────────────────────────────────── */
+.tour-card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 14px 14px 0 0;
+}
+
+/* ─── Close / Skip button ───────────────────────────────── */
+.tour-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.tour-close-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="light"] .tour-close-btn {
+  border-color: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] .tour-close-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* ─── Icon pill ─────────────────────────────────────────── */
+.tour-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  background: rgba(255, 255, 255, 0.9) !important;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+}
+
+.tour-card--modal .tour-card-icon {
+  margin-left: auto;
+  margin-right: auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+}
+
+[data-theme="light"] .tour-card-icon {
+  background: rgba(0, 0, 0, 0.9) !important;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Typography ────────────────────────────────────────── */
+.tour-card-title {
+  font-size: 0.9375rem;
+  font-weight: 650;
+  color: #fff;
+  margin-bottom: 4px;
+  padding-right: 28px;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+[data-theme="light"] .tour-card-title {
+  color: #0a0a0a;
+}
+
+.tour-card-desc {
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 12px;
+}
+
+[data-theme="light"] .tour-card-desc {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.tour-card--modal .tour-card-title {
+  font-size: 1.1rem;
+  padding-right: 0;
+  margin-bottom: 6px;
+}
+
+.tour-card--modal .tour-card-desc {
+  font-size: 0.85rem;
+  max-width: 280px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ─── Progress bar ──────────────────────────────────────── */
+.tour-progress-bar {
+  width: 100%;
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+[data-theme="light"] .tour-progress-bar {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.tour-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.7) !important;
+}
+
+[data-theme="light"] .tour-progress-fill {
+  background: rgba(0, 0, 0, 0.6) !important;
+}
+
+/* ─── Step dots ─────────────────────────────────────────── */
+.tour-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+
+.tour-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tour-dot:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.3);
+}
+
+.tour-dot.active {
+  width: 20px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.tour-dot.completed {
+  background: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+[data-theme="light"] .tour-dot {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .tour-dot:hover {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+[data-theme="light"] .tour-dot.active {
+  background: rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .tour-dot.completed {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* ─── Navigation buttons ────────────────────────────────── */
+.tour-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tour-nav-main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tour-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  letter-spacing: -0.01em;
+}
+
+.tour-btn--skip {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.25);
+  padding: 6px 8px;
+}
+
+.tour-btn--skip:hover {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="light"] .tour-btn--skip {
+  color: rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .tour-btn--skip:hover {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.tour-btn--prev {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tour-btn--prev:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+[data-theme="light"] .tour-btn--prev {
+  background: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.5);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .tour-btn--prev:hover {
+  background: rgba(0, 0, 0, 0.07);
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.tour-btn--next {
+  color: #000;
+  background: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+  padding: 7px 14px;
+}
+
+.tour-btn--next:hover {
+  transform: translateY(-1px);
+  background: #fff !important;
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.15);
+}
+
+.tour-btn--next:active {
+  transform: translateY(0);
+}
+
+[data-theme="light"] .tour-btn--next {
+  color: #fff;
+  background: rgba(0, 0, 0, 0.85) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .tour-btn--next:hover {
+  background: #000 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* ─── Step counter ──────────────────────────────────────── */
+.tour-step-counter {
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.15);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+[data-theme="light"] .tour-step-counter {
+  color: rgba(0, 0, 0, 0.15);
+}
+
+/* ─── Keyboard shortcut hint ────────────────────────────── */
+.tour-card::before {
+  content: 'Esc to skip · ← → to navigate';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.5625rem;
+  color: rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.03em;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+[data-theme="light"] .tour-card::before {
+  color: rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Mobile responsive ─────────────────────────────────── */
+@media (max-width: 768px) {
+  .tour-card--modal {
+    width: calc(100vw - 24px);
+    max-width: 340px;
+  }
+
+  .tour-card--tooltip {
+    position: fixed !important;
+    bottom: 12px !important;
+    left: 12px !important;
+    right: 12px !important;
+    top: auto !important;
+    width: auto;
+    max-width: none;
+  }
+
+  .tour-card-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .tour-card-title {
+    font-size: 0.875rem;
+  }
+
+  .tour-card-desc {
+    font-size: 0.75rem;
+  }
+
+  .tour-dots {
+    gap: 3px;
+  }
+
+  .tour-dot {
+    width: 5px;
+    height: 5px;
+  }
+
+  .tour-dot.active {
+    width: 16px;
+  }
+}
+
+/* ─── Subtle shine on modal cards ───────────────────────── */
+@keyframes tourCardShine {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+.tour-card--modal::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.02),
+    transparent
+  );
+  animation: tourCardShine 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+[data-theme="light"] .tour-card--modal::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 0, 0, 0.02),
+    transparent
+  );
+}
+
+/* ─── Floating icon on modal ────────────────────────────── */
+.tour-card--modal .tour-card-icon {
+  animation: tourIconFloat 3s ease-in-out infinite;
+}
+
+@keyframes tourIconFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}

@@ -9,6 +9,7 @@ import { setAuthToken } from '../utils/apiClient';
 import { useMobileNav } from '../hooks/useMediaQuery';
 import Sidebar from '../ui/Sidebar';
 import Topbar from '../ui/Topbar';
+import OnboardingTour from '../components/OnboardingTour';
 
 function GraduationWarningStrip({ user, profile, pathname }) {
   if (user?.role !== 'student' || !profile?.graduationYear) return null;
@@ -99,6 +100,7 @@ export default function AppLayout() {
         onMobileClose={() => setMobileOpen(false)}
         isMobileNav={isMobileNav}
       />
+      <OnboardingTour />
       <div className="app-main">
         <GraduationWarningStrip user={user} profile={profile} pathname={location.pathname} />
         <Topbar

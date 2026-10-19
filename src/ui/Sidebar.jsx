@@ -66,6 +66,19 @@ function SidebarLinks({ links, collapsed, isMobile, location, onNavigate }) {
   const { data: communityUnreadData } = useGetCommunityUnreadCountQuery();
   const communityUnread = communityUnreadData?.data?.count || 0;
 
+  // Map route paths to tour target IDs
+  const tourIdMap = {
+    '/app/dashboard': 'link-dashboard',
+    '/app/profile': 'link-profile',
+    '/app/directory': 'link-directory',
+    '/app/mentorship': 'link-mentorship',
+    '/app/messages': 'link-messages',
+    '/app/jobs': 'link-jobs',
+    '/app/community': 'link-community',
+    '/app/events': 'link-events',
+    '/app/achievements': 'link-achievements',
+  };
+
   return (
     <div className="sidebar-nav" role="navigation" aria-label="App navigation">
       {links.map((link) => {
@@ -74,6 +87,7 @@ function SidebarLinks({ links, collapsed, isMobile, location, onNavigate }) {
           || (link.to !== '/app/dashboard' && location.pathname.startsWith(link.to));
         const isMessages = link.to === '/app/messages';
         const isCommunity = link.to === '/app/community';
+        const tourId = tourIdMap[link.to];
 
         return (
           <NavLink
@@ -82,6 +96,7 @@ function SidebarLinks({ links, collapsed, isMobile, location, onNavigate }) {
             className={`sidebar-link ${isActive ? 'active' : ''}`}
             title={collapsed && !isMobile ? link.label : undefined}
             onClick={onNavigate}
+            {...(tourId ? { 'data-tour': tourId } : {})}
           >
             <span className="sidebar-link-icon">
               <Icon size={20} />
@@ -136,6 +151,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
       {!isMobileNav && (
         <motion.aside
           className="sidebar sidebar-desktop"
+          data-tour="sidebar"
           animate={{ width: collapsed ? 72 : 260 }}
           transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
         >
