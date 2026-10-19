@@ -24,9 +24,9 @@ const tourSteps = [
   },
   {
     id: 'sidebar',
-    target: '[data-tour="sidebar"]',
-    title: 'Navigation',
-    description: 'Your command center — every feature is one click away.',
+    target: '[data-tour="sidebar"], [data-tour="sidebar-mobile"], [data-tour="mobile-menu"]',
+    title: 'Navigation Menu',
+    description: 'Your command center — access all features and pages with a single tap or click.',
     position: 'right',
     accent: BW_ACCENT,
   },
@@ -50,15 +50,16 @@ const tourSteps = [
     id: 'directory',
     target: '[data-tour="link-directory"]',
     title: 'Directory',
-    description: 'Browse and connect with alumni and students.',
+    description: 'Browse and connect with alumni and students across batches.',
     position: 'right',
     accent: BW_ACCENT,
+    role: 'student',
   },
   {
     id: 'mentorship',
     target: '[data-tour="link-mentorship"]',
     title: 'Mentorship',
-    description: 'Find mentors or become one for career guidance.',
+    description: 'Find mentors or become one for career guidance and mock interviews.',
     position: 'right',
     accent: BW_ACCENT,
   },
@@ -66,7 +67,7 @@ const tourSteps = [
     id: 'messages',
     target: '[data-tour="link-messages"]',
     title: 'Messages',
-    description: 'Real-time private chat with the community.',
+    description: 'Real-time private chat and connections with the community.',
     position: 'right',
     accent: BW_ACCENT,
   },
@@ -74,7 +75,7 @@ const tourSteps = [
     id: 'jobs',
     target: '[data-tour="link-jobs"]',
     title: 'Jobs & Internships',
-    description: 'Exclusive opportunities shared by DTU alumni.',
+    description: 'Exclusive job opportunities and referrals shared by DTU alumni.',
     position: 'right',
     accent: BW_ACCENT,
   },
@@ -82,7 +83,7 @@ const tourSteps = [
     id: 'community',
     target: '[data-tour="link-community"]',
     title: 'Community',
-    description: 'Discussions, knowledge sharing, and networking.',
+    description: 'Discussions, knowledge sharing, and networking channels.',
     position: 'right',
     accent: BW_ACCENT,
   },
@@ -90,7 +91,7 @@ const tourSteps = [
     id: 'events',
     target: '[data-tour="link-events"]',
     title: 'Events',
-    description: 'Reunions, workshops, webinars, and more.',
+    description: 'Reunions, workshops, webinars, and tech meetups.',
     position: 'right',
     accent: BW_ACCENT,
   },
@@ -98,7 +99,7 @@ const tourSteps = [
     id: 'achievements',
     target: '[data-tour="link-achievements"]',
     title: 'Achievements',
-    description: 'Earn badges and get recognized for contributions.',
+    description: 'Earn badges and get recognized for your contributions.',
     position: 'right',
     accent: BW_ACCENT,
   },
@@ -106,7 +107,7 @@ const tourSteps = [
     id: 'search',
     target: '[data-tour="search"]',
     title: 'Search',
-    description: 'Find alumni, jobs, events — instantly from anywhere.',
+    description: 'Find alumni, jobs, and events instantly from anywhere.',
     position: 'bottom',
     accent: BW_ACCENT,
   },
@@ -114,7 +115,7 @@ const tourSteps = [
     id: 'notifications',
     target: '[data-tour="notifications"]',
     title: 'Notifications',
-    description: 'Real-time alerts for messages, events, and more.',
+    description: 'Real-time alerts for messages, events, and updates.',
     position: 'bottom-end',
     accent: BW_ACCENT,
   },
@@ -122,7 +123,7 @@ const tourSteps = [
     id: 'theme',
     target: '[data-tour="theme-toggle"]',
     title: 'Theme',
-    description: 'Switch between dark and light mode.',
+    description: 'Switch between dark and light mode anytime.',
     position: 'bottom-end',
     accent: BW_ACCENT,
   },
@@ -136,7 +137,59 @@ const tourSteps = [
 ];
 
 /* ─── Helpers ──────────────────────────────────────────── */
+function isElementVisible(el) {
+  if (!el) return false;
+  const rect = el.getBoundingClientRect();
+  return (
+    rect.width > 0 &&
+    rect.height > 0 &&
+    rect.bottom > 0 &&
+    rect.top < window.innerHeight &&
+    rect.right > 0 &&
+    rect.left < window.innerWidth
+  );
+}
+
 function getTooltipPosition(targetEl, position) {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
+  // On mobile screens, dock as a clean bottom card or top card
+  if (isMobile) {
+    if (!targetEl) {
+      return {
+        top: 'auto',
+        bottom: 'calc(14px + env(safe-area-inset-bottom, 0px))',
+        left: '12px',
+        right: '12px',
+        width: 'auto',
+        maxWidth: 'calc(100vw - 24px)',
+        transform: 'none',
+      };
+    }
+    const rect = targetEl.getBoundingClientRect();
+    const inTopHalf = rect.top < window.innerHeight / 2;
+    return inTopHalf
+      ? {
+          top: 'auto',
+          bottom: 'calc(14px + env(safe-area-inset-bottom, 0px))',
+          left: '12px',
+          right: '12px',
+          width: 'auto',
+          maxWidth: 'calc(100vw - 24px)',
+          transform: 'none',
+        }
+      : {
+          top: 'calc(14px + env(safe-area-inset-top, 0px))',
+          bottom: 'auto',
+          left: '12px',
+          right: '12px',
+          width: 'auto',
+          maxWidth: 'calc(100vw - 24px)',
+          transform: 'none',
+        };
+  }
+
+  // Desktop positioning:
   if (!targetEl) return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
 
   const rect = targetEl.getBoundingClientRect();
@@ -183,12 +236,23 @@ function SpotlightOverlay({ targetEl }) {
   if (!targetEl) return null;
 
   const rect = targetEl.getBoundingClientRect();
-  const padding = 8;
-  const x = rect.left - padding;
-  const y = rect.top - padding;
+  if (
+    rect.width <= 0 ||
+    rect.height <= 0 ||
+    rect.bottom <= 0 ||
+    rect.top >= window.innerHeight ||
+    rect.right <= 0 ||
+    rect.left >= window.innerWidth
+  ) {
+    return null;
+  }
+
+  const padding = 6;
+  const x = Math.max(0, rect.left - padding);
+  const y = Math.max(0, rect.top - padding);
   const w = rect.width + padding * 2;
   const h = rect.height + padding * 2;
-  const r = 12;
+  const r = 10;
 
   return (
     <svg className="tour-spotlight-svg" width="100%" height="100%">
@@ -197,11 +261,16 @@ function SpotlightOverlay({ targetEl }) {
           <rect width="100%" height="100%" fill="white" />
           <rect x={x} y={y} width={w} height={h} rx={r} ry={r} fill="black" />
         </mask>
+        <linearGradient id="tour-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.85)" />
+          <stop offset="50%" stopColor="rgba(255,255,255,0.3)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0.85)" />
+        </linearGradient>
       </defs>
       <rect
         width="100%"
         height="100%"
-        fill="rgba(0,0,0,0.72)"
+        fill="rgba(0,0,0,0.76)"
         mask="url(#tour-spotlight-mask)"
       />
       {/* Animated glow ring around the spotlighted element */}
@@ -217,19 +286,26 @@ function SpotlightOverlay({ targetEl }) {
         stroke="url(#tour-ring-gradient)"
         strokeWidth="2"
       />
-      <defs>
-        <linearGradient id="tour-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.8)" />
-          <stop offset="50%" stopColor="rgba(255,255,255,0.4)" />
-          <stop offset="100%" stopColor="rgba(255,255,255,0.8)" />
-        </linearGradient>
-      </defs>
     </svg>
   );
 }
 
+/* ─── Drawer steps set ─────────────────────────────────── */
+const DRAWER_STEP_IDS = new Set([
+  'sidebar',
+  'dashboard',
+  'profile',
+  'directory',
+  'mentorship',
+  'messages',
+  'jobs',
+  'community',
+  'events',
+  'achievements',
+]);
+
 /* ─── Main Tour Component ─────────────────────────────── */
-export default function OnboardingTour() {
+export default function OnboardingTour({ isMobileNav = false, setMobileOpen }) {
   const user = useSelector(selectCurrentUser);
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -238,6 +314,33 @@ export default function OnboardingTour() {
   const tooltipRef = useRef(null);
 
   const userId = user?.id || user?._id;
+
+  // Touch swipe support for mobile
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  const handleTouchStart = (e) => {
+    if (e.targetTouches?.[0]) {
+      touchStartX.current = e.targetTouches[0].clientX;
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.targetTouches?.[0]) {
+      touchEndX.current = e.targetTouches[0].clientX;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > 45) {
+      if (diff > 0) {
+        handleNext();
+      } else {
+        handlePrev();
+      }
+    }
+  };
 
   // Listen for manual trigger to restart tour
   useEffect(() => {
@@ -266,20 +369,47 @@ export default function OnboardingTour() {
     const step = tourSteps[currentStep];
     if (!step || step.type === 'modal') {
       setTargetEl(null);
-      setTooltipPos({});
+      setTooltipPos(getTooltipPosition(null, 'bottom'));
       return;
     }
-    const el = document.querySelector(step.target);
-    if (el) {
+    const el = step.target ? document.querySelector(step.target) : null;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
+    if (el && isElementVisible(el)) {
       setTargetEl(el);
       setTooltipPos(getTooltipPosition(el, step.position));
-      // Scroll into view if needed
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (!isMobile) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     } else {
       setTargetEl(null);
-      setTooltipPos({});
+      setTooltipPos(getTooltipPosition(null, step.position));
     }
   }, [currentStep]);
+
+  // Automatically open mobile drawer during sidebar steps so links can be highlighted
+  useEffect(() => {
+    if (!isActive) return;
+    const step = tourSteps[currentStep];
+    const isDrawerStep = step && DRAWER_STEP_IDS.has(step.id);
+
+    if (isMobileNav && setMobileOpen) {
+      if (isDrawerStep) {
+        setMobileOpen(true);
+        // Wait for drawer transition to complete before calculating element spotlight
+        const timer = setTimeout(() => {
+          updatePosition();
+        }, 320);
+        return () => clearTimeout(timer);
+      } else {
+        setMobileOpen(false);
+        const timer = setTimeout(() => {
+          updatePosition();
+        }, 260);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [currentStep, isActive, isMobileNav, setMobileOpen, updatePosition]);
 
   useEffect(() => {
     if (!isActive) return undefined;
@@ -297,41 +427,61 @@ export default function OnboardingTour() {
     if (userId) {
       localStorage.setItem(`${TOUR_STORAGE_KEY}_${userId}`, 'true');
     }
+    if (isMobileNav && setMobileOpen) {
+      setMobileOpen(false);
+    }
     setIsActive(false);
     setCurrentStep(0);
-  }, [userId]);
+  }, [userId, isMobileNav, setMobileOpen]);
 
   const handleNext = useCallback(() => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
     let next = currentStep + 1;
-    // Skip steps whose target element doesn't exist
     while (next < tourSteps.length) {
       const s = tourSteps[next];
-      if (s.type === 'modal' || !s.target || document.querySelector(s.target)) break;
-      next++;
+      if (s.role === 'student' && user?.role === 'alumni') {
+        next++;
+        continue;
+      }
+      if (!isMobile && s.target && !document.querySelector(s.target)) {
+        next++;
+        continue;
+      }
+      break;
     }
     if (next < tourSteps.length) {
       setCurrentStep(next);
     } else {
       completeTour();
     }
-  }, [currentStep, completeTour]);
+  }, [currentStep, user, completeTour]);
 
   const handlePrev = useCallback(() => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
     let prev = currentStep - 1;
-    // Skip steps whose target element doesn't exist
     while (prev >= 0) {
       const s = tourSteps[prev];
-      if (s.type === 'modal' || !s.target || document.querySelector(s.target)) break;
-      prev--;
+      if (s.role === 'student' && user?.role === 'alumni') {
+        prev--;
+        continue;
+      }
+      if (!isMobile && s.target && !document.querySelector(s.target)) {
+        prev--;
+        continue;
+      }
+      break;
     }
     if (prev >= 0) {
       setCurrentStep(prev);
     }
-  }, [currentStep]);
+  }, [currentStep, user]);
 
   const handleSkip = useCallback(() => {
+    if (isMobileNav && setMobileOpen) {
+      setMobileOpen(false);
+    }
     completeTour();
-  }, [completeTour]);
+  }, [completeTour, isMobileNav, setMobileOpen]);
 
   // Keyboard navigation: Esc to skip, Arrow keys to navigate
   useEffect(() => {
@@ -351,9 +501,12 @@ export default function OnboardingTour() {
 
   if (!isActive) return null;
 
-  const visibleSteps = tourSteps.filter(
-    (s) => s.type === 'modal' || !s.target || !!document.querySelector(s.target)
-  );
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  const visibleSteps = tourSteps.filter((s) => {
+    if (s.role === 'student' && user?.role === 'alumni') return false;
+    if (!isMobile && s.target && !document.querySelector(s.target)) return false;
+    return true;
+  });
   const step = tourSteps[currentStep] || visibleSteps[0];
   const isModal = step?.type === 'modal';
   const visibleIndex = visibleSteps.findIndex((s) => s.id === step?.id);
@@ -387,10 +540,13 @@ export default function OnboardingTour() {
               ref={tooltipRef}
               className={`tour-card ${isModal ? 'tour-card--modal' : 'tour-card--tooltip'}`}
               style={!isModal ? tooltipPos : undefined}
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              initial={{ opacity: 0, y: 16, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              exit={{ opacity: 0, y: -10, scale: 0.96 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             >
               {/* Top accent bar */}
               <div className="tour-card-accent" style={{ background: step.accent }} />

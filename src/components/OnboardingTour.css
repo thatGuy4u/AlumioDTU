@@ -67,11 +67,12 @@
 
 /* ─── Modal vs Tooltip positioning ──────────────────────── */
 .tour-card--modal {
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 340px;
+  max-width: calc(100vw - 28px);
   padding: 26px 20px 18px;
   text-align: center;
 }
@@ -403,36 +404,52 @@
 
 /* ─── Mobile responsive ─────────────────────────────────── */
 @media (max-width: 768px) {
+  /* Never show keyboard shortcuts on touch devices */
+  .tour-card::before {
+    display: none !important;
+  }
+
+  .tour-card {
+    border-radius: 16px;
+    padding: 16px 14px 12px;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.65),
+      0 2px 8px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+
   .tour-card--modal {
-    width: calc(100vw - 24px);
-    max-width: 340px;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: min(340px, calc(100vw - 28px)) !important;
+    max-width: 340px !important;
+    padding: 24px 18px 16px !important;
   }
 
   .tour-card--tooltip {
-    position: fixed !important;
-    bottom: 12px !important;
-    left: 12px !important;
-    right: 12px !important;
-    top: auto !important;
-    width: auto;
-    max-width: none;
-  }
-
-  .tour-card-icon {
-    width: 36px;
-    height: 36px;
+    max-width: min(420px, calc(100vw - 24px));
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .tour-card-title {
-    font-size: 0.875rem;
+    font-size: 0.95rem;
+    line-height: 1.35;
+    margin-bottom: 6px;
+    padding-right: 32px;
   }
 
   .tour-card-desc {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    margin-bottom: 12px;
   }
 
   .tour-dots {
-    gap: 3px;
+    gap: 4px;
+    margin-bottom: 12px;
   }
 
   .tour-dot {
@@ -441,7 +458,68 @@
   }
 
   .tour-dot.active {
-    width: 16px;
+    width: 14px;
+  }
+
+  .tour-nav {
+    gap: 6px;
+  }
+
+  .tour-btn {
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    min-height: 38px;
+    border-radius: 9px;
+  }
+
+  .tour-btn--next {
+    padding: 8px 14px;
+  }
+
+  .tour-close-btn {
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+  }
+
+  .tour-step-counter {
+    margin-top: 8px;
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .tour-card {
+    padding: 13px 12px 10px;
+  }
+
+  .tour-card-title {
+    font-size: 0.88rem;
+  }
+
+  .tour-card-desc {
+    font-size: 0.76rem;
+  }
+
+  .tour-btn {
+    padding: 7px 9px;
+    font-size: 0.72rem;
+    min-height: 34px;
+  }
+
+  .tour-dots {
+    gap: 3px;
+  }
+
+  .tour-dot {
+    width: 4px;
+    height: 4px;
+  }
+
+  .tour-dot.active {
+    width: 12px;
   }
 }
 
@@ -475,14 +553,4 @@
     rgba(0, 0, 0, 0.02),
     transparent
   );
-}
-
-/* ─── Floating icon on modal ────────────────────────────── */
-.tour-card--modal .tour-card-icon {
-  animation: tourIconFloat 3s ease-in-out infinite;
-}
-
-@keyframes tourIconFloat {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-4px); }
 }

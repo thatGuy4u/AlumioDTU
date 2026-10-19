@@ -14,6 +14,7 @@ export default function LeftDrawer({
   logo,
   className = '',
   width = 300,
+  ...restProps
 }) {
   if (typeof document === 'undefined') return null;
 
@@ -41,6 +42,7 @@ export default function LeftDrawer({
             role="dialog"
             aria-modal="true"
             aria-label={title || 'Navigation menu'}
+            {...restProps}
           >
             {(logo || title) && (
               <div className="left-drawer-header">

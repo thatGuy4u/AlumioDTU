@@ -203,6 +203,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
         className="sidebar sidebar-mobile"
         width={300}
         logo={logo}
+        data-tour="sidebar-mobile"
       >
         <SidebarLinks
           links={links}

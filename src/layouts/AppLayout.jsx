@@ -100,7 +100,10 @@ export default function AppLayout() {
         onMobileClose={() => setMobileOpen(false)}
         isMobileNav={isMobileNav}
       />
-      <OnboardingTour />
+      <OnboardingTour
+        isMobileNav={isMobileNav}
+        setMobileOpen={setMobileOpen}
+      />
       <div className="app-main">
         <GraduationWarningStrip user={user} profile={profile} pathname={location.pathname} />
         <Topbar

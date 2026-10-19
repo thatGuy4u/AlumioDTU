@@ -133,6 +133,7 @@ export default function Topbar({ onMenuToggle, isMobileNav = false, mobileOpen =
           type="button"
           className="topbar-menu-btn"
           onClick={onMenuToggle}
+          data-tour="mobile-menu"
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={mobileOpen}
         >
