@@ -5,14 +5,19 @@ dotenv.config();
 
 async function seedAdmin() {
   try {
+    if (!process.env.ADMIN_PASSWORD || !process.env.ADMIN_EMAIL) {
+      console.error('❌ ADMIN_EMAIL and ADMIN_PASSWORD env vars are required');
+      process.exit(1);
+    }
+
     const existing = await prisma.user.findFirst({ where: { role: 'admin' } });
     if (existing) { console.log('Admin already exists:', existing.email); process.exit(0); }
 
-    const hashedPw = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'AdminDTU@2025', 12);
+    const hashedPw = await bcrypt.hash(process.env.ADMIN_PASSWORD, 12);
     const admin = await prisma.user.create({
       data: {
         name: process.env.ADMIN_NAME || 'DTU Admin',
-        email: process.env.ADMIN_EMAIL || 'admin@dtu.ac.in',
+        email: process.env.ADMIN_EMAIL,
         password: hashedPw,
         role: 'admin',
         isEmailVerified: true,
